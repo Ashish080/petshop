@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, Heart, ShoppingBag } from 'lucide-react';
+import { Star, Heart } from 'lucide-react';
 import { themeConfig } from '@/config/theme';
+import CartPawButton from '@/components/ui/CartPawButton';
 
 interface ProductCardProps {
     id: string;
@@ -16,50 +17,40 @@ interface ProductCardProps {
 
 export default function ProductCard({ id, name, price, rating, reviews, image }: ProductCardProps) {
     return (
-        <div className={`bg-white group overflow-hidden transition-all duration-300 hover:-translate-y-1 ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover}`}>
-            <div className="relative h-56 w-full overflow-hidden bg-gray-50 p-4">
+        <div className={`bg-white dark:bg-card-bg group overflow-hidden transition-all duration-500 hover:-translate-y-2 border border-card-border ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover}`}>
+            <div className="relative h-56 w-full overflow-hidden bg-bg-page/50 p-4">
                 <Image
                     src={image}
                     alt={name}
                     fill
-                    className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                    className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
-                <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-sm text-gray-400 hover:text-red-500 transition-colors z-10">
-                    <Heart size={18} />
+                <button className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-text-light hover:text-brand-primary transition-colors z-10 border border-card-border">
+                    <Heart size={20} />
                 </button>
             </div>
 
             <div className="p-5">
                 <div className="flex items-center gap-1 mb-2">
-                    <Star className="text-yellow-400 fill-yellow-400" size={14} />
-                    <span className="text-xs font-medium text-gray-700">{rating}</span>
-                    <span className="text-xs text-gray-400">({reviews})</span>
+                    <Star className="text-accent fill-accent" size={14} />
+                    <span className="text-xs font-black text-text-primary">{rating}</span>
+                    <span className="text-xs text-text-light">({reviews})</span>
                 </div>
 
                 <Link href={`/products/${id}`}>
-                    <h3 className="text-base font-semibold mb-1 line-clamp-2 min-h-[40px] hover:opacity-80 transition-opacity" style={{ color: themeConfig.colors.text }}>
+                    <h3 className="text-base font-black mb-1 line-clamp-2 min-h-[40px] hover:text-brand-primary transition-colors text-text-primary leading-tight">
                         {name}
                     </h3>
                 </Link>
 
                 <div className="flex items-center justify-between mt-4">
-                    <span className="text-lg font-bold" style={{ color: themeConfig.colors.primary }}>${price.toFixed(2)}</span>
-                    <button
-                        className={`p-2 transition-colors flex items-center justify-center ${themeConfig.radius.md}`}
-                        style={{ backgroundColor: `${themeConfig.colors.secondary}15`, color: themeConfig.colors.secondary }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.backgroundColor = themeConfig.colors.secondary;
-                            e.currentTarget.style.color = '#fff';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.backgroundColor = `${themeConfig.colors.secondary}15`;
-                            e.currentTarget.style.color = themeConfig.colors.secondary;
-                        }}
-                        aria-label="Add to cart"
-                    >
-                        <ShoppingBag size={18} />
-                    </button>
+                    <span className="text-lg font-black text-brand-primary">${price.toFixed(2)}</span>
+                    <CartPawButton
+                        className={`p-2.5 transition-all flex items-center justify-center hover:scale-110 active:scale-90 shadow-md ${themeConfig.radius.lg}`}
+                        style={{ backgroundColor: `${themeConfig.colors.secondary}`, color: 'white' }}
+                        ariaLabel="Add to cart"
+                    />
                 </div>
             </div>
         </div>

@@ -7,19 +7,20 @@ import Services from "@/components/sections/Services";
 import OffersBanner from "@/components/sections/OffersBanner";
 import Testimonials from "@/components/sections/Testimonials";
 import BlogPreview from "@/components/sections/BlogPreview";
+import ScrollFadeIn from "@/components/ui/ScrollFadeIn";
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <CategoryGrid />
-      <FeaturedPets />
-      <WhyChooseUs />
-      <BestSellingProducts />
-      <OffersBanner />
-      <Services />
-      <Testimonials />
-      <BlogPreview />
+      <ScrollFadeIn><CategoryGrid /></ScrollFadeIn>
+      <ScrollFadeIn delay={100}><FeaturedPets /></ScrollFadeIn>
+      <ScrollFadeIn delay={100}><WhyChooseUs /></ScrollFadeIn>
+      <ScrollFadeIn delay={100}><BestSellingProducts /></ScrollFadeIn>
+      <ScrollFadeIn delay={50}><OffersBanner /></ScrollFadeIn>
+      <ScrollFadeIn delay={100}><Services /></ScrollFadeIn>
+      <ScrollFadeIn delay={100}><Testimonials /></ScrollFadeIn>
+      <ScrollFadeIn delay={100}><BlogPreview /></ScrollFadeIn>
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Phone, Calendar } from 'lucide-react';
 import { themeConfig } from '@/config/theme';
 
 interface PetCardProps {
@@ -17,7 +17,7 @@ interface PetCardProps {
 export default function PetCard({ id, name, breed, age, image, healthStatus }: PetCardProps) {
     return (
         <div
-            className={`bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover}`}
+            className={`bg-white dark:bg-card-bg overflow-hidden transition-all duration-500 hover:-translate-y-2 border border-card-border ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover}`}
         >
             <div className="relative h-64 w-full overflow-hidden">
                 <Image
@@ -35,30 +35,27 @@ export default function PetCard({ id, name, breed, age, image, healthStatus }: P
 
             <div className="p-5">
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold" style={{ color: themeConfig.colors.text }}>{name}</h3>
-                    <span className="text-sm font-medium px-2 py-1 bg-gray-100 text-gray-600 rounded-md">{age}</span>
+                    <h3 className="text-xl font-black text-text-primary">{name}</h3>
+                    <span className="text-xs font-black px-2 py-1 bg-secondary/10 text-secondary rounded-full">{age}</span>
                 </div>
-                <p className="text-sm mb-5" style={{ color: themeConfig.colors.textLight }}>{breed}</p>
+                <p className="text-sm mb-5 text-text-light font-medium">{breed}</p>
 
-                <Link href={`/pets/${id}`} className="block w-full">
+                <div className="flex gap-3 mt-6">
                     <button
-                        className={`w-full py-2.5 font-medium transition-colors border ${themeConfig.radius.md}`}
-                        style={{
-                            color: themeConfig.colors.primary,
-                            borderColor: themeConfig.colors.primary,
-                        }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.backgroundColor = themeConfig.colors.primary;
-                            e.currentTarget.style.color = '#fff';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.color = themeConfig.colors.primary;
-                        }}
+                        className={`flex-1 py-3 flex items-center justify-center gap-2 font-black text-sm transition-all border-2 border-secondary text-secondary hover:bg-secondary/5 ${themeConfig.radius.lg}`}
                     >
-                        Enquire Now
+                        <Phone size={18} strokeWidth={2.5} />
+                        Call Now
                     </button>
-                </Link>
+                    <Link href={`/pets/${id}`} className="flex-1">
+                        <button
+                            className={`w-full py-3 flex items-center justify-center gap-2 font-black text-sm transition-all bg-brand-primary text-white hover:opacity-90 shadow-lg shadow-brand-primary/20 ${themeConfig.radius.lg}`}
+                        >
+                            <Calendar size={18} strokeWidth={2.5} />
+                            Book Now
+                        </button>
+                    </Link>
+                </div>
             </div>
         </div>
     );

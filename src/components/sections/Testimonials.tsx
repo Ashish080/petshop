@@ -5,13 +5,13 @@ import { themeConfig } from '@/config/theme';
 
 export default function Testimonials() {
     return (
-        <section className={themeConfig.spacing.section} style={{ backgroundColor: themeConfig.colors.background }}>
+        <section className={`${themeConfig.spacing.section} bg-bg-page transition-colors duration-300`}>
             <div className={themeConfig.spacing.container}>
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4" style={{ color: themeConfig.colors.text }}>
+                    <h2 className="text-3xl font-black tracking-tight sm:text-5xl mb-4 text-text-primary">
                         What Pet Parents Say
                     </h2>
-                    <p className="max-w-2xl mx-auto text-lg" style={{ color: themeConfig.colors.textLight }}>
+                    <p className="max-w-2xl mx-auto text-lg text-text-light">
                         Don't just take our word for it - hear from our happy community.
                     </p>
                 </div>
@@ -20,14 +20,14 @@ export default function Testimonials() {
                     {testimonialsData.map((testimonial) => (
                         <div
                             key={testimonial.id}
-                            className={`bg-white p-8 relative ${themeConfig.radius.lg} ${themeConfig.shadows.medium}`}
+                            className={`bg-white dark:bg-card-bg p-8 relative border border-card-border ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover} transition-all duration-500 hover:-translate-y-2`}
                         >
-                            <div className="flex items-center gap-1 mb-6 text-yellow-400">
+                            <div className="flex items-center gap-1 mb-6 text-accent">
                                 {[...Array(testimonial.rating)].map((_, i) => (
-                                    <Star key={i} size={20} className="fill-yellow-400" />
+                                    <Star key={i} size={20} className="fill-accent" />
                                 ))}
                             </div>
-                            <p className="text-lg italic mb-8 relative z-10" style={{ color: themeConfig.colors.text }}>
+                            <p className="text-lg italic mb-8 relative z-10 text-text-primary font-medium">
                                 "{testimonial.content}"
                             </p>
                             <div className="flex items-center gap-4 mt-auto">
@@ -41,8 +41,8 @@ export default function Testimonials() {
                                     />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold" style={{ color: themeConfig.colors.text }}>{testimonial.name}</h4>
-                                    <p className="text-sm" style={{ color: themeConfig.colors.textLight }}>{testimonial.role}</p>
+                                    <h4 className="font-black text-text-primary">{testimonial.name}</h4>
+                                    <p className="text-sm text-text-light font-medium">{testimonial.role}</p>
                                 </div>
                             </div>
                         </div>

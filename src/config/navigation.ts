@@ -4,6 +4,8 @@ export const navigationConfig = {
         { title: "Pets", href: "/pets" },
         { title: "Products", href: "/products" },
         { title: "Services", href: "/services" },
+        { title: "Pet Match", href: "/quiz" },
+        { title: "Book Vet", href: "/book-vet" },
         { title: "Contact", href: "/contact" },
     ],
     footerNav: {
@@ -20,7 +22,10 @@ export const navigationConfig = {
         company: [
             { title: "About Us", href: "/about" },
             { title: "Contact", href: "/contact" },
-            { title: "Blog", href: "/blog" },
+            { title: "Pet Match Quiz", href: "/quiz" },
+            { title: "Subscribe & Save", href: "/subscribe" },
+            { title: "My Dashboard", href: "/dashboard" },
+            { title: "Book Virtual Vet", href: "/book-vet" },
         ],
         legal: [
             { title: "Refund Policy", href: "/policies#refund" },

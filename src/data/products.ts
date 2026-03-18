@@ -28,7 +28,7 @@ export const productsData = [
         price: 15.99,
         rating: 4.5,
         reviews: 210,
-        image: "https://images.unsplash.com/photo-1545641477-742de2ff3cc4?q=80&w=600&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?q=80&w=600&auto=format&fit=crop",
         description: "Keep your feline friend entertained for hours.",
         isBestSeller: false,
     },

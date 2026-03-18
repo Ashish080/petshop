@@ -12,10 +12,10 @@ export default function BestSellingProducts() {
             <div className={themeConfig.spacing.container}>
                 <div className="flex justify-between items-end mb-10">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-3" style={{ color: themeConfig.colors.text }}>
+                        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-3 text-text-primary">
                             Best Selling Products
                         </h2>
-                        <p className="max-w-2xl text-lg" style={{ color: themeConfig.colors.textLight }}>
+                        <p className="max-w-2xl text-lg text-text-light">
                             Discover our most loved products for your furry friends. High quality and trusted by pet parents.
                         </p>
                     </div>

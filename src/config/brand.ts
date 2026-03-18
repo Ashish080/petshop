@@ -1,5 +1,5 @@
 export const brandConfig = {
-  name: "Kanha Pet Shop & Care 2020",
+  name: "Kanha Pet Shop & Care",
   tagline: "Your Pet’s Happiness Starts Here",
   description: "Premium pet shop and care services for your furry friends.",
   phone: "+91 98765 43210",

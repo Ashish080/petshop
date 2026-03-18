@@ -8,7 +8,7 @@ export default function FeaturedPets() {
     const featuredPets = petsData.filter(pet => pet.isFeatured).slice(0, 4);
 
     return (
-        <section className={`${themeConfig.spacing.section} bg-white`}>
+        <section className={`${themeConfig.spacing.section} bg-white dark:bg-[#1a1a2e] transition-colors duration-300`}>
             <div className={themeConfig.spacing.container}>
                 <div className="flex justify-between items-end mb-10">
                     <div>

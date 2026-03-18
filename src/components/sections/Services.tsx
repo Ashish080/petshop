@@ -16,13 +16,13 @@ export default function Services() {
     const { services: content } = siteContent;
 
     return (
-        <section className={`${themeConfig.spacing.section} bg-white`}>
+        <section className={`${themeConfig.spacing.section} bg-bg-page transition-colors duration-400`}>
             <div className={themeConfig.spacing.container}>
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4" style={{ color: themeConfig.colors.text }}>
+                    <h2 className="text-3xl font-black tracking-tight sm:text-5xl mb-4 text-text-primary">
                         {content.title}
                     </h2>
-                    <p className="max-w-2xl mx-auto text-lg" style={{ color: themeConfig.colors.textLight }}>
+                    <p className="max-w-2xl mx-auto text-lg text-text-light font-medium">
                         {content.subtitle}
                     </p>
                 </div>
@@ -31,9 +31,9 @@ export default function Services() {
                     {servicesData.map((service) => (
                         <div
                             key={service.id}
-                            className={`group overflow-hidden border border-gray-100 transition-all hover:${themeConfig.shadows.hover} ${themeConfig.radius.lg}`}
+                            className={`group overflow-hidden border border-card-border bg-white dark:bg-card-bg transition-all duration-500 hover:-translate-y-2 ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover}`}
                         >
-                            <div className="relative h-48 w-full overflow-hidden">
+                            <div className="relative h-52 w-full overflow-hidden">
                                 <Image
                                     src={service.image}
                                     alt={service.title}
@@ -42,25 +42,23 @@ export default function Services() {
                                     sizes="(max-width: 768px) 100vw, 33vw"
                                 />
                                 <div
-                                    className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md text-primary"
-                                    style={{ color: themeConfig.colors.primary }}
+                                    className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg text-secondary border border-secondary/20"
                                 >
                                     {iconMap[service.icon]}
                                 </div>
                             </div>
-                            <div className="p-6 flex flex-col h-[calc(100%-12rem)]">
-                                <h3 className="text-xl font-bold mb-2" style={{ color: themeConfig.colors.text }}>{service.title}</h3>
-                                <p className="mb-4 text-sm flex-grow" style={{ color: themeConfig.colors.textLight }}>{service.description}</p>
-                                <div className="flex items-center justify-between mt-auto">
-                                    <span className="font-semibold" style={{ color: themeConfig.colors.secondary }}>
+                            <div className="p-6">
+                                <h3 className="text-xl font-black mb-2 text-text-primary">{service.title}</h3>
+                                <p className="mb-6 text-sm text-text-light font-medium leading-relaxed">{service.description}</p>
+                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-card-border/50">
+                                    <span className="font-black text-secondary">
                                         From ${service.priceStartingAt}
                                     </span>
                                     <Link
                                         href={`/services#${service.title.toLowerCase().replace(' ', '-')}`}
-                                        className="flex items-center gap-1 text-sm font-semibold hover:opacity-80 transition-opacity"
-                                        style={{ color: themeConfig.colors.primary }}
+                                        className="flex items-center gap-1 text-sm font-black hover:text-secondary transition-colors text-brand-primary"
                                     >
-                                        Book Now <ArrowRight size={16} />
+                                        Book Now <ArrowRight size={16} strokeWidth={3} />
                                     </Link>
                                 </div>
                             </div>

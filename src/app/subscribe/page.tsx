@@ -48,7 +48,7 @@ export default function SubscribePage() {
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                     <div className="p-8 md:p-12 sm:flex items-center gap-12">
                         <div className="relative w-full sm:w-1/3 h-64 bg-gray-50 rounded-2xl mb-8 sm:mb-0 pb-10 flex-shrink-0 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center p-6">
-                            <Image src="https://images.unsplash.com/photo-1589924691995-400dc9ecc119?q=80&w=600&auto=format&fit=crop" auto="format" alt="Premium Dog Food" width={200} height={200} className="object-contain absolute bottom-4 -rotate-6 shadow-2xl drop-shadow-xl" />
+                            <Image src="https://images.unsplash.com/photo-1589924691995-400dc9ecc119?q=80&w=600&auto=format&fit=crop" alt="Premium Dog Food" width={200} height={200} className="object-contain absolute bottom-4 -rotate-6 shadow-2xl drop-shadow-xl" />
                         </div>
 
                         <div className="flex-1">
