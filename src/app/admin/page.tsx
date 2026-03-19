@@ -85,7 +85,7 @@ export default function AdminPage() {
                 {/* Big Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-12">
                     {[
-                        { label: "Total Revenue", value: "$12,450", change: "+14.2%", color: "text-brand-primary", bg: "bg-brand-primary/5" },
+                        { label: "Total Revenue", value: "₹12,45,000", change: "+14.2%", color: "text-brand-primary", bg: "bg-brand-primary/5" },
                         { label: "Active Pets", value: "48", change: "+2 New", color: "text-secondary", bg: "bg-secondary/5" },
                         { label: "Appointments", value: "112", change: "+5 Today", color: "text-accent", bg: "bg-accent/5" },
                         { label: "New Customers", value: "850", change: "+12%", color: "text-green-500", bg: "bg-green-500/5" },
@@ -132,10 +132,10 @@ export default function AdminPage() {
                                     </thead>
                                     <tbody className="divide-y divide-card-border/30">
                                         {[
-                                            { name: "Golden Retriever", type: "Pet Adoption", data: "$850", id: "#DOG-101", img: "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=100&auto=format&fit=crop" },
-                                            { name: "Royal Canin Puppy", type: "Product", data: "$65", id: "#PROD-242", img: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=100&auto=format&fit=crop" },
-                                            { name: "Maine Coon Kitten", type: "Pet Adoption", data: "$600", id: "#CAT-085", img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=100&auto=format&fit=crop" },
-                                            { name: "Plush Squeak Toy", type: "Product", data: "$12", id: "#PROD-004", img: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=100&auto=format&fit=crop" },
+                                            { name: "Golden Retriever", type: "Pet Adoption", data: "₹65,000", id: "#DOG-101", img: "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=100&auto=format&fit=crop" },
+                                            { name: "Royal Canin Puppy", type: "Product", data: "₹5,200", id: "#PROD-242", img: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=100&auto=format&fit=crop" },
+                                            { name: "Maine Coon Kitten", type: "Pet Adoption", data: "₹45,000", id: "#CAT-085", img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=100&auto=format&fit=crop" },
+                                            { name: "Plush Squeak Toy", type: "Product", data: "₹950", id: "#PROD-004", img: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=100&auto=format&fit=crop" },
                                         ].map((row, i) => (
                                             <tr key={i} className="group hover:bg-brand-primary/5 transition-colors">
                                                 <td className="py-6">

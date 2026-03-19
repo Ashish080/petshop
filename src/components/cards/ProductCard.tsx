@@ -45,7 +45,7 @@ export default function ProductCard({ id, name, price, rating, reviews, image }:
                 </Link>
 
                 <div className="flex items-center justify-between mt-4">
-                    <span className="text-lg font-black text-brand-primary">${price.toFixed(2)}</span>
+                    <span className="text-lg font-black text-brand-primary">₹{price.toLocaleString('en-IN')}</span>
                     <CartPawButton
                         className={`p-2.5 transition-all flex items-center justify-center hover:scale-110 active:scale-90 shadow-md ${themeConfig.radius.lg}`}
                         style={{ backgroundColor: `${themeConfig.colors.secondary}`, color: 'white' }}

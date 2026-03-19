@@ -9,13 +9,25 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function UserLoginPage() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long.');
+            return;
+        }
+
         setLoading(true);
         setTimeout(() => {
+            // Save email to localStorage to simulate a "real" session
+            localStorage.setItem('userEmail', email);
             router.push('/dashboard');
         }, 1200);
     };
@@ -64,6 +76,11 @@ export default function UserLoginPage() {
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-6">
+                        {error && (
+                            <div className="p-4 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl animate-in fade-in slide-in-from-top-2 border border-red-200 dark:border-red-900/50">
+                                {error}
+                            </div>
+                        )}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-text-light px-2">Account Email</label>
                             <div className="relative">
@@ -71,6 +88,8 @@ export default function UserLoginPage() {
                                 <input
                                     type="email"
                                     required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     placeholder="hello@pawsomeuser.com"
                                     className="w-full pl-14 pr-6 py-4 bg-white dark:bg-card-bg border border-card-border rounded-2xl text-sm font-bold text-text-primary placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all shadow-sm"
                                 />
@@ -87,6 +106,8 @@ export default function UserLoginPage() {
                                 <input
                                     type="password"
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     className="w-full pl-14 pr-6 py-4 bg-white dark:bg-card-bg border border-card-border rounded-2xl text-sm font-bold text-text-primary placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all shadow-sm"
                                 />
