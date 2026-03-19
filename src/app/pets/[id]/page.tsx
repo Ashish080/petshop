@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { themeConfig } from '@/config/theme';
 import { ShieldCheck, Calendar, Phone, MessageCircle, Heart, Share2, Info } from 'lucide-react';
 import { brandConfig } from '@/config/brand';
+import AdoptPetButton from '@/components/ui/AdoptPetButton';
 
 export default async function PetDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
@@ -112,22 +113,26 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
 
                             {/* Action Buttons */}
                             <div className="space-y-4 pt-6 border-t border-card-border/50">
-                                <a
-                                    href={`tel:${brandConfig.phone}`}
-                                    className={`flex justify-center items-center gap-3 py-4 font-black transition-all bg-brand-primary text-white hover:-translate-y-1 hover:shadow-xl active:scale-95 shadow-lg shadow-brand-primary/25 ${themeConfig.radius.lg}`}
-                                >
-                                    <Phone size={22} strokeWidth={3} />
-                                    Meet {pet.name}
-                                </a>
-                                <a
-                                    href={brandConfig.whatsapp}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`flex justify-center items-center gap-3 py-4 font-black transition-all bg-secondary text-white hover:-translate-y-1 hover:shadow-xl active:scale-95 shadow-lg shadow-secondary/25 ${themeConfig.radius.lg}`}
-                                >
-                                    <MessageCircle size={22} strokeWidth={3} />
-                                    Chat via WhatsApp
-                                </a>
+                                <AdoptPetButton pet={pet} />
+
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <a
+                                        href={`tel:${brandConfig.phone}`}
+                                        className={`flex flex-col items-center justify-center p-4 border border-card-border hover:bg-bg-page transition-all ${themeConfig.radius.lg}`}
+                                    >
+                                        <Phone size={20} className="mb-2 text-brand-primary" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-text-light">Call Store</span>
+                                    </a>
+                                    <a
+                                        href={brandConfig.whatsapp}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex flex-col items-center justify-center p-4 border border-card-border hover:bg-bg-page transition-all ${themeConfig.radius.lg}`}
+                                    >
+                                        <MessageCircle size={20} className="mb-2 text-green-500" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-text-light">WhatsApp</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

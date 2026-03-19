@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Activity, Calendar, Syringe, Plus, Settings, User, Bell, Search, Heart, ChevronRight, PawPrint, ShoppingBag, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // Mock Data for demonstration
 const mockPets = [
@@ -37,34 +38,52 @@ const mockPets = [
 ];
 
 export default function DashboardPage() {
-    // State to toggle between "No Pets", "Single Pet", and "Multiple Pets" for UI demonstration
-    const [petList, setPetList] = useState(mockPets);
+    // Initializing state with empty array for a "Real New User" experience
+    const [petList, setPetList] = useState<any[]>([]);
     const [activePetIndex, setActivePetIndex] = useState(0);
     const [userName, setUserName] = useState('Valued Guest');
+    const router = useRouter();
 
-    // Load user data from localStorage
+    // Load user and pet data from localStorage on mount
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const savedEmail = localStorage.getItem('userEmail');
-            if (savedEmail) {
-                // Extract name from email (e.g. mr.singh.ashish11@gmail.com -> Ashish Singh)
-                const parts = savedEmail.split('@')[0].split('.');
-                let namePart = 'User';
-                if (parts.length > 0) {
-                    namePart = parts[parts.length - 1]; // Take the last part before @
-                }
-                const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-                setUserName(formattedName);
+            if (!savedEmail) {
+                // Not logged in -> Redirect to login
+                router.push('/login');
+                return;
+            }
+
+            const parts = savedEmail.split('@')[0].split('.');
+            let namePart = 'User';
+            if (parts.length > 0) {
+                namePart = parts[parts.length - 1];
+            }
+            const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+            setUserName(formattedName);
+
+            // Load PURCHASED pets for THIS USER
+            const myPetsRaw = localStorage.getItem(`myPets_${savedEmail}`);
+            if (myPetsRaw) {
+                setPetList(JSON.parse(myPetsRaw));
             }
         }
-    }, []);
+    }, [router]);
+
+    const handleLogout = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('userEmail');
+            // We keep myPets so if they log in again they see them, but they are NOT accessible without login
+            window.location.href = '/';
+        }
+    };
 
     const activePet = petList[activePetIndex];
 
     return (
-        <div className="min-h-screen bg-bg-page flex flex-col md:flex-row transition-colors duration-300">
+        <div className="min-h-screen bg-bg-page flex flex-col md:flex-row transition-colors duration-300 font-outfit">
             {/* Sidebar */}
-            <aside className="w-full md:w-80 bg-nav-bg border-r border-card-border p-8 flex flex-col gap-10 sticky top-0 md:h-screen shrink-0">
+            <aside className="w-full md:w-80 bg-nav-bg border-r border-card-border p-8 flex flex-col gap-10 sticky top-0 md:h-screen shrink-0 overflow-y-auto">
                 <div className="flex flex-col gap-8">
                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10">
                         <div className="w-14 h-14 rounded-2xl overflow-hidden relative shadow-lg shadow-brand-primary/20 border-2 border-white text-brand-primary flex items-center justify-center bg-white">
@@ -100,7 +119,7 @@ export default function DashboardPage() {
                                 )}
                             </a>
                         ))}
-                        <button onClick={() => window.location.href = '/'} className="flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl font-black text-sm transition-all mt-4 border border-transparent hover:border-red-500/20">
+                        <button onClick={handleLogout} className="flex items-center gap-3 px-5 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl font-black text-sm transition-all mt-4 border border-transparent hover:border-red-500/20">
                             <LogOut size={20} /> Logout
                         </button>
                     </nav>
@@ -239,7 +258,7 @@ export default function DashboardPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        {activePet.records.map((record, i) => (
+                                        {activePet.records?.map((record: any, i: number) => (
                                             <div key={i} className="flex items-center justify-between p-6 bg-bg-page/50 rounded-3xl border border-card-border/50 hover:bg-brand-primary/5 hover:border-brand-primary/20 transition-all cursor-pointer group">
                                                 <div className="flex items-center gap-5">
                                                     <div className="w-14 h-14 bg-white dark:bg-card-bg rounded-2xl flex flex-col items-center justify-center shadow-sm border border-card-border group-hover:scale-110 transition-transform">

@@ -1,7 +1,7 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, ShoppingCart, User } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, LayoutDashboard } from 'lucide-react';
 import { brandConfig } from '@/config/brand';
 import { navigationConfig } from '@/config/navigation';
 import { themeConfig } from '@/config/theme';
@@ -9,6 +9,17 @@ import NightWalkToggle from '@/components/ui/NightWalkToggle';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const [user, setUser] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const savedEmail = localStorage.getItem('userEmail');
+            if (savedEmail) {
+                const name = savedEmail.split('@')[0].split('.')[0];
+                setUser(name.charAt(0).toUpperCase() + name.slice(1));
+            }
+        }
+    }, []);
 
     return (
         <nav className="bg-nav-bg/80 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-card-border transition-all duration-300">
@@ -37,10 +48,16 @@ export default function Navbar() {
                     <div className="flex items-center gap-x-3 md:gap-x-4">
                         <div className="flex items-center gap-x-1 sm:gap-x-3">
                             <NightWalkToggle />
-                            <Link href="/login" className="p-2 text-text-body hover:text-brand-primary transition-colors hidden sm:block" aria-label="User account">
-                                <User size={20} />
-                            </Link>
-                            <button className="p-2 text-text-body hover:text-brand-primary transition-colors relative" aria-label="Shopping cart">
+                            {user ? (
+                                <Link href="/dashboard" className="flex items-center gap-2 py-2 px-3 bg-brand-primary/10 rounded-full text-brand-primary hover:bg-brand-primary/20 transition-all group" aria-label="Go to Dashboard">
+                                    <LayoutDashboard size={18} className="group-hover:rotate-12 transition-transform" />
+                                    <span className="hidden sm:inline font-black text-xs uppercase tracking-widest">Dashboard ({user})</span>
+                                </Link>
+                            ) : (
+                                <Link href="/login" className="p-2 text-text-body hover:text-brand-primary transition-colors hidden sm:block" aria-label="User account">
+                                    <User size={20} />
+                                </Link>
+                            )}    <button className="p-2 text-text-body hover:text-brand-primary transition-colors relative" aria-label="Shopping cart">
                                 <ShoppingCart size={22} />
                                 <span className="absolute top-1 right-1 text-[10px] w-4 h-4 flex items-center justify-center text-white rounded-full bg-secondary font-black border-2 border-white dark:border-nav-bg">
                                     0
@@ -86,6 +103,17 @@ export default function Navbar() {
                                 {item.title}
                             </Link>
                         ))}
+
+                        {user && (
+                            <Link
+                                href="/dashboard"
+                                onClick={() => setIsOpen(false)}
+                                className="block px-3 py-3 rounded-xl text-lg font-bold text-brand-primary bg-brand-primary/5 border border-brand-primary/10 transition-colors"
+                            >
+                                My Dashboard ({user})
+                            </Link>
+                        )}
+
                         <div className="pt-6">
                             <Link href="/products" onClick={() => setIsOpen(false)}>
                                 <button

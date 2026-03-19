@@ -131,37 +131,54 @@ export default function AdminPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-card-border/30">
-                                        {[
-                                            { name: "Golden Retriever", type: "Pet Adoption", data: "₹65,000", id: "#DOG-101", img: "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=100&auto=format&fit=crop" },
-                                            { name: "Royal Canin Puppy", type: "Product", data: "₹5,200", id: "#PROD-242", img: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=100&auto=format&fit=crop" },
-                                            { name: "Maine Coon Kitten", type: "Pet Adoption", data: "₹45,000", id: "#CAT-085", img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=100&auto=format&fit=crop" },
-                                            { name: "Plush Squeak Toy", type: "Product", data: "₹950", id: "#PROD-004", img: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=100&auto=format&fit=crop" },
-                                        ].map((row, i) => (
-                                            <tr key={i} className="group hover:bg-brand-primary/5 transition-colors">
-                                                <td className="py-6">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 rounded-2xl overflow-hidden relative shadow-md">
-                                                            <Image src={row.img} alt={row.name} fill className="object-cover" />
+                                        {(typeof window !== 'undefined' && localStorage.getItem('allTransactions')) ? (
+                                            JSON.parse(localStorage.getItem('allTransactions') || '[]').map((row: any, i: number) => (
+                                                <tr key={i} className="group hover:bg-brand-primary/5 transition-colors">
+                                                    <td className="py-6">
+                                                        <div className="flex items-center gap-4">
+                                                            <div>
+                                                                <h4 className="font-black text-text-primary text-sm leading-tight">{row.name}</h4>
+                                                                <p className="text-[10px] font-black text-text-light tracking-widest">{row.id}</p>
+                                                            </div>
                                                         </div>
+                                                    </td>
+                                                    <td className="py-6">
+                                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-brand-primary/10 text-brand-primary border border-brand-primary/20`}>
+                                                            {row.type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-6 font-black text-text-primary text-sm">
+                                                        <div>{row.price}</div>
+                                                        <div className="text-[9px] font-bold text-text-light mt-1 truncate max-w-[120px]">{row.customer}</div>
+                                                    </td>
+                                                    <td className="py-6 text-right font-black text-text-light text-[10px] uppercase tracking-widest">{row.date}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            [
+                                                { name: "Golden Retriever", type: "Adoption", data: "₹65,000", id: "#DOG-101", customer: "demo@petshop.in", date: "18 Mar" },
+                                                { name: "Royal Canin Puppy", type: "Product", data: "₹5,200", id: "#PROD-242", customer: "rahul@gmail.com", date: "17 Mar" },
+                                            ].map((row, i) => (
+                                                <tr key={i} className="group hover:bg-brand-primary/5 transition-colors">
+                                                    <td className="py-6">
                                                         <div>
                                                             <h4 className="font-black text-text-primary text-sm leading-tight">{row.name}</h4>
                                                             <p className="text-[10px] font-black text-text-light tracking-widest">{row.id}</p>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="py-6">
-                                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${row.type === 'Product' ? 'bg-secondary/10 text-secondary' : 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20'}`}>
-                                                        {row.type}
-                                                    </span>
-                                                </td>
-                                                <td className="py-6 font-black text-text-primary text-sm">{row.data}</td>
-                                                <td className="py-6 text-right">
-                                                    <button className="p-2 text-text-light hover:text-brand-primary transition-all">
-                                                        <ExternalLink size={18} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                    <td className="py-6">
+                                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${row.type === 'Product' ? 'bg-secondary/10 text-secondary' : 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20'}`}>
+                                                            {row.type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-6 font-black text-text-primary text-sm">
+                                                        <div>{row.data}</div>
+                                                        <div className="text-[9px] font-bold text-text-light mt-1">{row.customer}</div>
+                                                    </td>
+                                                    <td className="py-6 text-right font-black text-text-light text-[10px] uppercase tracking-widest">{row.date}</td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
