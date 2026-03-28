@@ -8,9 +8,11 @@ interface CartPawButtonProps {
     className?: string;
     style?: React.CSSProperties;
     ariaLabel?: string;
+    /** Called after the paw animation starts (e.g. add to Zustand cart) */
+    onAddToCart?: () => void;
 }
 
-export default function CartPawButton({ size = 18, className = "", style = {}, ariaLabel = "Add to cart" }: CartPawButtonProps) {
+export default function CartPawButton({ size = 18, className = "", style = {}, ariaLabel = "Add to cart", onAddToCart }: CartPawButtonProps) {
     const [paws, setPaws] = useState<{ id: number; x: number; y: number }[]>([]);
     const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -21,6 +23,7 @@ export default function CartPawButton({ size = 18, className = "", style = {}, a
         const id = Date.now();
         setPaws(prev => [...prev, { id, x, y }]);
         setTimeout(() => setPaws(prev => prev.filter(p => p.id !== id)), 650);
+        onAddToCart?.();
     };
 
     return (

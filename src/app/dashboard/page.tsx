@@ -186,7 +186,7 @@ export default function DashboardPage() {
                                         className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-sm transition-all ${activePetIndex === idx ? 'bg-secondary text-white shadow-lg' : 'text-text-light hover:bg-card-bg'}`}
                                     >
                                         <div className="w-6 h-6 rounded-lg relative overflow-hidden border border-white/20">
-                                            <Image src={pet.image} alt={pet.name} fill className="object-cover" />
+                                            <Image src={pet.image} alt={pet.name} fill className="object-cover" sizes="24px" />
                                         </div>
                                         {pet.name}
                                     </button>
@@ -204,7 +204,7 @@ export default function DashboardPage() {
                                     <div className="absolute top-0 right-0 w-48 h-48 bg-brand-primary/5 rounded-bl-[100px] -z-1 transition-all group-hover:scale-110"></div>
                                     <div className="flex flex-col items-center text-center">
                                         <div className="w-40 h-40 rounded-[48px] overflow-hidden border-8 border-bg-page shadow-2xl relative mb-8 rotate-3 transition-transform group-hover:rotate-0">
-                                            <Image src={activePet.image} fill className="object-cover" alt={activePet.name} />
+                                            <Image src={activePet.image} fill className="object-cover" alt={activePet.name} sizes="160px" />
                                         </div>
                                         <h2 className="text-4xl font-black text-text-primary mb-2 line-clamp-1">{activePet.name}</h2>
                                         <p className="text-secondary font-black tracking-tight mb-8">{activePet.breed} • {activePet.age}</p>

@@ -28,7 +28,7 @@ export default function Hero() {
                                     "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop"
                                 ].map((url, i) => (
                                     <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-nav-bg bg-gray-200 overflow-hidden relative">
-                                        <Image src={url} alt="Customer" fill className="object-cover" />
+                                        <Image src={url} alt="Customer" fill className="object-cover" sizes="32px" />
                                     </div>
                                 ))}
                             </div>

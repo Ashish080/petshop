@@ -1,25 +1,24 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Menu, X, ShoppingCart, User, LayoutDashboard } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { brandConfig } from '@/config/brand';
 import { navigationConfig } from '@/config/navigation';
 import { themeConfig } from '@/config/theme';
 import NightWalkToggle from '@/components/ui/NightWalkToggle';
+import { useCartStore } from '@/store/cartStore';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
-    const [user, setUser] = useState<string | null>(null);
+    const { data: session, status } = useSession();
+    const cartCount = useCartStore((s) => s.itemCount);
 
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedEmail = localStorage.getItem('userEmail');
-            if (savedEmail) {
-                const name = savedEmail.split('@')[0].split('.')[0];
-                setUser(name.charAt(0).toUpperCase() + name.slice(1));
-            }
-        }
-    }, []);
+    const navLabel = useMemo(() => {
+        if (status !== 'authenticated' || !session?.user) return null;
+        const raw = session.user.name?.trim() || session.user.email?.split('@')[0] || 'Account';
+        return raw.charAt(0).toUpperCase() + raw.slice(1);
+    }, [status, session?.user]);
 
     return (
         <nav className="bg-nav-bg/80 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-card-border transition-all duration-300">
@@ -48,21 +47,28 @@ export default function Navbar() {
                     <div className="flex items-center gap-x-3 md:gap-x-4">
                         <div className="flex items-center gap-x-1 sm:gap-x-3">
                             <NightWalkToggle />
-                            {user ? (
+                            {navLabel ? (
                                 <Link href="/dashboard" className="flex items-center gap-2 py-2 px-3 bg-brand-primary/10 rounded-full text-brand-primary hover:bg-brand-primary/20 transition-all group" aria-label="Go to Dashboard">
                                     <LayoutDashboard size={18} className="group-hover:rotate-12 transition-transform" />
-                                    <span className="hidden sm:inline font-black text-xs uppercase tracking-widest">Dashboard ({user})</span>
+                                    <span className="hidden sm:inline font-black text-xs uppercase tracking-widest">Dashboard ({navLabel})</span>
                                 </Link>
                             ) : (
-                                <Link href="/login" className="p-2 text-text-body hover:text-brand-primary transition-colors hidden sm:block" aria-label="User account">
+                                <Link href="/auth/login" className="p-2 text-text-body hover:text-brand-primary transition-colors hidden sm:block" aria-label="Sign in">
                                     <User size={20} />
                                 </Link>
-                            )}    <button className="p-2 text-text-body hover:text-brand-primary transition-colors relative" aria-label="Shopping cart">
+                            )}
+                            <Link
+                                href="/cart"
+                                className="p-2 text-text-body hover:text-brand-primary transition-colors relative"
+                                aria-label="Shopping cart"
+                            >
                                 <ShoppingCart size={22} />
-                                <span className="absolute top-1 right-1 text-[10px] w-4 h-4 flex items-center justify-center text-white rounded-full bg-secondary font-black border-2 border-white dark:border-nav-bg">
-                                    0
-                                </span>
-                            </button>
+                                {cartCount > 0 && (
+                                    <span className="absolute top-1 right-1 min-w-[1rem] h-4 px-0.5 flex items-center justify-center text-white rounded-full bg-secondary text-[10px] font-black border-2 border-white dark:border-nav-bg">
+                                        {cartCount > 99 ? '99+' : cartCount}
+                                    </span>
+                                )}
+                            </Link>
                         </div>
 
                         <div className="hidden md:block">
@@ -104,13 +110,22 @@ export default function Navbar() {
                             </Link>
                         ))}
 
-                        {user && (
+                        {navLabel && (
                             <Link
                                 href="/dashboard"
                                 onClick={() => setIsOpen(false)}
                                 className="block px-3 py-3 rounded-xl text-lg font-bold text-brand-primary bg-brand-primary/5 border border-brand-primary/10 transition-colors"
                             >
-                                My Dashboard ({user})
+                                My Dashboard ({navLabel})
+                            </Link>
+                        )}
+                        {!navLabel && (
+                            <Link
+                                href="/auth/login"
+                                onClick={() => setIsOpen(false)}
+                                className="block px-3 py-3 rounded-xl text-lg font-bold text-text-body hover:bg-brand-primary/5 transition-colors"
+                            >
+                                Sign in
                             </Link>
                         )}
 

@@ -6,18 +6,51 @@ import { Lock, Mail, ArrowRight, ShieldCheck, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn, signOut, getSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 export default function AdminLoginPage() {
+    const [email, setEmail] = useState('admin@petshop.com');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Mock login delay
-        setTimeout(() => {
+        try {
+            const result = await signIn('credentials', {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                toast.error('Invalid email or password');
+                return;
+            }
+
+            // Session may not be readable in the same tick as signIn
+            let session = await getSession();
+            if (!session?.user) {
+                await new Promise((r) => setTimeout(r, 150));
+                session = await getSession();
+            }
+            const role = session?.user?.role;
+            if (role !== 'admin') {
+                toast.error('This account does not have admin access.');
+                await signOut({ redirect: false });
+                return;
+            }
+
+            toast.success('Welcome back');
             router.push('/admin');
-        }, 1500);
+            router.refresh();
+        } catch {
+            toast.error('Something went wrong');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -48,7 +81,10 @@ export default function AdminLoginPage() {
                                 <input
                                     type="email"
                                     required
-                                    placeholder="admin@kanhapetshop.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="admin@petshop.com"
+                                    autoComplete="email"
                                     className="w-full pl-14 pr-6 py-4 bg-bg-page border border-card-border rounded-2xl text-sm font-bold text-text-primary placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
                                 />
                             </div>
@@ -61,7 +97,10 @@ export default function AdminLoginPage() {
                                 <input
                                     type="password"
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
+                                    autoComplete="current-password"
                                     className="w-full pl-14 pr-6 py-4 bg-bg-page border border-card-border rounded-2xl text-sm font-bold text-text-primary placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all"
                                 />
                             </div>
@@ -81,6 +120,10 @@ export default function AdminLoginPage() {
                             )}
                         </button>
                     </form>
+
+                    <p className="mt-6 text-center text-[10px] text-text-light">
+                        Demo: admin@petshop.com / admin123 (after <code className="text-text-primary">npm run seed</code>)
+                    </p>
 
                     <div className="mt-10 pt-8 border-t border-card-border/50 text-center">
                         <Link href="/" className="text-xs font-black text-secondary hover:underline flex items-center justify-center gap-2">

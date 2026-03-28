@@ -197,7 +197,7 @@ export default function AdminPage() {
                                 ].map((staff, i) => (
                                     <div key={i} className="flex items-center gap-4 p-4 bg-white/10 rounded-3xl border border-white/20 backdrop-blur-sm">
                                         <div className="w-12 h-12 rounded-2xl overflow-hidden relative border-2 border-white/50">
-                                            <Image src={staff.img} alt={staff.name} fill className="object-cover" />
+                                            <Image src={staff.img} alt={staff.name} fill className="object-cover" sizes="48px" />
                                         </div>
                                         <div>
                                             <h4 className="font-black text-sm">{staff.name}</h4>

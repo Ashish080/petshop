@@ -86,7 +86,7 @@ export default function UserLoginPage() {
                                     className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-bg-page transition-all text-left group"
                                 >
                                     <div className="w-10 h-10 rounded-full overflow-hidden relative border-2 border-white shadow-sm">
-                                        <Image src={acc.img} alt={acc.name} fill className="object-cover" />
+                                        <Image src={acc.img} alt={acc.name} fill className="object-cover" sizes="40px" />
                                     </div>
                                     <div className="flex-1 overflow-hidden">
                                         <p className="text-sm font-black text-text-primary line-clamp-1 group-hover:text-brand-primary">{acc.name}</p>
@@ -134,6 +134,8 @@ export default function UserLoginPage() {
                             alt="Happy Dog"
                             fill
                             className="object-cover"
+                            sizes="256px"
+                            priority
                         />
                     </div>
                     <h2 className="text-5xl font-black text-white mb-6 leading-tight">Welcome to the <br />Fur-mily! 🐾</h2>
