@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Paths that require authentication
@@ -56,8 +56,11 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
+    '/admin',
     '/checkout/:path*',
+    '/checkout',
     '/orders/:path*',
+    '/orders',
     '/auth/login',
     '/auth/register'
   ]

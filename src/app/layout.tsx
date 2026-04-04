@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { Providers } from "@/components/Providers";
 import { brandConfig } from "@/config/brand";
@@ -22,15 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} min-h-screen flex flex-col`}>
+      <body className={`${outfit.className} min-h-screen flex flex-col bg-gray-50`}>
         <ThemeProvider>
           <Providers>
-            <Navbar />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-            <FloatingWhatsApp />
+            {children}
           </Providers>
         </ThemeProvider>
       </body>

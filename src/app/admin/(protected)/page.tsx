@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { themeConfig } from '@/config/theme';
 import { brandConfig } from '@/config/brand';
 import {
@@ -19,51 +20,13 @@ import {
 import Image from 'next/image';
 
 export default function AdminPage() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     return (
-        <div className="min-h-screen bg-bg-page flex flex-col md:flex-row transition-colors duration-300">
-            {/* Admin Sidebar */}
-            <aside className="w-full md:w-72 bg-nav-bg border-r border-card-border p-8 flex flex-col sticky top-0 md:h-screen shrink-0">
-                <div className="mb-12">
-                    <h2 className="text-2xl font-black text-brand-primary tracking-tighter flex items-center gap-2">
-                        <LayoutDashboard size={28} strokeWidth={3} />
-                        Admin CP
-                    </h2>
-                    <p className="text-[10px] font-black text-text-light uppercase tracking-[0.2em] mt-2">Brand Management v1.0</p>
-                </div>
-
-                <nav className="flex flex-col gap-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-light px-4 mb-2">Internal Tools</p>
-                    <a href="#" className="flex items-center gap-3 px-5 py-4 bg-brand-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-brand-primary/25 transition-all">
-                        <BarChart3 size={20} /> Overview
-                    </a>
-                    {[
-                        { icon: Dog, label: "Manage Pets" },
-                        { icon: ShoppingBag, label: "Inventory" },
-                        { icon: CalendarCheck, label: "Appointments" },
-                        { icon: Users, label: "Customers" },
-                        { icon: Settings, label: "Site Config" },
-                    ].map((item, idx) => (
-                        <a key={idx} href="#" className="flex items-center gap-3 px-5 py-4 text-text-light hover:text-text-primary hover:bg-brand-primary/5 rounded-2xl font-black text-sm transition-all">
-                            <item.icon size={20} /> {item.label}
-                        </a>
-                    ))}
-                </nav>
-
-                <div className="mt-auto pt-8 border-t border-card-border/50">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-white font-black text-xs">
-                            AD
-                        </div>
-                        <div>
-                            <h4 className="font-black text-text-primary text-sm leading-none mb-1">Admin User</h4>
-                            <p className="text-[10px] font-black text-secondary tracking-widest uppercase">Super Admin</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            {/* Admin Main Content */}
-            <main className="flex-1 p-6 md:p-12 lg:p-16">
+        <>
                 <header className="mb-12 flex flex-col lg:flex-row justify-between lg:items-center gap-6">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black text-text-primary mb-3 tracking-tighter">Command Center</h1>
@@ -131,7 +94,7 @@ export default function AdminPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-card-border/30">
-                                        {(typeof window !== 'undefined' && localStorage.getItem('allTransactions')) ? (
+                                        {(mounted && localStorage.getItem('allTransactions')) ? (
                                             JSON.parse(localStorage.getItem('allTransactions') || '[]').map((row: any, i: number) => (
                                                 <tr key={i} className="group hover:bg-brand-primary/5 transition-colors">
                                                     <td className="py-6">
@@ -161,9 +124,11 @@ export default function AdminPage() {
                                             ].map((row, i) => (
                                                 <tr key={i} className="group hover:bg-brand-primary/5 transition-colors">
                                                     <td className="py-6">
-                                                        <div>
-                                                            <h4 className="font-black text-text-primary text-sm leading-tight">{row.name}</h4>
-                                                            <p className="text-[10px] font-black text-text-light tracking-widest">{row.id}</p>
+                                                        <div className="flex items-center gap-4">
+                                                            <div>
+                                                                <h4 className="font-black text-text-primary text-sm leading-tight">{row.name}</h4>
+                                                                <p className="text-[10px] font-black text-text-light tracking-widest">{row.id}</p>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                     <td className="py-6">
@@ -233,7 +198,6 @@ export default function AdminPage() {
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+        </>
     );
 }

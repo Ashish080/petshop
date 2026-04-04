@@ -102,38 +102,7 @@ function OrdersContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-100 p-6 hidden lg:block">
-        <Link href="/admin" className="flex items-center gap-2 mb-8">
-          <Package className="w-8 h-8 text-orange-500" />
-          <span className="text-xl font-bold text-gray-900">Admin</span>
-        </Link>
-
-        <nav className="space-y-2">
-          <Link href="/admin" className="block px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 font-medium">
-            Dashboard
-          </Link>
-          <Link href="/admin/products" className="block px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 font-medium">
-            Products
-          </Link>
-          <Link href="/admin/inventory" className="block px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 font-medium">
-            Inventory
-          </Link>
-          <Link href="/admin/orders" className="block px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-medium">
-            Orders
-          </Link>
-        </nav>
-
-        <div className="absolute bottom-6 left-6 right-6">
-          <Link href="/" className="block px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 font-medium">
-            ← Back to Store
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="lg:ml-64 p-8">
+    <>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Orders</h1>
           <p className="text-gray-600">Manage customer orders</p>
@@ -327,8 +296,7 @@ function OrdersContent() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+      </>
   );
 }
 

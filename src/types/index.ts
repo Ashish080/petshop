@@ -22,6 +22,7 @@ export interface Product {
 }
 
 export interface ProductVariant {
+  _id?: string;
   name: string;
   sku: string;
   price: number;

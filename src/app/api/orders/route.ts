@@ -211,7 +211,8 @@ export async function POST(request: NextRequest) {
     const order = await Order.create({
       user: {
         email,
-        name: session.user.name ?? undefined,
+        name: shippingAddress.name || session.user.name || undefined,
+        phone: shippingAddress.phone || undefined,
       },
       items: validatedItems.map((i) => ({
         productId: String(i.product),
@@ -223,7 +224,13 @@ export async function POST(request: NextRequest) {
           ? { variant: { variantName: i.variantName, selectedOption: i.variantName } }
           : {}),
       })),
-      shippingAddress,
+      shippingAddress: {
+        street: shippingAddress.street,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        zipCode: shippingAddress.pincode || shippingAddress.zipCode,
+        country: shippingAddress.country || 'India',
+      },
       subtotal,
       tax: 0,
       shipping: delivery,
