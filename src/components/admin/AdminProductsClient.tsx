@@ -1,22 +1,22 @@
 'use client';
 import { useState, useTransition } from 'react';
 import { Plus, Search, Edit2, Trash2, AlertTriangle, Package } from 'lucide-react';
-import type { IProduct } from '@/types';
+import type { Product } from '@/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ProductFormPanel } from './ProductFormPanel';
 import toast from 'react-hot-toast';
 
-export function AdminProductsClient({ initialProducts }: { initialProducts: IProduct[] }) {
+export function AdminProductsClient({ initialProducts }: { initialProducts: Product[] }) {
   const [products, setProducts] = useState(initialProducts);
   const [search, setSearch] = useState('');
   const [panelOpen, setPanelOpen] = useState(false);
-  const [editProduct, setEditProduct] = useState<IProduct | null>(null);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.category.toLowerCase().includes(search.toLowerCase())
+    (p.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (p.category?.toLowerCase() || '').includes(search.toLowerCase())
   );
 
   const handleDelete = async (id: string) => {
@@ -28,7 +28,7 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: IPro
     }
   };
 
-  const handleSave = async (data: Partial<IProduct>) => {
+  const handleSave = async (data: Partial<Product>) => {
     const method = editProduct ? 'PUT' : 'POST';
     const url = editProduct ? `/api/products/${editProduct._id}` : '/api/products';
     const res = await fetch(url, {
@@ -49,10 +49,10 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: IPro
     setEditProduct(null);
   };
 
-  const stockBadge = (p: IProduct) => {
-    if (p.stock === 0) return <Badge label="Out of stock" variant="danger" />;
-    if (p.isLowStock) return <Badge label={`Low: ${p.stock}`} variant="warning" />;
-    return <Badge label={`${p.stock} units`} variant="success" />;
+  const stockBadge = (p: Product) => {
+    if (p.stock === 0) return <Badge variant="danger">Out of stock</Badge>;
+    if (p.isLowStock) return <Badge variant="warning">Low: {p.stock}</Badge>;
+    return <Badge variant="success">{p.stock} units</Badge>;
   };
 
   return (

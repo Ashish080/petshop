@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
-import type { IProduct, IVariant } from '@/types';
+import type { Product, ProductVariant } from '@/types';
 import { Button } from '@/components/ui/Button';
 
 const CATEGORIES = ['food','toys','grooming','accessories','health','bedding'];
@@ -9,8 +9,8 @@ const CATEGORIES = ['food','toys','grooming','accessories','health','bedding'];
 export function ProductFormPanel({
   product, onSave, onClose,
 }: {
-  product: IProduct | null;
-  onSave: (data: Partial<IProduct>) => Promise<void>;
+  product: Product | null;
+  onSave: (data: Partial<Product>) => Promise<void>;
   onClose: () => void;
 }) {
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ export function ProductFormPanel({
   const addVariant = () =>
     setForm({ ...form, variants: [...form.variants, { _id: Date.now().toString(), name: '', sku: '', price: 0, stock: 0 }] });
 
-  const updateVariant = (i: number, key: keyof IVariant, val: any) =>
+  const updateVariant = (i: number, key: keyof ProductVariant, val: any) =>
     setForm({ ...form, variants: form.variants.map((v, j) => j === i ? { ...v, [key]: val } : v) });
 
   const removeVariant = (i: number) =>
@@ -70,7 +70,7 @@ export function ProductFormPanel({
             <label className="text-sm text-gray-500 block mb-1.5">Category *</label>
             <select
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400 capitalize"
-              value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+              value={form.category} onChange={e => setForm({ ...form, category: e.target.value as Product['category'] })}
             >
               {CATEGORIES.map(c => <option key={c} value={c} className="capitalize">{c}</option>)}
             </select>
