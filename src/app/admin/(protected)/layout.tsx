@@ -38,6 +38,9 @@ export default async function AdminRootLayout({ children }: { children: React.Re
           <Link href="/admin/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-all">
             <ShoppingCart size={18} /> Orders
           </Link>
+          <Link href="/admin/billing" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-all">
+            <LayoutDashboard size={18} /> Billing
+          </Link>
         </nav>
         
         <div className="p-4 border-t border-gray-100">

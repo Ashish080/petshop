@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --bg:#0F1117;--sidebar:#15181F;--card:#1C2030;--card2:#222636;
+    --border:#2A2F3E;--text:#E8EAF0;--muted:#7A82A0;--accent:#6366F1;
+    --green:#10B981;--amber:#F59E0B;--red:#EF4444;--blue:#3B82F6;
+  }
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:24px;min-height:100vh;}
+  
+  h2{font-size:18px;font-weight:700;margin-bottom:4px;}
+  .page-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+
+  .layout{display:grid;grid-template-columns:1fr 380px;gap:20px;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+  .card-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .card-title{font-size:13px;font-weight:700;}
+  .card-body{padding:20px;}
+
+  label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+  input,select{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;}
+  input:focus,select:focus{border-color:var(--accent);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .form-full{margin-bottom:14px;}
+
+  /* PRODUCT TABLE */
+  .product-table{width:100%;border-collapse:collapse;margin-top:4px;}
+  .product-table th{font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);font-weight:600;padding:0 8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .product-table td{padding:6px 8px;vertical-align:middle;}
+  .product-table input,
+  .product-table select{padding:7px 10px;font-size:12px;}
+  .product-table .del-btn{background:rgba(239,68,68,0.12);border:none;border-radius:6px;color:#fca5a5;font-size:14px;cursor:pointer;padding:6px 10px;font-family:'Inter',sans-serif;transition:background 0.15s;}
+  .product-table .del-btn:hover{background:rgba(239,68,68,0.22);}
+  
+  .add-row-btn{margin-top:12px;width:100%;padding:9px;background:rgba(99,102,241,0.08);border:1px dashed rgba(99,102,241,0.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--accent);font-family:'Inter',sans-serif;transition:all 0.2s;}
+  .add-row-btn:hover{background:rgba(99,102,241,0.14);}
+
+  /* TOTALS */
+  .totals-section{background:var(--card);border:1px solid var(--border);border-radius:14px;}
+  .total-row{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid var(--border);font-size:13px;}
+  .total-row:last-child{border-bottom:none;}
+  .total-label{color:var(--muted);font-weight:500;}
+  .total-value{font-weight:700;}
+  .total-grand{background:rgba(99,102,241,0.08);padding:14px 20px;border-radius:0 0 14px 14px;}
+  .grand-label{font-size:14px;font-weight:700;color:var(--text);}
+  .grand-value{font-size:22px;font-weight:700;color:var(--accent);}
+
+  .action-btns{display:flex;gap:10px;margin-top:12px;}
+  .btn-print{flex:1;padding:12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text);font-family:'Inter',sans-serif;transition:all 0.2s;}
+  .btn-print:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-save{flex:1;padding:12px;background:var(--green);border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:white;font-family:'Inter',sans-serif;transition:all 0.2s;}
+  .btn-save:hover{background:#0d9e70;}
+  .btn-send{flex:1;padding:12px;background:var(--accent);border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:white;font-family:'Inter',sans-serif;transition:all 0.2s;}
+  .btn-send:hover{background:#4f46e5;}
+
+  /* INVOICE PREVIEW */
+  .invoice-preview{background:white;border-radius:14px;overflow:hidden;color:#1a1a1a;}
+  .inv-header{background:#1B4332;padding:20px 24px;color:white;}
+  .inv-logo{font-size:20px;font-weight:800;font-family:'Inter',sans-serif;margin-bottom:2px;}
+  .inv-logo span{color:#F4D03F;}
+  .inv-address{font-size:11px;opacity:0.7;margin-top:2px;}
+  .inv-meta{display:flex;justify-content:space-between;margin-top:12px;}
+  .inv-no{font-size:13px;font-weight:700;}
+  .inv-date{font-size:12px;opacity:0.7;}
+  .inv-body{padding:20px 24px;}
+  .inv-bill-to{margin-bottom:14px;}
+  .inv-bill-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#888;font-weight:600;margin-bottom:4px;}
+  .inv-cust-name{font-size:15px;font-weight:700;color:#1a1a1a;}
+  .inv-cust-phone{font-size:12px;color:#666;}
+  .inv-table{width:100%;border-collapse:collapse;margin:12px 0;}
+  .inv-table th{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#888;font-weight:600;padding:6px 8px;text-align:left;border-bottom:1px solid #e5e7eb;}
+  .inv-table td{padding:8px 8px;font-size:12px;color:#1a1a1a;border-bottom:1px solid #f3f4f6;}
+  .inv-totals{border-top:1px solid #e5e7eb;margin-top:8px;padding-top:10px;}
+  .inv-total-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;}
+  .inv-total-row.grand{font-size:16px;font-weight:800;color:#1B4332;margin-top:6px;border-top:2px solid #1B4332;padding-top:8px;}
+  .inv-footer{background:#f9fafb;padding:12px 24px;text-align:center;font-size:11px;color:#888;border-top:1px solid #e5e7eb;}
+  .gst-select-row{display:flex;align-items:center;gap:8px;}
+  .gst-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;display:inline-block;}
+  .gst5{background:rgba(16,185,129,0.15);color:#6ee7b7;}
+  .gst12{background:rgba(245,158,11,0.15);color:#fcd34d;}
+  .gst18{background:rgba(239,68,68,0.15);color:#fca5a5;}
+</style>
+</head>
+<body>
+
+<h2>🧾 Create GST Invoice</h2>
+<p class="page-sub">Vyapar-style invoicing · Auto GST Calculation · Instant Download</p>
+
+<div class="layout">
+  <!-- LEFT FORM -->
+  <div>
+    <!-- CUSTOMER -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">👤 Customer Details</span></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div><label>Customer Name *</label><input type="text" id="cust-name" value="Rahul Verma" oninput="updatePreview()"></div>
+          <div><label>Phone Number</label><input type="text" id="cust-phone" value="+91 98765 43210" oninput="updatePreview()"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Email</label><input type="text" id="cust-email" value="rahul@email.com"></div>
+          <div><label>Address</label><input type="text" id="cust-addr" value="Gomti Nagar, Lucknow"></div>
+        </div>
+        <div class="form-row">
+          <div><label>GST Number (optional)</label><input type="text" placeholder="22AAAAA0000A1Z5"></div>
+          <div><label>Invoice Date</label><input type="date" id="inv-date" value="2026-04-05" oninput="updatePreview()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📦 Products / Services</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:var(--muted);">GST Rate:</span>
+          <select id="global-gst" style="width:90px;padding:5px 8px;font-size:12px;" onchange="updateCalc()">
+            <option value="5">5%</option>
+            <option value="12" selected>12%</option>
+            <option value="18">18%</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-body">
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th style="width:35%;">Item / Description</th>
+              <th style="width:12%;">HSN</th>
+              <th style="width:10%;">Qty</th>
+              <th style="width:15%;">Rate (₹)</th>
+              <th style="width:12%;">GST%</th>
+              <th style="width:14%;">Total</th>
+              <th style="width:6%;"></th>
+            </tr>
+          </thead>
+          <tbody id="product-rows">
+            <tr>
+              <td><input type="text" value="Golden Retriever Pup (45 Days)" oninput="updateCalc()"></td>
+              <td><input type="text" value="01012100" style="width:90px;"></td>
+              <td><input type="number" value="1" min="1" style="width:55px;" oninput="updateCalc()"></td>
+              <td><input type="number" value="28000" oninput="updateCalc()"></td>
+              <td><select onchange="updateCalc()" style="width:70px;"><option>5</option><option selected>12</option><option>18</option></select></td>
+              <td id="row-total-0" style="font-weight:700;font-size:13px;color:var(--text);">₹31,360</td>
+              <td><button class="del-btn" onclick="deleteRow(this)">✕</button></td>
+            </tr>
+            <tr>
+              <td><input type="text" value="Royal Canin Dog Food (3kg)" oninput="updateCalc()"></td>
+              <td><input type="text" value="23091090" style="width:90px;"></td>
+              <td><input type="number" value="2" min="1" style="width:55px;" oninput="updateCalc()"></td>
+              <td><input type="number" value="1200" oninput="updateCalc()"></td>
+              <td><select onchange="updateCalc()" style="width:70px;"><option selected>5</option><option>12</option><option>18</option></select></td>
+              <td id="row-total-1" style="font-weight:700;font-size:13px;color:var(--text);">₹2,520</td>
+              <td><button class="del-btn" onclick="deleteRow(this)">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="add-row-btn" onclick="addRow()">+ Add Item</button>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">📝 Notes & Terms</span></div>
+      <div class="card-body">
+        <div class="form-full">
+          <label>Notes for Customer</label>
+          <input type="text" value="Free vet consultation included. Diet plan shared on WhatsApp. Thank you for choosing Kanha Pet Shop!">
+        </div>
+        <div class="form-row">
+          <div>
+            <label>Payment Method</label>
+            <select><option>Cash</option><option>UPI (GPay/PhonePe)</option><option selected>Bank Transfer</option><option>Card</option></select>
+          </div>
+          <div>
+            <label>Payment Status</label>
+            <select><option>Paid</option><option selected>Unpaid</option><option>Partial</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: TOTALS + PREVIEW -->
+  <div>
+    <!-- TOTALS -->
+    <div class="totals-section" style="margin-bottom:16px;">
+      <div class="total-row"><span class="total-label">Subtotal (Before GST)</span><span class="total-value" id="subtotal">₹30,400</span></div>
+      <div class="total-row"><span class="total-label">CGST</span><span class="total-value" id="cgst">₹1,740</span></div>
+      <div class="total-row"><span class="total-label">SGST</span><span class="total-value" id="sgst">₹1,740</span></div>
+      <div class="total-row"><span class="total-label">Total GST</span><span class="total-value" id="total-gst" style="color:var(--amber);">₹3,480</span></div>
+      <div class="total-row total-grand">
+        <span class="grand-label">Grand Total</span>
+        <span class="grand-value" id="grand-total">₹33,880</span>
+      </div>
+    </div>
+
+    <div class="action-btns" style="margin-bottom:16px;">
+      <button class="btn-print">🖨️ Print</button>
+      <button class="btn-save">💾 Save</button>
+      <button class="btn-send">📤 Send</button>
+    </div>
+
+    <!-- INVOICE PREVIEW -->
+    <div class="invoice-preview">
+      <div class="inv-header">
+        <div class="inv-logo">🐾 Kanha <span>Pet Shop</span></div>
+        <div class="inv-address">Shop No. X, Lucknow, UP · +91 XXXXX XXXXX · GSTIN: 09XXXXX1234Z5</div>
+        <div class="inv-meta">
+          <div>
+            <div class="inv-no">Invoice #INV-0042</div>
+            <div class="inv-date" id="prev-date">Date: 05 Apr 2026</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;opacity:0.7;">Status</div>
+            <div style="font-size:12px;font-weight:700;color:#F4D03F;">UNPAID</div>
+          </div>
+        </div>
+      </div>
+      <div class="inv-body">
+        <div class="inv-bill-to">
+          <div class="inv-bill-label">Bill To</div>
+          <div class="inv-cust-name" id="prev-name">Rahul Verma</div>
+          <div class="inv-cust-phone" id="prev-phone">+91 98765 43210 · Gomti Nagar, Lucknow</div>
+        </div>
+        <table class="inv-table">
+          <thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Rate</th><th>GST</th><th>Total</th></tr></thead>
+          <tbody id="inv-preview-rows">
+            <tr><td>1</td><td>Golden Retriever Pup (45 Days)</td><td>1</td><td>₹28,000</td><td>12%</td><td>₹31,360</td></tr>
+            <tr><td>2</td><td>Royal Canin Dog Food (3kg)</td><td>2</td><td>₹1,200</td><td>5%</td><td>₹2,520</td></tr>
+          </tbody>
+        </table>
+        <div class="inv-totals">
+          <div class="inv-total-row"><span>Subtotal</span><span id="prev-sub">₹30,400</span></div>
+          <div class="inv-total-row"><span>CGST + SGST</span><span id="prev-gst">₹3,480</span></div>
+          <div class="inv-total-row grand"><span>Total</span><span id="prev-grand">₹33,880</span></div>
+        </div>
+      </div>
+      <div class="inv-footer">Thank you for your purchase · Kanha Pet Shop, Lucknow · Lifetime Support: +91 XXXXX XXXXX</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let rowCount = 2;
+
+function updatePreview(){
+  var n=document.getElementById('cust-name').value||'Customer';
+  var p=document.getElementById('cust-phone').value||'';
+  document.getElementById('prev-name').textContent=n;
+  document.getElementById('prev-phone').textContent=p;
+  var d=document.getElementById('inv-date').value;
+  if(d){var parts=d.split('-');var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];document.getElementById('prev-date').textContent='Date: '+parts[2]+' '+months[parseInt(parts[1])-1]+' '+parts[0];}
+}
+
+function fmt(n){return '₹'+Math.round(n).toLocaleString('en-IN');}
+
+function updateCalc(){
+  var rows=document.getElementById('product-rows').querySelectorAll('tr');
+  var subtotal=0,totalGst=0;
+  var previewRows='';
+  rows.forEach(function(row,i){
+    var inputs=row.querySelectorAll('input');
+    var selects=row.querySelectorAll('select');
+    if(inputs.length<3)return;
+    var qty=parseFloat(inputs[1].value)||0;
+    var rate=parseFloat(inputs[2].value)||0;
+    var gst=parseFloat(selects[0].value)||12;
+    var base=qty*rate;
+    var gstAmt=base*(gst/100);
+    var total=base+gstAmt;
+    subtotal+=base;totalGst+=gstAmt;
+    var tdTot=row.querySelectorAll('td');
+    if(tdTot[5])tdTot[5].textContent=fmt(total);
+    previewRows+='<tr><td>'+(i+1)+'</td><td>'+inputs[0].value+'</td><td>'+qty+'</td><td>'+fmt(rate)+'</td><td>'+gst+'%</td><td>'+fmt(total)+'</td></tr>';
+  });
+  var half=totalGst/2;
+  var grand=subtotal+totalGst;
+  document.getElementById('subtotal').textContent=fmt(subtotal);
+  document.getElementById('cgst').textContent=fmt(half);
+  document.getElementById('sgst').textContent=fmt(half);
+  document.getElementById('total-gst').textContent=fmt(totalGst);
+  document.getElementById('grand-total').textContent=fmt(grand);
+  document.getElementById('prev-sub').textContent=fmt(subtotal);
+  document.getElementById('prev-gst').textContent=fmt(totalGst);
+  document.getElementById('prev-grand').textContent=fmt(grand);
+  document.getElementById('inv-preview-rows').innerHTML=previewRows;
+}
+
+function addRow(){
+  var tbody=document.getElementById('product-rows');
+  var tr=document.createElement('tr');
+  tr.innerHTML='<td><input type="text" placeholder="Product name" oninput="updateCalc()"></td><td><input type="text" placeholder="HSN" style="width:90px;"></td><td><input type="number" value="1" min="1" style="width:55px;" oninput="updateCalc()"></td><td><input type="number" value="0" oninput="updateCalc()"></td><td><select onchange="updateCalc()" style="width:70px;"><option>5</option><option selected>12</option><option>18</option></select></td><td style="font-weight:700;font-size:13px;color:var(--text);">₹0</td><td><button class="del-btn" onclick="deleteRow(this)">✕</button></td>';
+  tbody.appendChild(tr);
+  rowCount++;
+  updateCalc();
+}
+
+function deleteRow(btn){
+  var row=btn.closest('tr');
+  row.parentNode.removeChild(row);
+  updateCalc();
+}
+</script>
+</body>
+</html>
