@@ -25,26 +25,26 @@ export default async function AdminRootLayout({ children }: { children: React.Re
         </div>
         
         <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 px-2">Core Apps</p>
-          <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-all">
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 px-2">Core Apps</p>
+          <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-extrabold text-gray-700 hover:bg-gray-100 hover:text-brand-primary transition-all">
             <LayoutDashboard size={18} /> Dashboard
           </Link>
-          <Link href="/admin/products" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-all">
+          <Link href="/admin/products" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-extrabold text-gray-700 hover:bg-gray-100 hover:text-brand-primary transition-all">
             <Package size={18} /> Products
           </Link>
-          <Link href="/admin/inventory" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-all">
+          <Link href="/admin/inventory" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-extrabold text-gray-700 hover:bg-gray-100 hover:text-brand-primary transition-all">
             <ShoppingBag size={18} /> Inventory
           </Link>
-          <Link href="/admin/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-all">
+          <Link href="/admin/orders" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-extrabold text-gray-700 hover:bg-gray-100 hover:text-brand-primary transition-all">
             <ShoppingCart size={18} /> Orders
           </Link>
-          <Link href="/admin/billing" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-all">
+          <Link href="/admin/billing" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-extrabold text-gray-700 hover:bg-gray-100 hover:text-brand-primary transition-all">
             <LayoutDashboard size={18} /> Billing
           </Link>
         </nav>
         
         <div className="p-4 border-t border-gray-100">
-          <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-100 transition-all">
+          <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-extrabold text-gray-600 hover:bg-gray-100 transition-all">
             <Settings size={18} /> Storefront
           </Link>
         </div>
