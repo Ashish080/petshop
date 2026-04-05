@@ -22,40 +22,50 @@
 ------------------------------------------------ */
 @layer base {
   :root {
-    --bg-page: #F1F2F6;
-    --text-primary: #2D3436;
-    --text-body: #2D3436;
-    --text-light: #636E72;
+    --bg-page: #F8FAFC;
+    --text-primary: #0F172A;
+    --text-body: #334155;
+    --text-light: #64748B;
     --card-bg: #ffffff;
-    --card-border: #E1E2E6;
+    --card-border: #E2E8F0;
     --nav-bg: #ffffff;
     --primary: #FF7B54;
-    /* Coral */
     --secondary: #70A1FF;
-    /* Sky Blue */
     --accent: #FFD93D;
-    /* Honey */
+    --admin-primary: #4F46E5;
   }
 
   [data-theme="dark"] {
-    --bg-page: #1A1D23;
-    --text-primary: #F1F2F6;
-    --text-body: #DFE4EA;
-    --text-light: #A4B0BE;
-    --card-bg: #242933;
-    --card-border: #3D4451;
-    --nav-bg: #1A1D23;
+    --bg-page: #0f172a;
+    --text-primary: #f8fafc;
+    --text-body: #e2e8f0;
+    --text-light: #94a3b8;
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --nav-bg: #0f172a;
     --primary: #FF7B54;
     --secondary: #70A1FF;
     --accent: #FFD93D;
+    --admin-primary: #6366F1;
   }
 
   body {
     background-color: var(--bg-page);
     color: var(--text-body);
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.011em;
+    line-height: 1.6;
     transition: background-color 0.4s ease, color 0.4s ease;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
 }
 
 /* -----------------------------------------------

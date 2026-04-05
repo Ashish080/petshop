@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
 
     const product = await Product.create({
       ...data,
+      description: data.description || '',
       images: data.images || [],
       stock: data.stock || 0,
       lowStockThreshold: data.lowStockThreshold || 10,
@@ -115,7 +116,12 @@ export async function POST(request: NextRequest) {
       data: formattedProduct
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating product:', error);
+    if (error instanceof Error && error.name === 'ValidationError') {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to create product' },
       { status: 500 }

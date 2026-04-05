@@ -1,72 +1,84 @@
 import Link from 'next/link';
-import { Package, LayoutDashboard, ShoppingBag, ShoppingCart, Settings, ClipboardList } from 'lucide-react';
-
+import { Package, LayoutDashboard, ShoppingCart, Settings, ClipboardList, Menu, X, ArrowLeft } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export default async function AdminRootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session || session.user?.role !== 'admin') {
-    redirect('/admin/login');
+    redirect('/auth/login');
   }
 
   return (
-    <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans uppercase">
-      {/* Vyapar-Style Fixed Sidebar */}
-      <aside className="w-80 border-r-2 border-gray-100 bg-white flex flex-col shrink-0">
-        <div className="p-8 border-b-2 border-gray-50 flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#FF7B54] text-white flex items-center justify-center rounded-2xl font-black text-xl shadow-lg shadow-[#FF7B54]/30">
+    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-72 border-r border-slate-200 bg-white flex-col shrink-0 shadow-sm z-30">
+        <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-600 text-white flex items-center justify-center rounded-xl font-black text-lg shadow-lg shadow-indigo-200">
             K
           </div>
           <div>
-            <h2 className="font-black text-xl leading-tight tracking-tighter text-slate-900">KANHA PANEL</h2>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-black">OPS CONTROL v3.0</p>
+            <h2 className="font-bold text-lg leading-tight tracking-tight text-slate-900 uppercase">Kanha Admin</h2>
+            <p className="text-[10px] font-bold text-slate-400 tracking-wider">WORKSPACE v3.0</p>
           </div>
         </div>
         
-        <nav className="flex-1 overflow-y-auto px-6 py-10 space-y-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6 px-2 opacity-50">Strategic Ops</p>
+        <nav className="flex-1 overflow-y-auto px-4 py-8 space-y-1">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-3">Management</p>
           
-          <Link href="/admin" className="flex items-center gap-4 px-4 py-4 rounded-2xl text-xs font-black text-slate-800 hover:bg-[#FF7B54]/5 hover:text-[#FF7B54] transition-all group border border-transparent hover:border-[#FF7B54]/10">
-            <LayoutDashboard size={20} /> Dashboard
+          <Link href="/admin" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all group">
+            <LayoutDashboard size={18} className="opacity-70 group-hover:opacity-100" /> 
+            <span>Dashboard</span>
           </Link>
           
-          <Link href="/admin/products" className="flex items-center gap-4 px-4 py-4 rounded-2xl text-xs font-black text-slate-800 hover:bg-[#70A1FF]/5 hover:text-[#70A1FF] transition-all group border border-transparent hover:border-[#70A1FF]/10">
-            <Package size={20} /> Inventory
+          <Link href="/admin/products" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all group">
+            <Package size={18} className="opacity-70 group-hover:opacity-100" /> 
+            <span>Inventory</span>
           </Link>
           
-          <Link href="/admin/billing" className="flex items-center gap-4 px-4 py-4 rounded-2xl text-xs font-black text-slate-800 hover:bg-[#FFD93D]/5 hover:text-[#FFD93D] transition-all group border border-transparent hover:border-[#FFD93D]/10">
-            <ClipboardList size={20} /> Billing & GST
+          <Link href="/admin/billing" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all group">
+            <ClipboardList size={18} className="opacity-70 group-hover:opacity-100" /> 
+            <span>Billing & GST</span>
           </Link>
-
-          <Link href="/admin/orders" className="flex items-center gap-4 px-4 py-4 rounded-2xl text-xs font-black text-slate-800 hover:bg-[#2ECC71]/5 hover:text-[#2ECC71] transition-all group border border-transparent hover:border-[#2ECC71]/10">
-            <ShoppingCart size={20} /> Sales Logs
+42:
+          <Link href="/admin/orders" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all group">
+            <ShoppingCart size={18} className="opacity-70 group-hover:opacity-100" /> 
+            <span>Orders & Sales</span>
           </Link>
         </nav>
         
-        <div className="p-6 border-t-2 border-gray-50">
-          <Link href="/" className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl text-xs font-black text-gray-400 hover:bg-gray-100 transition-all border-2 border-gray-50">
-            <Settings size={18} /> Storefront
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+          <Link href="/" className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 hover:bg-white hover:text-indigo-600 transition-all border border-slate-200 bg-white">
+            <ArrowLeft size={16} /> <span>Storefront</span>
           </Link>
         </div>
       </aside>
       
-      {/* Main Container */}
+      {/* Mobile Topbar */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Topbar */}
-        <header className="h-16 border-b border-gray-200 bg-white px-8 flex items-center justify-between shrink-0 shadow-sm z-10">
-          <div className="font-semibold text-sm text-gray-500">
-            Internal Operations
+        <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between shrink-0 shadow-sm z-20">
+          <div className="flex items-center gap-4">
+            <button className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+              <Menu size={20} />
+            </button>
+            <div className="hidden sm:block font-semibold text-sm text-slate-400 uppercase tracking-widest">
+              Internal Ops
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold text-xs uppercase border border-brand-primary/20">
-               AD
+          
+          <div className="flex items-center gap-4">
+             <div className="flex flex-col items-end hidden sm:flex">
+               <span className="text-xs font-bold text-slate-900">{session.user.name || 'Admin'}</span>
+               <span className="text-[10px] font-bold text-slate-400 capitalize">{session.user.role}</span>
+             </div>
+             <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs border border-indigo-100 shadow-sm">
+               {session.user.name?.charAt(0) || 'A'}
              </div>
           </div>
         </header>
         
-        {/* Scrollable Workspace Viewport */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-6 md:p-8">
+        {/* Workspace Viewport */}
+        <main className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
@@ -75,3 +87,4 @@ export default async function AdminRootLayout({ children }: { children: React.Re
     </div>
   );
 }
+

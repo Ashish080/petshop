@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ArrowRight } from 'lucide-react';
 
 type Step = 'address' | 'payment' | 'confirm';
 
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
         throw new Error(err.error ?? 'Order failed');
       }
       const order = await res.json();
-      setOrderId(order.data._id || order.data.id);
+      setOrderId(order.data.orderNumber || order.data._id || order.data.id);
       clearCart();
       setStep('confirm');
     } catch (err: any) {
@@ -94,53 +94,59 @@ export default function CheckoutPage() {
 
           {/* Address step */}
           {step === 'address' && (
-            <div className="bg-white rounded-2xl p-6 border border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Shipping address</h2>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-orange-100 text-orange-600 flex items-center justify-center rounded-lg">
+                  <CheckCircle2 size={18} />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Shipping Details</h2>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-5">
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="text-sm text-gray-500 block mb-1.5">Full name</label>
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">Full Name</label>
                   <input
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-500/5 transition-all"
                     value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Ravi Kumar"
+                    placeholder="e.g. Rahul Sharma"
                   />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="text-sm text-gray-500 block mb-1.5">Phone number</label>
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">Phone Number</label>
                   <input
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-500/5 transition-all"
                     value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     placeholder="+91 98765 43210"
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-sm text-gray-500 block mb-1.5">Street address</label>
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">Street Address</label>
                   <input
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-500/5 transition-all"
                     value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })}
                     placeholder="House no., Street, Locality"
                   />
                 </div>
-                <div>
-                  <label className="text-sm text-gray-500 block mb-1.5">City</label>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">City</label>
                   <input
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-500/5 transition-all"
                     value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
                     placeholder="Lucknow"
                   />
                 </div>
-                <div>
-                  <label className="text-sm text-gray-500 block mb-1.5">Pincode</label>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">Pincode</label>
                   <input
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-500/5 transition-all"
                     value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })}
                     placeholder="226001"
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-sm text-gray-500 block mb-1.5">State</label>
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-1">State</label>
                   <select
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-500/5 transition-all bg-white cursor-pointer"
                     value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })}
                   >
                     {['Uttar Pradesh','Delhi','Maharashtra','Karnataka','Tamil Nadu','Rajasthan','Gujarat','West Bengal'].map(s => (
@@ -150,43 +156,52 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <Button
-                size="lg" className="w-full mt-6"
+                size="lg" className="w-full mt-8 font-black uppercase tracking-widest text-xs py-5"
                 onClick={() => setStep('payment')}
                 disabled={!form.name || !form.street || !form.city || !form.pincode || !form.phone}
               >
-                Continue to payment →
+                Proceed to Payment <ArrowRight className="ml-2 hover:translate-x-1 transition-transform" size={18} />
               </Button>
             </div>
           )}
 
           {/* Payment step */}
           {step === 'payment' && (
-            <div className="bg-white rounded-2xl p-6 border border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Payment method</h2>
-              <div className="space-y-3 mb-6">
-                <label className="flex items-center gap-4 p-4 border-2 border-orange-400 bg-orange-50 rounded-xl cursor-pointer">
-                  <input type="radio" name="payment" defaultChecked className="accent-orange-500" />
-                  <div>
-                    <p className="font-medium text-gray-900 text-sm">Cash on delivery</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Pay when your order arrives</p>
+            <div className="bg-white rounded-2xl p-10 border border-gray-100 shadow-xl shadow-orange-500/5 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="text-center mb-10">
+                <h2 className="text-2xl font-black text-gray-900 mb-2">Almost Done!</h2>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Select your preferred payment mode</p>
+              </div>
+              
+              <div className="space-y-4 mb-10">
+                <label className="flex items-center gap-5 p-6 border-2 border-orange-500 bg-orange-50/50 rounded-2xl cursor-pointer transition-all hover:bg-orange-50">
+                  <div className="w-6 h-6 rounded-full border-4 border-orange-500 bg-white flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-orange-500"></div>
                   </div>
-                  <span className="ml-auto text-xs font-medium text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">Free</span>
+                  <div>
+                    <p className="font-black text-gray-900 text-sm uppercase tracking-wide">Cash on Delivery</p>
+                    <p className="text-[11px] font-bold text-gray-500 mt-1 uppercase tracking-widest">Pay when your order arrives</p>
+                  </div>
+                  <span className="ml-auto text-[10px] font-black text-orange-600 bg-orange-100 px-3 py-1 rounded-full uppercase tracking-widest">Recommended</span>
                 </label>
-                <label className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-not-allowed opacity-50">
-                  <input type="radio" name="payment" disabled />
+                
+                <label className="flex items-center gap-5 p-6 border border-gray-100 rounded-2xl cursor-not-allowed opacity-50 bg-gray-50">
+                  <div className="w-6 h-6 rounded-full border-2 border-gray-200 bg-white"></div>
                   <div>
-                    <p className="font-medium text-gray-900 text-sm">UPI / Net banking</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Coming soon</p>
+                    <p className="font-black text-gray-400 text-sm uppercase tracking-wide">Digital Payment</p>
+                    <p className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-widest">UPI, Cards, Netbanking</p>
                   </div>
+                  <span className="ml-auto text-[10px] font-black text-gray-400 bg-gray-100 px-3 py-1 rounded-full uppercase tracking-widest">Unavailable</span>
                 </label>
               </div>
-              <div className="flex gap-3">
-                <Button variant="secondary" onClick={() => setStep('address')}>← Back</Button>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button variant="secondary" className="sm:flex-1 py-5 uppercase tracking-widest text-xs font-black" onClick={() => setStep('address')}>Go Back</Button>
                 <Button
-                  size="lg" className="flex-1" loading={loading}
+                  size="lg" className="sm:flex-[2] py-5 uppercase tracking-widest text-xs font-black shadow-2xl shadow-orange-500/20" loading={loading}
                   onClick={handlePlaceOrder}
                 >
-                  Place order · ₹{orderTotal.toLocaleString('en-IN')}
+                  Confirm Order · ₹{orderTotal.toLocaleString('en-IN')}
                 </Button>
               </div>
             </div>
@@ -194,19 +209,25 @@ export default function CheckoutPage() {
 
           {/* Confirmed step */}
           {step === 'confirm' && (
-            <div className="bg-white rounded-2xl p-10 border border-gray-100 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-8 h-8 text-green-600" />
+            <div className="bg-white rounded-[40px] p-16 border border-gray-100 text-center shadow-2xl animate-in zoom-in-95 duration-500">
+              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                <CheckCircle2 size={48} className="text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Order placed!</h2>
-              <p className="text-gray-500 mb-1">Order ID: <span className="font-mono text-gray-700">#{orderId.slice(-8).toUpperCase()}</span></p>
-              <p className="text-gray-400 text-sm mb-8">You'll receive a confirmation on your registered email.</p>
-              <div className="flex gap-3 justify-center">
-                <Button variant="secondary" onClick={() => router.push('/orders')}>View orders</Button>
-                <Button onClick={() => router.push('/products')}>Continue shopping</Button>
+              <h2 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">Order Confirmed!</h2>
+              <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-xs mb-8">Synchronizing with Logistics...</p>
+              
+              <div className="bg-gray-50 rounded-3xl p-8 mb-10 border border-gray-100 inline-block">
+                <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Tracking Inventory ID</p>
+                <p className="text-2xl font-black text-gray-900 font-mono tracking-tighter">#{orderId}</p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button variant="secondary" className="px-10 py-5 uppercase tracking-widest text-xs font-black" onClick={() => router.push('/orders')}>Access History</Button>
+                <Button className="px-10 py-5 uppercase tracking-widest text-xs font-black shadow-xl shadow-orange-500/20" onClick={() => router.push('/products')}>Resume Shopping</Button>
               </div>
             </div>
           )}
+
         </div>
 
         {/* Order summary */}

@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
 
       await Product.findByIdAndUpdate(item.product, { $inc: updateQuery }, { 
         arrayFilters: item.variantName ? [{ 'elem.name': item.variantName }] : [],
-        new: true 
+        returnDocument: 'after' 
       });
     }
 

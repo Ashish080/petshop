@@ -22,9 +22,9 @@ import type { AdminStats, Order } from '@/types';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export function AdminDashboardClient() {
-    const [stats, setStats] = useState<AdminStats | null>(null);
-    const [loading, setLoading] = useState(true);
+export function AdminDashboardClient({ initialStats }: { initialStats: AdminStats | null }) {
+    const [stats, setStats] = useState<AdminStats | null>(initialStats);
+    const [loading, setLoading] = useState(!initialStats);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showQuickActions, setShowQuickActions] = useState(false);
     const [notifications, setNotifications] = useState([
@@ -48,19 +48,22 @@ export function AdminDashboardClient() {
     };
 
     useEffect(() => {
-        fetchStats();
-    }, []);
+        if (!initialStats) {
+            fetchStats();
+        }
+    }, [initialStats]);
 
     const formatCurrency = (num: number) => `₹${Number(num || 0).toLocaleString('en-IN')}`;
 
-    if (loading) {
+    if (loading && !stats) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Synchronizing Workspace...</p>
+                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Synchronizing Workspace...</p>
             </div>
         );
     }
+
 
     return (
         <div className="animate-fade-in">
@@ -159,32 +162,32 @@ export function AdminDashboardClient() {
                         label: "Total Revenue", 
                         value: formatCurrency(stats?.totalRevenue || 1245000), 
                         trend: "+14.2% vs Last Month", 
-                        color: "text-[#FF7B54]", // Orange
-                        bg: "bg-[#FF7B54]/5",
+                        color: "text-indigo-600",
+                        bg: "bg-indigo-600/5",
                         icon: TrendingUp 
                     },
                     { 
                         label: "Active Pets", 
                         value: stats?.totalProducts || 48, 
                         trend: "+2 New vs Last Month", 
-                        color: "text-[#70A1FF]", // Blue
-                        bg: "bg-[#70A1FF]/5",
+                        color: "text-blue-600",
+                        bg: "bg-blue-600/5",
                         icon: Package 
                     },
                     { 
                         label: "Appointments", 
                         value: stats?.totalOrders || 112, 
                         trend: "+5 Today vs Last Month", 
-                        color: "text-[#FFD93D]", // Yellow
-                        bg: "bg-[#FFD93D]/5",
+                        color: "text-emerald-600",
+                        bg: "bg-emerald-600/5",
                         icon: ShoppingBag 
                     },
                     { 
                         label: "New Customers", 
                         value: stats?.totalCustomers || 850, 
                         trend: "+12% vs Last Month", 
-                        color: "text-[#2ECC71]", // Green
-                        bg: "bg-[#2ECC71]/5",
+                        color: "text-violet-600",
+                        bg: "bg-violet-600/5",
                         icon: Users 
                     },
                 ].map((stat, idx) => (

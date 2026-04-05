@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
-import { connectDB } from '../src/lib/db';
+import connectDB from '../src/lib/mongoose';
 import Product from '../src/models/Product';
 import User from '../src/models/User';
+import Pet from '../src/models/Pet';
+import { petsData } from '../src/data/pets';
 
 async function seedDatabase() {
   try {
@@ -10,6 +12,7 @@ async function seedDatabase() {
 
     // Clear existing data
     await Product.deleteMany({});
+    await Pet.deleteMany({});
     await User.deleteMany({});
     console.log('🗑️  Cleared existing data');
 
@@ -30,7 +33,7 @@ async function seedDatabase() {
     });
     console.log('👤 Created admin user (admin@petshop.com / admin123)');
 
-    // Create sample products (schema: variants are { name, sku, price, stock }; checkout without variant uses product.stock)
+    // Create sample products
     const products = [
       {
         catalogId: 'p1',
@@ -46,6 +49,7 @@ async function seedDatabase() {
         rating: 4.8,
         reviewCount: 124,
         variants: [],
+        isActive: true
       },
       {
         catalogId: 'p2',
@@ -61,6 +65,7 @@ async function seedDatabase() {
         rating: 4.9,
         reviewCount: 89,
         variants: [],
+        isActive: true
       },
       {
         catalogId: 'p3',
@@ -76,6 +81,7 @@ async function seedDatabase() {
         rating: 4.5,
         reviewCount: 210,
         variants: [],
+        isActive: true
       },
       {
         catalogId: 'p4',
@@ -91,6 +97,7 @@ async function seedDatabase() {
         rating: 4.7,
         reviewCount: 56,
         variants: [],
+        isActive: true
       },
       {
         name: 'Natural Dog Treats',
@@ -105,81 +112,21 @@ async function seedDatabase() {
         rating: 4.6,
         reviewCount: 342,
         variants: [],
+        isActive: true
       },
-      {
-        name: 'Pet Grooming Kit',
-        description: 'Complete grooming kit with clippers, scissors, comb, and brush. Professional quality for home use.',
-        price: 2999,
-        category: 'grooming',
-        images: [
-          'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600&auto=format&fit=crop'
-        ],
-        stock: 30,
-        lowStockThreshold: 8,
-        rating: 4.4,
-        reviewCount: 78,
-        variants: [],
-      },
-      {
-        name: 'Luxury Cat Tower',
-        description: 'Multi-level cat tower with scratching posts, hiding spots, and perches. Perfect for multiple cats.',
-        price: 12999,
-        category: 'accessories',
-        images: [
-          'https://images.unsplash.com/photo-1545249390-6bdfa286032f?q=80&w=600&auto=format&fit=crop'
-        ],
-        stock: 8,
-        lowStockThreshold: 3,
-        rating: 4.9,
-        reviewCount: 45,
-        variants: [],
-      },
-      {
-        name: 'Automatic Pet Feeder',
-        description: 'Smart automatic feeder with programmable meal times and portion control. WiFi enabled.',
-        price: 8999,
-        category: 'accessories',
-        images: [
-          'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=600&auto=format&fit=crop'
-        ],
-        stock: 15,
-        lowStockThreshold: 5,
-        rating: 4.7,
-        reviewCount: 92,
-        variants: [],
-      },
-      {
-        name: 'Organic Shampoo for Dogs',
-        description: 'Gentle organic shampoo with oatmeal and aloe vera. Hypoallergenic formula for sensitive skin.',
-        price: 899,
-        category: 'grooming',
-        images: [
-          'https://images.unsplash.com/photo-1585837575652-2c90698b7f31?q=80&w=600&auto=format&fit=crop'
-        ],
-        stock: 60,
-        lowStockThreshold: 15,
-        rating: 4.5,
-        reviewCount: 156,
-        variants: [],
-      },
-      {
-        name: 'Rope Toy Set',
-        description: 'Durable rope toys for tug-of-war and chewing. Helps clean teeth and massage gums.',
-        price: 799,
-        category: 'toys',
-        images: [
-          'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?q=80&w=600&auto=format&fit=crop'
-        ],
-        stock: 5,
-        lowStockThreshold: 20,
-        rating: 4.3,
-        reviewCount: 287,
-        variants: [],
-      }
     ];
 
     await Product.insertMany(products);
     console.log('📦 Created sample products');
+
+    // Create sample pets
+    const pets = petsData.map(p => ({
+        ...p,
+        isActive: true
+    }));
+    await Pet.insertMany(pets);
+    console.log('🐕 Created sample pets');
+
 
     console.log('\n✅ Database seeded successfully!');
     console.log('\n📋 Test Credentials:');

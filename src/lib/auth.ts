@@ -2,9 +2,15 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import connectDB from './mongoose';
 import User from '@/models/User';
-import type { NextAuthConfig } from 'next-auth';
+import { authConfig } from './auth.config';
 
-export const authConfig: NextAuthConfig = {
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       name: 'credentials',
@@ -40,39 +46,4 @@ export const authConfig: NextAuthConfig = {
       }
     })
   ],
-  session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60,
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.email = user.email;
-        token.name = user.name ?? undefined;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as 'user' | 'admin';
-        session.user.email = (token.email as string) ?? '';
-        session.user.name = (token.name as string | undefined) ?? '';
-      }
-      return session;
-    }
-  },
-  pages: {
-    signIn: '/auth/login',
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-};
-
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth(authConfig);
+});

@@ -56,22 +56,26 @@ function scopedStorageKey(name: string) {
   return `${name}__${cartStorageOwnerKey}`;
 }
 
-/** Guest: no localStorage — avoids “2 items in cart” when nobody is logged in after refresh. */
+function getActiveStorage() {
+  if (typeof window === 'undefined') return null;
+  return cartStorageOwnerKey === 'guest' ? sessionStorage : localStorage;
+}
+
 const browserStorage = createJSONStorage(() => ({
   getItem: (name) => {
-    if (typeof window === 'undefined') return null;
-    if (cartStorageOwnerKey === 'guest') return null;
-    return localStorage.getItem(scopedStorageKey(name));
+    const storage = getActiveStorage();
+    if (!storage) return null;
+    return storage.getItem(scopedStorageKey(name));
   },
   setItem: (name, value) => {
-    if (typeof window === 'undefined') return;
-    if (cartStorageOwnerKey === 'guest') return;
-    localStorage.setItem(scopedStorageKey(name), value);
+    const storage = getActiveStorage();
+    if (!storage) return;
+    storage.setItem(scopedStorageKey(name), value);
   },
   removeItem: (name) => {
-    if (typeof window === 'undefined') return;
-    if (cartStorageOwnerKey === 'guest') return;
-    localStorage.removeItem(scopedStorageKey(name));
+    const storage = getActiveStorage();
+    if (!storage) return;
+    storage.removeItem(scopedStorageKey(name));
   },
 }));
 
@@ -117,14 +121,14 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem: (product, variantName) => {
-        const newItems = get().items.filter(
-          i => !(i.product === product && i.variantName === variantName)
-        );
-
-        const totals = calculateTotals(newItems);
-        const itemCount = newItems.reduce((sum, i) => sum + i.quantity, 0);
-
-        set({ ...totals, itemCount });
+        set((state) => {
+          const newItems = state.items.filter(
+            i => !(i.product === product && i.variantName === variantName)
+          );
+          const totals = calculateTotals(newItems);
+          const itemCount = newItems.reduce((sum, i) => sum + i.quantity, 0);
+          return { ...totals, itemCount };
+        });
       },
 
       updateQuantity: (product, quantity, variantName) => {
@@ -146,6 +150,7 @@ export const useCartStore = create<CartStore>()(
           return { ...totals, itemCount };
         });
       },
+
 
       clearCart: () => {
         set(initialState);

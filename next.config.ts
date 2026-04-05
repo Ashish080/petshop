@@ -7,6 +7,22 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.jdmagicbox.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'content.jdmagicbox.com',
+      },
     ],
   },
 };
