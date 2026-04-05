@@ -6,10 +6,6 @@ export interface IOrderItem {
   price: number;
   quantity: number;
   image: string;
-  variant?: {
-    variantName: string;
-    selectedOption: string;
-  };
 }
 
 export interface IOrder extends Document {
@@ -26,7 +22,8 @@ export interface IOrder extends Document {
   total: number;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   paymentMethod?: 'card' | 'upi' | 'cod';
-  orderStatus: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  orderStatus: 'placed' | 'confirmed' | 'accepted' | 'picked' | 'out-for-delivery' | 'delivered' | 'cancelled';
+  riderId?: string;
   shippingAddress: {
     street: string;
     city: string;
@@ -34,7 +31,6 @@ export interface IOrder extends Document {
     zipCode: string;
     country: string;
   };
-  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,11 +40,7 @@ const OrderItemSchema = new Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
-  image: { type: String },
-  variant: {
-    variantName: String,
-    selectedOption: String
-  }
+  image: { type: String }
 });
 
 const OrderSchema = new Schema<IOrder>({
@@ -76,22 +68,21 @@ const OrderSchema = new Schema<IOrder>({
   orderStatus: { 
     type: String, 
     required: true, 
-    enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
-    default: 'pending'
+    enum: ['placed', 'confirmed', 'accepted', 'picked', 'out-for-delivery', 'delivered', 'cancelled'],
+    default: 'placed'
   },
+  riderId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   shippingAddress: {
     street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
     zipCode: { type: String, required: true },
     country: { type: String, required: true }
-  },
-  notes: String
+  }
 }, {
   timestamps: true
 });
 
-// Must run before validation — `required: true` on orderNumber runs before `pre('save')`
 OrderSchema.pre('validate', function () {
   const doc = this as IOrder;
   if (!doc.orderNumber) {
@@ -102,5 +93,4 @@ OrderSchema.pre('validate', function () {
 });
 
 const Order: Model<IOrder> = mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
-
 export default Order;

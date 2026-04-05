@@ -1,23 +1,49 @@
 "use client";
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, ShoppingCart, User, LayoutDashboard } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, LayoutDashboard, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import { brandConfig } from '@/config/brand';
 import { navigationConfig } from '@/config/navigation';
 import { themeConfig } from '@/config/theme';
 import NightWalkToggle from '@/components/ui/NightWalkToggle';
 import { useCartStore } from '@/store/cartStore';
+import SearchModal from '@/components/layout/SearchModal';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const { data: session, status } = useSession();
     const cartCount = useCartStore((s) => s.itemCount);
+    const router = useRouter();
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    const handleSearch = () => {
+        if (!session) {
+            toast.error('Identity Verification Required -- Login to access search functions', {
+                style: {
+                    background: '#1e293b',
+                    color: '#fff',
+                    borderRadius: '24px',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    fontSize: '10px',
+                    letterSpacing: '0.1em',
+                    border: '1px solid #334155'
+                },
+                icon: '🔒'
+            });
+            router.push('/auth/login?callbackUrl=/products');
+            return;
+        }
+        setIsSearchOpen(true);
+    };
 
     const navLabel = useMemo(() => {
         if (status !== 'authenticated' || !session?.user) return null;
@@ -51,6 +77,13 @@ export default function Navbar() {
 
                     <div className="flex items-center gap-x-3 md:gap-x-4">
                         <div className="flex items-center gap-x-1 sm:gap-x-3">
+                            <button 
+                                onClick={handleSearch}
+                                className="p-2 text-text-primary hover:text-brand-primary transition-colors flex items-center justify-center group"
+                                aria-label="Search items"
+                            >
+                                <Search size={22} className="group-hover:scale-110 transition-transform" />
+                            </button>
                             <NightWalkToggle />
                             {navLabel ? (
                                 <Link href="/admin" className="flex items-center gap-2 py-2 px-4 bg-brand-primary/10 rounded-full text-brand-primary hover:bg-brand-primary/20 transition-all group" aria-label="Go to Dashboard">
@@ -58,7 +91,7 @@ export default function Navbar() {
                                     <span className="hidden sm:inline font-black text-xs uppercase tracking-widest">Dashboard ({navLabel})</span>
                                 </Link>
                             ) : (
-                                <Link href="/login" className="p-2 text-text-primary hover:text-brand-primary transition-colors hidden sm:block" aria-label="Sign in">
+                                <Link href="/auth/login" className="p-2 text-text-primary hover:text-brand-primary transition-colors hidden sm:block" aria-label="Sign in">
                                     <User size={22} />
                                 </Link>
                             )}
@@ -146,6 +179,10 @@ export default function Navbar() {
                     </div>
                 </div>
             )}
+            <SearchModal 
+                isOpen={isSearchOpen} 
+                onClose={() => setIsSearchOpen(false)} 
+            />
         </nav>
     );
 }

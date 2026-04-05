@@ -5,17 +5,9 @@ export interface IUser extends Document {
   email: string;
   password: string;
   name: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'rider';
   phone?: string;
   avatar?: string;
-  addresses: {
-    isDefault: boolean;
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  }[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -35,24 +27,15 @@ const UserSchema = new Schema<IUser>({
   role: { 
     type: String, 
     required: true, 
-    enum: ['user', 'admin'], 
+    enum: ['user', 'admin', 'rider'], 
     default: 'user' 
   },
   phone: String,
-  avatar: String,
-  addresses: [{
-    isDefault: { type: Boolean, default: false },
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String,
-    country: String
-  }]
+  avatar: String
 }, {
   timestamps: true
 });
 
-// Hash password before saving (Mongoose 9: async middleware, no `next`)
 UserSchema.pre('save', async function () {
   const doc = this as IUser;
   if (!doc.isModified('password')) return;
@@ -60,11 +43,9 @@ UserSchema.pre('save', async function () {
   doc.password = await bcrypt.hash(doc.password, salt);
 });
 
-// Compare password method
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
-
 export default User;

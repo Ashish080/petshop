@@ -1,16 +1,17 @@
 'use client';
 import Link from 'next/link';
-import { Package, LayoutDashboard, ShoppingCart, Settings, ClipboardList } from 'lucide-react';
+import { Package, LayoutDashboard, ShoppingCart, Settings, ClipboardList, Zap } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export function AdminSidebar() {
   const pathname = usePathname();
   
   const navItems = [
-    { href: "/admin", icon: LayoutDashboard, label: "Dashboard", color: "#FF7B54" },
-    { href: "/admin/products", icon: Package, label: "Inventory", color: "#70A1FF" },
-    { href: "/admin/billing", icon: ClipboardList, label: "Billing & GST", color: "#FFD93D" },
+    { href: "/admin", icon: LayoutDashboard, label: "Command Center", color: "#6366F1" },
+    { href: "/admin/analytics", icon: Zap, label: "Analytics Console", color: "#FF7B54" },
+    { href: "/admin/inventory", icon: Package, label: "Inventory Hub", color: "#70A1FF" },
     { href: "/admin/orders", icon: ShoppingCart, label: "Sales Logs", color: "#2ECC71" },
+    { href: "/admin/billing", icon: ClipboardList, label: "Billing & GST", color: "#FFD93D" },
   ];
 
   return (

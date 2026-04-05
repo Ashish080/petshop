@@ -4,6 +4,7 @@ import type { Product } from '@/types';
 import { ProductActions } from '@/components/products/ProductActions';
 import { Star, Truck, RotateCcw, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { ActivityTracker } from '@/components/analytics/ActivityTracker';
 
 async function getProduct(id: string): Promise<Product | null> {
   try {
