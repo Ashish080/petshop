@@ -5,7 +5,9 @@ import { Package, Truck, CheckCircle, Clock, MapPin, Search, ChevronRight, X, Ar
 import { motion, AnimatePresence } from 'framer-motion';
 
 const STATUS_CONFIG: Record<string, { label: string, icon: any, color: string }> = {
+    pending: { label: 'Order Pending', icon: Clock, color: 'slate' },
     placed: { label: 'Order Placed', icon: Clock, color: 'slate' },
+    confirmed: { label: 'Order Confirmed', icon: CheckCircle, color: 'indigo' },
     accepted: { label: 'Assigned to Rider', icon: Zap, color: 'indigo' },
     picked: { label: 'In Transit', icon: Package, color: 'amber' },
     'out-for-delivery': { label: 'Nearing Target', icon: Truck, color: 'sky' },
@@ -119,11 +121,22 @@ export default function OrdersClient({ orders: initialOrders }: { orders: any[] 
                             </div>
 
                             <div className="relative space-y-10 pl-8 border-l-2 border-slate-100 pb-2">
-                                {['placed', 'accepted', 'picked', 'out-for-delivery', 'delivered'].map((s, i) => {
+                                {['pending', 'confirmed', 'accepted', 'picked', 'out-for-delivery', 'delivered'].map((s, i) => {
                                     const cfg = STATUS_CONFIG[s];
-                                    const currentIdx = ['placed', 'accepted', 'picked', 'out-for-delivery', 'delivered'].indexOf(liveOrder.orderStatus);
-                                    const isDone = i <= currentIdx;
-                                    const isActive = i === currentIdx;
+                                    const chain = ['pending', 'placed', 'confirmed', 'accepted', 'picked', 'out-for-delivery', 'delivered'];
+                                    const currentIdx = chain.indexOf(liveOrder.orderStatus);
+                                    
+                                    // Map current status to step index
+                                    // if status is 'placed', it counts as 'pending' for the first step
+                                    let stepActiveIndex = 0;
+                                    if (liveOrder.orderStatus === 'confirmed') stepActiveIndex = 1;
+                                    if (liveOrder.orderStatus === 'accepted') stepActiveIndex = 2;
+                                    if (liveOrder.orderStatus === 'picked') stepActiveIndex = 3;
+                                    if (liveOrder.orderStatus === 'out-for-delivery') stepActiveIndex = 4;
+                                    if (liveOrder.orderStatus === 'delivered') stepActiveIndex = 5;
+
+                                    const isDone = i <= stepActiveIndex;
+                                    const isActive = i === stepActiveIndex;
 
                                     return (
                                         <div key={s} className="relative group/step">

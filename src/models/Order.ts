@@ -22,7 +22,7 @@ export interface IOrder extends Document {
   total: number;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   paymentMethod?: 'card' | 'upi' | 'cod';
-  orderStatus: 'placed' | 'confirmed' | 'accepted' | 'picked' | 'out-for-delivery' | 'delivered' | 'cancelled';
+  orderStatus: 'pending' | 'placed' | 'confirmed' | 'accepted' | 'picked' | 'out-for-delivery' | 'delivered' | 'cancelled';
   riderId?: string;
   shippingAddress: {
     street: string;
@@ -68,8 +68,8 @@ const OrderSchema = new Schema<IOrder>({
   orderStatus: { 
     type: String, 
     required: true, 
-    enum: ['placed', 'confirmed', 'accepted', 'picked', 'out-for-delivery', 'delivered', 'cancelled'],
-    default: 'placed'
+    enum: ['pending', 'placed', 'confirmed', 'accepted', 'picked', 'out-for-delivery', 'delivered', 'cancelled'],
+    default: 'pending'
   },
   riderId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   shippingAddress: {

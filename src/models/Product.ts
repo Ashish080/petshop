@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IProduct extends Document {
   /** Matches static catalog ids (e.g. p1, p2) used on /products when not using Mongo _id */
   catalogId?: string;
-  sku: string;
+  sku?: string;
   name: string;
   description: string;
   buyPrice: number;
@@ -28,7 +28,7 @@ export interface IProduct extends Document {
 }
 
 const ProductSchema = new Schema<IProduct>({
-  sku: { type: String, required: true, unique: true, uppercase: true, trim: true },
+  sku: { type: String, uppercase: true, trim: true },
   name: { type: String, required: true, trim: true },
   description: { type: String, required: true },
   buyPrice: { type: Number, default: 0 },
@@ -36,7 +36,10 @@ const ProductSchema = new Schema<IProduct>({
   category: { 
     type: String, 
     required: true, 
-    enum: ['Pets', 'Food', 'Accessories', 'Medicine', 'Grooming', 'Other'],
+    enum: [
+      'Pets', 'Food', 'Accessories', 'Medicine', 'Grooming', 'Other',
+      'food', 'toys', 'health', 'bedding', 'accessories'
+    ],
     index: true
   },
   images: [{ type: String }],
