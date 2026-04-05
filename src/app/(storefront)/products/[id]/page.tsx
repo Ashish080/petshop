@@ -1,15 +1,16 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import type { IProduct } from '@/types';
+import type { Product } from '@/types';
 import { ProductActions } from '@/components/products/ProductActions';
 import { Star, Truck, RotateCcw, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 
-async function getProduct(id: string): Promise<IProduct | null> {
+async function getProduct(id: string): Promise<Product | null> {
   try {
     const res = await fetch(`${process.env.NEXTAUTH_URL}/api/products/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
-    return res.json();
+    const data = await res.json();
+    return data.product;
   } catch { return null; }
 }
 
@@ -17,7 +18,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
   const product = await getProduct(params.id);
   if (!product) notFound();
 
-  const discount = product.price < 1500 ? 0 : Math.round(Math.random() * 15 + 5);
+  // Deterministic discount based on price or product ID to avoid hydration mismatch/randomness
+  const discount = product.price > 2000 ? 10 : 0;
   const originalPrice = discount ? Math.round(product.price / (1 - discount / 100)) : null;
 
   return (
@@ -37,7 +39,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         {/* Image gallery */}
         <div className="flex gap-3">
           <div className="flex flex-col gap-2">
-            {product.images.slice(0, 4).map((img, i) => (
+            {product.images.slice(0, 4).map((img: string, i: number) => (
               <div key={i} className="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-orange-400 transition-colors cursor-pointer">
                 <Image src={img} alt={`${product.name} ${i + 1}`} width={64} height={64} className="object-cover w-full h-full" />
               </div>
@@ -51,7 +53,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             )}
             {product.isLowStock && (
               <div className="absolute top-3 left-3">
-                <Badge label={`Only ${product.stock} left!`} variant="warning" />
+                <Badge variant="warning">Only {product.stock} left!</Badge>
               </div>
             )}
           </div>
@@ -60,8 +62,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         {/* Product info */}
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge label={product.category} variant="info" />
-            {product.stock === 0 && <Badge label="Out of stock" variant="danger" />}
+            <Badge variant="info">{product.category}</Badge>
+            {product.stock === 0 && <Badge variant="danger">Out of stock</Badge>}
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 leading-tight">{product.name}</h1>

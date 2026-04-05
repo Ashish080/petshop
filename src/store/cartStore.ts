@@ -39,10 +39,13 @@ export function setCartStorageOwnerKey(key: string) {
 /**
  * Remove legacy keys. Guest cart is not persisted anymore (only in-memory while browsing).
  */
+let migrationRan = false;
 export function migrateLegacyCartStorage() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || migrationRan) return;
+  migrationRan = true;
   try {
     localStorage.removeItem(PERSIST_NAME);
+    localStorage.removeItem('cart');
     localStorage.removeItem(`${PERSIST_NAME}__guest`);
   } catch {
     /* ignore */
@@ -78,37 +81,39 @@ export const useCartStore = create<CartStore>()(
       ...initialState,
 
       addItem: (item) => {
-        const currentItems = get().items;
-        const existingIndex = currentItems.findIndex(
-          i => i.product === item.product && i.variantName === item.variantName
-        );
-        const cap =
-          item.stock ??
-          (existingIndex > -1 ? currentItems[existingIndex]?.stock : undefined) ??
-          Number.POSITIVE_INFINITY;
-
-        let newItems;
-        if (existingIndex > -1) {
-          newItems = currentItems.map((i, index) =>
-            index === existingIndex
-              ? {
-                  ...i,
-                  quantity: Math.min(i.quantity + item.quantity, cap),
-                  stock: item.stock ?? i.stock,
-                }
-              : i
+        set((state) => {
+          const currentItems = state.items;
+          const existingIndex = currentItems.findIndex(
+            i => i.product === item.product && i.variantName === item.variantName
           );
-        } else {
-          newItems = [
-            ...currentItems,
-            { ...item, quantity: Math.min(item.quantity, cap) },
-          ];
-        }
+          const cap =
+            item.stock ??
+            (existingIndex > -1 ? currentItems[existingIndex]?.stock : undefined) ??
+            Number.POSITIVE_INFINITY;
 
-        const totals = calculateTotals(newItems);
-        const itemCount = newItems.reduce((sum, i) => sum + i.quantity, 0);
+          let newItems;
+          if (existingIndex > -1) {
+            newItems = currentItems.map((i, index) =>
+              index === existingIndex
+                ? {
+                    ...i,
+                    quantity: Math.min(i.quantity + item.quantity, cap),
+                    stock: item.stock ?? i.stock,
+                  }
+                : i
+            );
+          } else {
+            newItems = [
+              ...currentItems,
+              { ...item, quantity: Math.min(item.quantity, cap) },
+            ];
+          }
 
-        set({ ...totals, itemCount });
+          const totals = calculateTotals(newItems);
+          const itemCount = newItems.reduce((sum, i) => sum + i.quantity, 0);
+
+          return { ...totals, itemCount };
+        });
       },
 
       removeItem: (product, variantName) => {
@@ -128,16 +133,18 @@ export const useCartStore = create<CartStore>()(
           return;
         }
 
-        const newItems = get().items.map((i) => {
-          if (i.product !== product || i.variantName !== variantName) return i;
-          const cap = i.stock ?? Number.POSITIVE_INFINITY;
-          return { ...i, quantity: Math.min(quantity, cap) };
+        set((state) => {
+          const newItems = state.items.map((i) => {
+            if (i.product !== product || i.variantName !== variantName) return i;
+            const cap = i.stock ?? Number.POSITIVE_INFINITY;
+            return { ...i, quantity: Math.min(quantity, cap) };
+          });
+
+          const totals = calculateTotals(newItems);
+          const itemCount = newItems.reduce((sum, i) => sum + i.quantity, 0);
+
+          return { ...totals, itemCount };
         });
-
-        const totals = calculateTotals(newItems);
-        const itemCount = newItems.reduce((sum, i) => sum + i.quantity, 0);
-
-        set({ ...totals, itemCount });
       },
 
       clearCart: () => {

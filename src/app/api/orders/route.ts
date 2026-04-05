@@ -16,7 +16,6 @@ function escapeRegex(s: string) {
 
 /**
  * Resolve product for checkout: try ObjectId, catalogId, then exact / case-insensitive name.
- * If ObjectId is valid hex but missing in DB, we still fall back to catalog + name.
  */
 async function findProductForOrderLine(item: { product: string; name: string }) {
   const idOrRef = String(item.product ?? '').trim();
@@ -49,14 +48,10 @@ async function findProductForOrderLine(item: { product: string; name: string }) 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
-
     const session = await auth();
 
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -73,9 +68,7 @@ export async function GET(request: NextRequest) {
       query.orderStatus = status;
     }
 
-    const orders = await Order.find(query)
-      .sort({ createdAt: -1 })
-      .lean();
+    const orders = await Order.find(query).sort({ createdAt: -1 }).lean();
 
     const formattedOrders = orders.map(o => ({
       ...o,
@@ -84,22 +77,16 @@ export async function GET(request: NextRequest) {
       user: typeof o.user === 'object' ? (o.user as any).email : o.user,
       items: o.items.map(item => ({
         ...item,
-        product: (item as any).product?.toString() || item.productId
+        product: (item as any).product?.toString() || (item as any).productId
       })),
       createdAt: o.createdAt.toISOString(),
       updatedAt: o.updatedAt.toISOString()
     }));
 
-    return NextResponse.json({
-      success: true,
-      data: formattedOrders
-    });
+    return NextResponse.json({ success: true, data: formattedOrders });
   } catch (error) {
     console.error('Error fetching orders:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch orders' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to fetch orders' }, { status: 500 });
   }
 }
 
@@ -107,31 +94,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
-
     const session = await auth();
 
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { items, shippingAddress, paymentMethod, notes } = await request.json();
 
-    // Validation
+    // Basic Validation
     if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Order must contain at least one item' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Order must contain at least one item' }, { status: 400 });
     }
 
-    if (!shippingAddress) {
-      return NextResponse.json(
-        { success: false, error: 'Shipping address is required' },
-        { status: 400 }
-      );
+    if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode || !shippingAddress.phone) {
+      return NextResponse.json({ success: false, error: 'Incomplete shipping details' }, { status: 400 });
     }
 
     // Validate stock and calculate total
@@ -141,10 +118,7 @@ export async function POST(request: NextRequest) {
     for (const item of items) {
       const qty = Number(item.quantity);
       if (!Number.isInteger(qty) || qty < 1) {
-        return NextResponse.json(
-          { success: false, error: 'Each item must have a positive integer quantity' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: 'Invalid quantity' }, { status: 400 });
       }
 
       const product = await findProductForOrderLine({
@@ -153,29 +127,19 @@ export async function POST(request: NextRequest) {
       });
 
       if (!product) {
-        return NextResponse.json(
-          { success: false, error: `Product ${item.name} is not available` },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: `Product ${item.name} is not available` }, { status: 400 });
       }
 
       let unitPrice = product.price;
 
-      // Check stock & resolve price from DB (ignore client-tampered prices)
       if (item.variantName) {
         const variant = product.variants.find((v) => v.name === item.variantName);
         if (!variant || variant.stock < qty) {
-          return NextResponse.json(
-            { success: false, error: `Insufficient stock for ${product.name} (${item.variantName})` },
-            { status: 400 }
-          );
+          return NextResponse.json({ success: false, error: `Insufficient stock for ${product.name} (${item.variantName})` }, { status: 400 });
         }
         unitPrice = variant.price;
       } else if (product.stock < qty) {
-        return NextResponse.json(
-          { success: false, error: `Insufficient stock for ${product.name}` },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: `Insufficient stock for ${product.name}` }, { status: 400 });
       }
 
       totalPrice += unitPrice * qty;
@@ -189,7 +153,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Calculate delivery
     const freeDeliveryThreshold = parseInt(process.env.NEXT_PUBLIC_FREE_DELIVERY_THRESHOLD || '499');
     const delivery = totalPrice >= freeDeliveryThreshold ? 0 : 50;
     const subtotal = totalPrice;
@@ -201,13 +164,9 @@ export async function POST(request: NextRequest) {
       email = dbUser?.email?.trim() ?? '';
     }
     if (!email) {
-      return NextResponse.json(
-        { success: false, error: 'Account email is required to place an order' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Account email is required' }, { status: 400 });
     }
 
-    // Create order and deduct stock atomically
     const order = await Order.create({
       user: {
         email,
@@ -228,7 +187,7 @@ export async function POST(request: NextRequest) {
         street: shippingAddress.street,
         city: shippingAddress.city,
         state: shippingAddress.state,
-        zipCode: shippingAddress.pincode || shippingAddress.zipCode,
+        zipCode: shippingAddress.pincode,
         country: shippingAddress.country || 'India',
       },
       subtotal,
@@ -241,46 +200,32 @@ export async function POST(request: NextRequest) {
       ...(typeof notes === 'string' && notes.trim() ? { notes: notes.trim() } : {}),
     });
 
-    // Deduct stock
+    // Atomic Stock Deduction
     for (const item of validatedItems) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        if (item.variantName) {
-          // Deduct from variant
-          const variant = product.variants.find(v => v.name === item.variantName);
-          if (variant) {
-            variant.stock -= item.quantity;
-          }
-        } else {
-          // Deduct from main stock
-          product.stock -= item.quantity;
-        }
-        await product.save();
+      const updateQuery: any = {};
+      if (item.variantName) {
+        updateQuery['variants.$[elem].stock'] = -item.quantity;
+      } else {
+        updateQuery['stock'] = -item.quantity;
       }
-    }
 
-    const formattedOrder = {
-      ...order.toObject(),
-      _id: order._id.toString(),
-      id: order._id.toString(),
-      items: order.items.map((i) => ({
-        ...i,
-        productId: (i as { productId?: string }).productId,
-      })),
-      createdAt: order.createdAt.toISOString(),
-      updatedAt: order.updatedAt.toISOString(),
-    };
+      await Product.findByIdAndUpdate(item.product, { $inc: updateQuery }, { 
+        arrayFilters: item.variantName ? [{ 'elem.name': item.variantName }] : [],
+        new: true 
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      data: formattedOrder,
+      data: {
+        ...order.toObject(),
+        _id: order._id.toString(),
+        id: order._id.toString(),
+      },
       message: 'Order placed successfully'
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating order:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to create order' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to create order' }, { status: 500 });
   }
 }

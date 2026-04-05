@@ -3,6 +3,8 @@ import Footer from "@/components/layout/Footer";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
 import MobileStickyCtas from "@/components/ui/MobileStickyCtas";
 
+export const dynamic = 'force-dynamic';
+
 export default function StorefrontLayout({
   children,
 }: Readonly<{

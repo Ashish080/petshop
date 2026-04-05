@@ -3,16 +3,12 @@
 import { SessionProvider } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
 import { ReactNode } from 'react';
-import { CartProvider } from '@/context/CartContext';
-import { AuthProvider } from '@/context/AuthContext';
 import { CartOwnerSync } from '@/components/CartOwnerSync';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
       <CartOwnerSync />
-      <AuthProvider>
-      <CartProvider>
       {children}
       <Toaster
         position="top-right"
@@ -38,8 +34,6 @@ export function Providers({ children }: { children: ReactNode }) {
           },
         }}
       />
-      </CartProvider>
-      </AuthProvider>
     </SessionProvider>
   );
 }

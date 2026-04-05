@@ -1,11 +1,27 @@
-import { productsData } from '@/data/products';
+import { connectDB } from '@/lib/mongoose';
+import Product from '@/models/Product';
 import ProductCard from '@/components/cards/ProductCard';
 import { themeConfig } from '@/config/theme';
-import { Sparkles, Package, ShoppingBag, Filter, ArrowUpDown } from 'lucide-react';
+import { Sparkles, ShoppingBag, Filter, ArrowUpDown } from 'lucide-react';
+import type { Product as IProduct } from '@/types';
 
 export const metadata = { title: "Pet Products - Premium Supplies" };
+export const dynamic = 'force-dynamic';
 
-export default function ProductsPage() {
+async function getProducts(): Promise<IProduct[]> {
+    try {
+        await connectDB();
+        const docs = await Product.find({ isActive: true }).sort({ createdAt: -1 }).lean();
+        return JSON.parse(JSON.stringify(docs));
+    } catch (e) {
+        console.error('Failed to fetch products:', e);
+        return [];
+    }
+}
+
+export default async function ProductsPage() {
+    const products = await getProducts();
+
     return (
         <div className="py-12 md:py-20 min-h-screen bg-bg-page transition-colors duration-300 relative overflow-hidden">
             {/* Background Accent */}
@@ -53,18 +69,32 @@ export default function ProductsPage() {
 
                 {/* Product Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 xl:gap-10">
-                    {productsData.map((product, i) => (
-                        <div
-                            key={product.id}
-                            style={{ animationDelay: `${i * 100}ms` }}
-                            className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-                        >
-                            <ProductCard {...product} />
+                    {products.length > 0 ? (
+                        products.map((product, i) => (
+                            <div
+                                key={product._id}
+                                style={{ animationDelay: `${i * 100}ms` }}
+                                className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
+                            >
+                                <ProductCard 
+                                    id={product._id} 
+                                    name={product.name}
+                                    price={product.price}
+                                    rating={product.rating}
+                                    reviews={product.reviewCount}
+                                    images={product.images}
+                                    category={product.category}
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full py-20 text-center text-gray-500 font-bold uppercase tracking-widest">
+                            No products found in the catalog
                         </div>
-                    ))}
+                    )}
                 </div>
 
-                {/* Empty State/Newsletter Hook */}
+                {/* Newsletter */}
                 <div className="mt-20 p-12 bg-white dark:bg-card-bg rounded-[40px] border border-card-border/50 text-center relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 via-transparent to-secondary/5 opacity-50"></div>
                     <div className="relative z-10 max-w-xl mx-auto">
@@ -85,7 +115,6 @@ export default function ProductsPage() {
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

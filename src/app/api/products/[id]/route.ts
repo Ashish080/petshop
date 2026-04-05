@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       product: {
         ...product,
         id: product._id.toString(),
-        _id: undefined
+        _id: product._id.toString(),
       }
     });
   } catch (error) {
@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       product: {
         ...product.toObject(),
         id: product._id.toString(),
-        _id: undefined
+        _id: product._id.toString(),
       }
     });
   } catch (error) {
