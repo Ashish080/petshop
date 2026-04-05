@@ -37,7 +37,8 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
       body: JSON.stringify(data),
     });
     if (!res.ok) { toast.error('Failed to save'); return; }
-    const saved = await res.json();
+    const json = await res.json();
+    const saved = json.data || json;
     if (editProduct) {
       setProducts(products.map(p => p._id === saved._id ? saved : p));
       toast.success('Product updated');

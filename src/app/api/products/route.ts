@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
 
     const product = await Product.create({
       ...data,
+      description: data.description?.trim() || 'No description provided.',
       images: data.images || [],
       stock: data.stock || 0,
       lowStockThreshold: data.lowStockThreshold || 10,

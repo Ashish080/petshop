@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/cards/ProductCard';
-import { productsData } from '@/data/products';
 import { themeConfig } from '@/config/theme';
+import { connectDB } from '@/lib/mongoose';
+import ProductModel from '@/models/Product';
 
-export default function BestSellingProducts() {
-    const bestSellers = productsData.filter(product => product.isBestSeller).slice(0, 4);
+export default async function BestSellingProducts() {
+    await connectDB();
+    const products = await ProductModel.find({ isActive: true }).limit(4).lean();
 
     return (
         <section className={themeConfig.spacing.section}>
@@ -29,8 +31,18 @@ export default function BestSellingProducts() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                    {bestSellers.map((product) => (
-                        <ProductCard key={product.id} {...product} />
+                    {products.map((product) => (
+                        <ProductCard 
+                            key={product._id.toString()} 
+                            id={product._id.toString()}
+                            name={product.name}
+                            price={product.price}
+                            category={product.category}
+                            image={product.images?.[0]}
+                            images={product.images as string[]}
+                            rating={product.rating || 5}
+                            reviews={product.reviewCount || 0}
+                        />
                     ))}
                 </div>
 

@@ -12,6 +12,8 @@ import BlogPreview from "@/components/sections/BlogPreview";
 import { ScrollStorySection } from "@/components/ui/ScrollStory";
 import { HorizontalShowcase } from "@/components/sections/HorizontalShowcase";
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   return (
     <div className="noise-bg">
