@@ -1,67 +1,61 @@
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export const proxy = auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
+  const user = req.auth?.user;
 
-  // Paths that require authentication
-  const protectedPaths = ['/checkout', '/orders', '/admin'];
-  
-  // Paths that should redirect to dashboard if already authenticated
-  const authPaths = ['/auth/login', '/auth/register'];
+  const isApiRoute = nextUrl.pathname.startsWith('/api');
+  const isAuthRoute = nextUrl.pathname.startsWith('/auth') || nextUrl.pathname.includes('/auth/');
+  const isAdminRoute = nextUrl.pathname.startsWith('/admin');
+  const isRiderRoute = nextUrl.pathname.startsWith('/rider');
 
-  // Check if user is authenticated
-  const token = await getToken({ 
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET 
-  });
+  // 1. Allow API routes (they handle their own auth)
+  if (isApiRoute) return NextResponse.next();
 
-  const isAuthenticated = !!token;
-  const isAdmin = token?.role === 'admin';
-
-  const isAdminLoginPage =
-    pathname === '/admin/login' || pathname.startsWith('/admin/login/');
-
-  // Protect admin routes (guests may open /admin/login to sign in with NextAuth)
-  if (pathname.startsWith('/admin') && !isAdminLoginPage) {
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
+  // 2. Auth Page Access (Don't let logged in users go to login)
+  if (isAuthRoute) {
+    if (isLoggedIn) {
+       // Redirect based on role
+       if (user?.role === 'admin') return NextResponse.redirect(new URL('/admin', nextUrl));
+       if (user?.role === 'rider') return NextResponse.redirect(new URL('/rider', nextUrl));
+       return NextResponse.redirect(new URL('/', nextUrl));
     }
-    if (!isAdmin) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
+    return NextResponse.next();
   }
 
-  // Protect checkout and orders routes
-  if (protectedPaths.some(path => pathname.startsWith(path)) && !pathname.startsWith('/admin')) {
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
+  // 3. Admin Protection
+  if (isAdminRoute) {
+    // Admin login path should be allowed if unauthenticated
+    if (nextUrl.pathname.includes('/auth')) return NextResponse.next();
+    
+    if (!isLoggedIn || user?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/admin/auth/login', nextUrl));
     }
+    return NextResponse.next();
   }
 
-  // Redirect authenticated users away from auth pages
-  if (authPaths.some(path => pathname.startsWith(path))) {
-    if (isAuthenticated) {
-      if (isAdmin) {
-        return NextResponse.redirect(new URL('/admin', request.url));
-      }
-      return NextResponse.redirect(new URL('/', request.url));
+  // 4. Rider Protection
+  if (isRiderRoute) {
+    // Rider signup/login should be allowed if unauthenticated
+    if (nextUrl.pathname.includes('/auth')) return NextResponse.next();
+    
+    if (!isLoggedIn || user?.role !== 'rider') {
+      return NextResponse.redirect(new URL('/rider/auth/login', nextUrl));
     }
+    return NextResponse.next();
+  }
+
+  // 5. General Protection (Checkout/Orders/Profile)
+  const isProtectedRoute = ['/checkout', '/orders', '/cart', '/profile', '/dashboard'].some(p => nextUrl.pathname.startsWith(p));
+  if (isProtectedRoute && !isLoggedIn) {
+    return NextResponse.redirect(new URL('/auth/login?callbackUrl=' + nextUrl.pathname, nextUrl));
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: [
-    '/admin/:path*',
-    '/admin',
-    '/checkout/:path*',
-    '/checkout',
-    '/orders/:path*',
-    '/orders',
-    '/auth/login',
-    '/auth/register'
-  ]
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

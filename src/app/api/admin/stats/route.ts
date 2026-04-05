@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongoose';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import User from '@/models/User';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 
 // GET /api/admin/stats - Get dashboard statistics (Admin only)
 export async function GET(request: NextRequest) {

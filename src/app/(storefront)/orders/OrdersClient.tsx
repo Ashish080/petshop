@@ -72,7 +72,7 @@ export default function OrdersClient({ orders: initialOrders }: { orders: any[] 
                                             <span className="text-[10px] font-bold text-slate-400 capitalize bg-slate-50 px-2.5 py-1 rounded-full">{order.orderStatus.replace('-', ' ')}</span>
                                         </div>
                                         <h3 className="text-xl font-black text-slate-900 tracking-tight">{order.items[0]?.name}{order.items.length > 1 ? ` +${order.items.length-1} more` : ''}</h3>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mt-2 italic">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mt-2 italic">{order.createdAt}</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-row md:flex-col items-end gap-2 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-slate-50">

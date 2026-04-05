@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
 import Product from '@/models/Product';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;

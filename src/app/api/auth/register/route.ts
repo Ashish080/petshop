@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
     
-    const { name, email, password, phone, address } = await request.json();
+    const { name, email, password, phone, role: requestedRole } = await request.json();
 
     // Validation
     if (!name || !email || !password) {
@@ -33,9 +33,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine role - admin if email matches ADMIN_EMAIL
+    // Determine target role
     const adminEmail = process.env.ADMIN_EMAIL;
-    const role = adminEmail && email.toLowerCase() === adminEmail.toLowerCase() ? 'admin' : 'user';
+    let role = 'user';
+    
+    if (adminEmail && email.toLowerCase() === adminEmail.toLowerCase()) {
+      role = 'admin';
+    } else if (requestedRole === 'rider') {
+      role = 'rider';
+    } else if (requestedRole === 'admin') {
+      // Only allow admin via email match for security
+      role = 'user'; 
+    }
 
     // Create new user
     const user = await User.create({

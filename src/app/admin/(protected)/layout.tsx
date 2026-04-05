@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Package, LayoutDashboard, ShoppingBag, ShoppingCart, Settings, ClipboardList } from 'lucide-react';
 
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 
 export default async function AdminRootLayout({ children }: { children: React.ReactNode }) {

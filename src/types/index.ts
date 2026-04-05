@@ -87,8 +87,14 @@ export interface Order {
   /** Legacy alias used in some UI */
   totalPrice?: number;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
-  orderStatus: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  orderStatus: 'pending' | 'confirmed' | 'processing' | 'accepted' | 'picked' | 'out-for-delivery'| 'shipped' | 'delivered' | 'cancelled';
   paymentMethod?: 'cod' | 'upi' | 'card';
+  riderId?: string;
+  feedback?: {
+    rating: number;
+    comment?: string;
+    createdAt: string;
+  };
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -100,7 +106,7 @@ export interface User {
   id?: string;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'rider';
   address?: {
     street: string;
     city: string;
@@ -116,7 +122,7 @@ export interface UserSession {
   id: string;
   email: string;
   name: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'rider';
 }
 
 // API Response Types

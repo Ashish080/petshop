@@ -20,8 +20,13 @@ const STEP_LABELS: Record<Step, string> = {
 };
 
 export default function CheckoutPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
+
+  if (status === 'unauthenticated') {
+    router.push('/auth/login?callbackUrl=/checkout');
+    return null;
+  }
   const { items, total, clearCart } = useCartStore();
   const [step, setStep] = useState<Step>('address');
   const [loading, setLoading] = useState(false);

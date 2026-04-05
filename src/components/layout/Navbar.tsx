@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, ShoppingCart, User, LayoutDashboard, Search } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, LayoutDashboard, Search, ShieldCheck, Truck, Package } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -85,13 +85,27 @@ export default function Navbar() {
                                 <Search size={22} className="group-hover:scale-110 transition-transform" />
                             </button>
                             <NightWalkToggle />
-                            {navLabel ? (
-                                <Link href="/admin" className="flex items-center gap-2 py-2 px-4 bg-brand-primary/10 rounded-full text-brand-primary hover:bg-brand-primary/20 transition-all group" aria-label="Go to Dashboard">
-                                    <LayoutDashboard size={18} className="group-hover:rotate-12 transition-transform" />
-                                    <span className="hidden sm:inline font-black text-xs uppercase tracking-widest">Dashboard ({navLabel})</span>
-                                </Link>
+                            {status === 'authenticated' ? (
+                                <div className="flex items-center gap-2">
+                                    {session.user.role === 'admin' ? (
+                                        <Link href="/admin" className="flex items-center gap-2 py-2 px-4 bg-rose-500/10 rounded-full text-rose-600 hover:bg-rose-500/20 transition-all group" aria-label="Command Center">
+                                            <ShieldCheck size={18} className="group-hover:rotate-12 transition-transform" />
+                                            <span className="hidden sm:inline font-black text-[10px] uppercase tracking-widest">Command Center</span>
+                                        </Link>
+                                    ) : session.user.role === 'rider' ? (
+                                        <Link href="/rider" className="flex items-center gap-2 py-2 px-4 bg-indigo-500/10 rounded-full text-indigo-600 hover:bg-indigo-500/20 transition-all group" aria-label="Rider Hub">
+                                            <Truck size={18} className="group-hover:rotate-12 transition-transform" />
+                                            <span className="hidden sm:inline font-black text-[10px] uppercase tracking-widest">Mission Hub</span>
+                                        </Link>
+                                    ) : (
+                                        <Link href="/orders" className="flex items-center gap-2 py-2 px-4 bg-emerald-500/10 rounded-full text-emerald-600 hover:bg-emerald-500/20 transition-all group" aria-label="My Orders">
+                                            <Package size={18} className="group-hover:rotate-12 transition-transform" />
+                                            <span className="hidden sm:inline font-black text-[10px] uppercase tracking-widest">Order Archives</span>
+                                        </Link>
+                                    )}
+                                </div>
                             ) : (
-                                <Link href="/auth/login" className="p-2 text-text-primary hover:text-brand-primary transition-colors hidden sm:block" aria-label="Sign in">
+                                <Link href="/auth/login" className="p-2.5 bg-zinc-100 text-zinc-900 hover:bg-zinc-900 hover:text-white rounded-2xl transition-all flex items-center justify-center" aria-label="Sign in">
                                     <User size={22} />
                                 </Link>
                             )}

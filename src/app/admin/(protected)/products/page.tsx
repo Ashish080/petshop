@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { connectDB } from '@/lib/mongoose';
 import Product from '@/models/Product';

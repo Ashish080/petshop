@@ -22,6 +22,7 @@ export interface IProduct extends Document {
   reviewCount: number;
   isActive: boolean;
   tags: string[];
+  demandCount: number;
   createdAt: Date;
   updatedAt: Date;
   isLowStock: boolean;
@@ -54,7 +55,8 @@ const ProductSchema = new Schema<IProduct>({
   rating: { type: Number, default: 0, min: 0, max: 5 },
   reviewCount: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
-  tags: [{ type: String }]
+  tags: [{ type: String }],
+  demandCount: { type: Number, default: 0 }
 }, {
   timestamps: true
 });

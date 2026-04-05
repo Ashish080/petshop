@@ -40,12 +40,29 @@ export default function UserAuth() {
             toast.success('Welcome back to the family! 🐾');
             router.push('/');
         } else {
-            // Simulated Sign up
-            toast.success('Account created! Now you can login.');
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password,
+                    role: 'user'
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                toast.error(data.error || 'Registration failed. Try again.');
+                return;
+            }
+
+            toast.success('Account created! Now you can login. 🐾');
             setIsLogin(true);
         }
-    } catch {
+    } catch (error) {
         toast.error('Something went wrong. Let\'s try again.');
+        console.error('Auth error:', error);
     } finally {
         setLoading(false);
     }

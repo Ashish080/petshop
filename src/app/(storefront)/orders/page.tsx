@@ -17,8 +17,13 @@ export default async function OrdersPage() {
         ...o,
         _id: o._id.toString(),
         riderId: o.riderId?.toString(),
-        createdAt: o.createdAt.toISOString(),
-        updatedAt: o.updatedAt.toISOString()
+        items: o.items.map((i: any) => ({
+            ...i,
+            _id: i._id.toString(),
+            productId: i.productId?.toString()
+        })),
+        createdAt: new Date(o.createdAt).toLocaleDateString('en-GB'),
+        updatedAt: new Date(o.updatedAt).toLocaleDateString('en-GB')
     }));
 
     return (

@@ -18,6 +18,8 @@ function OrdersContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [riders, setRiders] = useState<any[]>([]);
+  const [assigningLoading, setAssigningLoading] = useState(false);
 
   const fetchOrders = async () => {
     try {
@@ -35,12 +37,21 @@ function OrdersContent() {
     }
   };
 
+  const fetchRiders = async () => {
+    try {
+      const res = await fetch('/api/admin/riders');
+      const data = await res.json();
+      if (data.success) setRiders(data.data);
+    } catch (e) { console.error(e); }
+  };
+
   useEffect(() => {
     if (status === 'unauthenticated' || (status === 'authenticated' && session?.user?.role !== 'admin')) {
       router.push('/auth/login');
     } else if (status === 'authenticated' && session?.user?.role === 'admin') {
       setLoading(true);
       fetchOrders();
+      fetchRiders();
     }
   }, [status, session, router, statusFilter]);
 
@@ -52,6 +63,23 @@ function OrdersContent() {
       return { primary: u.name || u.email || 'Customer', secondary: u.email ?? '' };
     }
     return { primary: 'Customer', secondary: typeof u === 'string' ? u : '' };
+  };
+
+  const assignRider = async (orderId: string, riderId: string) => {
+    setAssigningLoading(true);
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, riderId })
+      });
+      if (res.ok) {
+        fetchOrders();
+        setSelectedOrder(null);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally { setAssigningLoading(false); }
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
@@ -269,6 +297,25 @@ function OrdersContent() {
                     <span className="font-semibold text-gray-900">Total</span>
                     <span className="text-2xl font-bold text-orange-500">₹{orderTotal(selectedOrder).toLocaleString('en-IN')}</span>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fleet Assignment</label>
+                  <div className="flex gap-2">
+                    <select
+                      className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400"
+                      onChange={(e) => {
+                        if (e.target.value) assignRider(selectedOrder._id, e.target.value);
+                      }}
+                      defaultValue={selectedOrder.riderId || ""}
+                    >
+                      <option value="">-- Unassigned --</option>
+                      {riders.map(r => (
+                        <option key={r._id} value={r._id}>{r.name} ({r.email})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <p className="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-black">Designate verified agent for mission</p>
                 </div>
 
                 <div>

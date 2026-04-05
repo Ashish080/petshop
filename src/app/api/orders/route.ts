@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongoose';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import User from '@/models/User';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 
 /** Cart may send Mongo ObjectId or static catalog ids (p1, p2) from `productsData`. */
 function isMongoObjectIdString(id: string): boolean {
@@ -241,21 +241,18 @@ export async function POST(request: NextRequest) {
       ...(typeof notes === 'string' && notes.trim() ? { notes: notes.trim() } : {}),
     });
 
-    // Deduct stock
+    // Deduct stock (atomic and validation-free)
     for (const item of validatedItems) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        if (item.variantName) {
-          // Deduct from variant
-          const variant = product.variants.find(v => v.name === item.variantName);
-          if (variant) {
-            variant.stock -= item.quantity;
-          }
-        } else {
-          // Deduct from main stock
-          product.stock -= item.quantity;
-        }
-        await product.save();
+      if (item.variantName) {
+        await Product.updateOne(
+          { _id: item.product, 'variants.name': item.variantName },
+          { $inc: { 'variants.$.stock': -item.quantity } }
+        );
+      } else {
+        await Product.updateOne(
+          { _id: item.product },
+          { $inc: { stock: -item.quantity } }
+        );
       }
     }
 

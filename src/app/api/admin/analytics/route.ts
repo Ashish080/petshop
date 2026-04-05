@@ -2,65 +2,56 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
-import Activity from '@/models/Activity';
+import User from '@/models/User';
 import { auth } from '@/auth';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await connectDB();
     const session = await auth();
 
-    if (!session || session.user.role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    if (session?.user?.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // Portfolio Insights
+    const mostDemanded = await Product.find().sort({ demandCount: -1 }).limit(5).lean();
+    const leastDemanded = await Product.find().sort({ demandCount: 1 }).limit(5).lean();
+    
+    // Bread Specific Analytics
+    const breadDemand = await Product.find({ name: /bread/i }).sort({ demandCount: -1 }).lean();
 
-    const [orderAnalytics, leadAnalytics, productSales, totalProducts] = await Promise.all([
-      Order.aggregate([
-        { $match: { createdAt: { $gte: thirtyDaysAgo }, orderStatus: { $ne: 'cancelled' } } },
-        { $group: { _id: null, totalOrders: { $sum: 1 }, totalRevenue: { $sum: '$total' } } }
-      ]),
-      Activity.aggregate([
-        { $match: { createdAt: { $gte: thirtyDaysAgo }, type: { $in: ['add-to-cart', 'checkout-start'] } } },
-        { $group: { _id: null, totalLeads: { $sum: 1 } } }
-      ]),
-      Order.aggregate([
-        { $match: { orderStatus: { $ne: 'cancelled' } } },
-        { $unwind: '$items' },
-        { $group: { _id: '$items.productId', name: { $first: '$items.name' }, unitsSold: { $sum: '$items.quantity' } } },
-        { $sort: { unitsSold: -1 } }
-      ]),
-      Product.countDocuments({ isActive: true })
-    ]);
+    // Mission Stats
+    const totalOrders = await Order.countDocuments();
+    const totalUsers = await User.countDocuments({ role: 'user' });
+    const totalRiders = await User.countDocuments({ role: 'rider' });
+    
+    const conversionRate = totalUsers > 0 ? (totalOrders / totalUsers) * 100 : 0;
 
-    const stats = orderAnalytics[0] || { totalOrders: 0, totalRevenue: 0 };
-    const leads = leadAnalytics[0] || { totalLeads: 0 };
-    const highDemanted = productSales.slice(0, 5); 
-    const lowDemanded = [...productSales].reverse().slice(0, 5);
-    const conversionRate = leads.totalLeads > 0 
-      ? ((stats.totalOrders / leads.totalLeads) * 100).toFixed(1) 
-      : 0;
+    // Monthly Trends (Simple)
+    const orders = await Order.find().select('total createdAt items').lean();
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
     return NextResponse.json({
       success: true,
       data: {
-        metrics: {
-          totalOrders: stats.totalOrders,
-          totalRevenue: stats.totalRevenue,
-          totalLeads: leads.totalLeads,
-          conversionRate: Number(conversionRate),
-          catalogSize: totalProducts
+        highlights: {
+            totalRevenue,
+            totalOrders,
+            totalUsers,
+            totalRiders,
+            conversionRate: conversionRate.toFixed(2)
         },
-        demand: {
-          topProducts: highDemanted,
-          bottomProducts: lowDemanded
-        }
+        products: {
+            mostDemanded,
+            leastDemanded,
+            breadDemand
+        },
+        trends: [] // Potential for Recharts
       }
     });
   } catch (error) {
-    console.error('Analytics Error:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Failed' }, { status: 500 });
   }
 }

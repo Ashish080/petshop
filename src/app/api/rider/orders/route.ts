@@ -19,11 +19,12 @@ export async function GET(request: NextRequest) {
     const query: any = {};
     
     if (status === 'available') {
-      query.orderStatus = { $in: ['placed', 'confirmed'] };
-      query.riderId = { $exists: false };
+      query.orderStatus = { $in: ['placed', 'confirmed', 'pending'] };
+      query.riderId = session.user.id; // Corrected: Assigned to THIS rider but not yet active
     } else {
       query.riderId = session.user.id;
       if (status) query.orderStatus = status;
+      else query.orderStatus = { $nin: ['pending', 'placed', 'confirmed', 'cancelled'] }; // Currently active or done
     }
 
     const orders = await Order.find(query).sort({ updatedAt: -1 }).lean();
@@ -48,9 +49,8 @@ export async function PATCH(request: NextRequest) {
 
     if (action === 'accept') {
       const order = await Order.findOneAndUpdate(
-        { _id: orderId, orderStatus: { $in: ['placed', 'confirmed'] }, riderId: { $exists: false } },
+        { _id: orderId, orderStatus: { $in: ['placed', 'confirmed', 'pending'] }, riderId: session.user.id },
         { 
-          riderId: session.user.id,
           orderStatus: 'accepted'
         },
         { new: true }

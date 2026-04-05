@@ -24,6 +24,11 @@ export interface IOrder extends Document {
   paymentMethod?: 'card' | 'upi' | 'cod';
   orderStatus: 'pending' | 'placed' | 'confirmed' | 'accepted' | 'picked' | 'out-for-delivery' | 'delivered' | 'cancelled';
   riderId?: string;
+  feedback?: {
+    rating: number;
+    comment?: string;
+    createdAt: Date;
+  };
   shippingAddress: {
     street: string;
     city: string;
@@ -72,6 +77,11 @@ const OrderSchema = new Schema<IOrder>({
     default: 'pending'
   },
   riderId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+  feedback: {
+    rating: { type: Number, min: 1, max: 5 },
+    comment: String,
+    createdAt: { type: Date, default: Date.now }
+  },
   shippingAddress: {
     street: { type: String, required: true },
     city: { type: String, required: true },
