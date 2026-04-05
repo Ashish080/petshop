@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Star, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { themeConfig } from '@/config/theme';
@@ -38,8 +39,11 @@ export default function ProductCard({ id, name, price, rating, reviews, images, 
     };
 
     return (
-        <div className={`bg-white dark:bg-card-bg group overflow-hidden transition-all duration-500 hover:-translate-y-2 border border-card-border ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover}`}>
-            <div className="relative h-56 w-full overflow-hidden bg-bg-page/50 p-4">
+        <motion.div
+            className={`group overflow-hidden border border-[var(--card-border)] bg-[var(--card-bg)] ${themeConfig.radius.lg} ${themeConfig.shadows.soft} gpu`}
+            whileHover={{ y: -6, transition: { duration: 0.35 } }}
+        >
+            <div className="relative h-56 w-full overflow-hidden bg-[var(--bg-page)]/50 p-4">
                 <Image
                     src={coverSrc}
                     alt={name}
@@ -48,7 +52,7 @@ export default function ProductCard({ id, name, price, rating, reviews, images, 
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
                 {isBestSeller && (
-                    <span className="absolute top-4 left-4 px-3 py-1 bg-secondary text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                    <span className="absolute left-4 top-4 rounded-full bg-[var(--secondary)] px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
                         Best Seller
                     </span>
                 )}
@@ -85,6 +89,6 @@ export default function ProductCard({ id, name, price, rating, reviews, images, 
                     />
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }

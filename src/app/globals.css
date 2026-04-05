@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
+/* Golden ratio (φ) & Fibonacci rhythm — layout + motion tokens */
 @theme {
+  --phi: 1.618;
+  --space-f8: 0.5rem;
+  --space-f13: 0.8125rem;
+  --space-f21: 1.3125rem;
+  --space-f34: 2.125rem;
+  --space-f55: 3.4375rem;
+  --space-f89: 5.5625rem;
+
   --color-brand-primary: var(--primary);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
@@ -11,59 +20,105 @@
   --color-card-bg: var(--card-bg);
   --color-card-border: var(--card-border);
   --color-nav-bg: var(--nav-bg);
+  --color-cream: var(--cream);
+  --color-mint: var(--mint);
+  --color-sky: var(--sky);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --text-display: clamp(2.5rem, 4vw + 1rem, 4.5rem);
+  --text-h2: clamp(1.875rem, 2.5vw + 0.75rem, 3rem);
+  --text-h3: clamp(1.375rem, 1.2vw + 1rem, 1.75rem);
+  --text-body: 1.0625rem;
+  --text-caption: 0.8125rem;
 }
 
-/* Tie Tailwind's dark: prefix to our data-theme attribute */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* -----------------------------------------------
-   Base layer: playful + midnight mode foundations
-   Using a more vibrant palette: Coral, Sky Blue, Honey
------------------------------------------------- */
 @layer base {
   :root {
-    --bg-page: #F1F2F6;
-    --text-primary: #2D3436;
-    --text-body: #2D3436;
-    --text-light: #636E72;
+    --primary: #ff7a00;
+    --secondary: #5eb8a8;
+    --accent: #8ec5ff;
+    --cream: #faf6f0;
+    --mint: #c8ebe0;
+    --sky: #8ec5ff;
+
+    --bg-page: #faf6f0;
+    --text-primary: #1a1d24;
+    --text-body: #2b303b;
+    --text-light: #5c6370;
     --card-bg: #ffffff;
-    --card-border: #E1E2E6;
-    --nav-bg: #ffffff;
-    --primary: #FF7B54;
-    /* Coral */
-    --secondary: #70A1FF;
-    /* Sky Blue */
-    --accent: #FFD93D;
-    /* Honey */
+    --card-border: #ebe6de;
+    --nav-bg: rgba(255, 255, 255, 0.72);
   }
 
   [data-theme="dark"] {
-    --bg-page: #1A1D23;
-    --text-primary: #F1F2F6;
-    --text-body: #DFE4EA;
-    --text-light: #A4B0BE;
-    --card-bg: #242933;
-    --card-border: #3D4451;
-    --nav-bg: #1A1D23;
-    --primary: #FF7B54;
-    --secondary: #70A1FF;
-    --accent: #FFD93D;
+    --primary: #ff8c29;
+    --secondary: #7ec8b8;
+    --accent: #9ed0ff;
+    --cream: #14161c;
+    --mint: #2a3d38;
+    --sky: #6a9fd4;
+
+    --bg-page: #0e1014;
+    --text-primary: #f4f1eb;
+    --text-body: #d8d4cc;
+    --text-light: #9a958c;
+    --card-bg: #171a21;
+    --card-border: #2a2e38;
+    --nav-bg: rgba(14, 16, 20, 0.75);
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: var(--bg-page);
     color: var(--text-body);
-    font-family: 'Outfit', sans-serif;
-    transition: background-color 0.4s ease, color 0.4s ease;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.618;
+    letter-spacing: -0.011em;
+    transition: background-color 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      color 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    color: var(--text-primary);
   }
 }
 
-/* -----------------------------------------------
-   Blob animation (quiz page background)
------------------------------------------------- */
 @layer utilities {
   .animate-blob {
     animation: blob 7s infinite;
+  }
+
+  /* Marquee utilities */
+  .paused {
+    animation-play-state: paused;
+  }
+
+  /* Hover pause for marquee rows */
+  .marquee-row:hover .marquee-inner {
+    animation-play-state: paused;
+  }
+
+  /* Scale 107 for image hover */
+  .group:hover .group-hover\:scale-107 {
+    transform: scale(1.07);
+  }
+
+  /* Hide native cursor on desktop when custom cursor is active */
+  @media (hover: hover) {
+    * {
+      cursor: none !important;
+    }
+    input, textarea, [contenteditable] {
+      cursor: none !important;
+    }
   }
 
   .animation-delay-2000 {
@@ -74,7 +129,6 @@
     animation-delay: 4s;
   }
 
-  /* Scroll fade-in utility */
   .fade-in-up {
     opacity: 0;
     transform: translateY(24px);
@@ -85,24 +139,98 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  .text-display {
+    font-size: var(--text-display);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+
+  .text-h2 {
+    font-size: var(--text-h2);
+    line-height: 1.15;
+    letter-spacing: -0.028em;
+    font-weight: 650;
+  }
+
+  .text-h3 {
+    font-size: var(--text-h3);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  .text-caption {
+    font-size: var(--text-caption);
+    line-height: 1.45;
+    letter-spacing: 0.04em;
+  }
+
+  .gpu {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lamp-range {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .lamp-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(145deg, #ff7a00, #e86800);
+    box-shadow: 0 8px 20px -6px rgba(255, 122, 0, 0.65);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .lamp-range::-moz-range-thumb {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(145deg, #ff7a00, #e86800);
+    box-shadow: 0 8px 20px -6px rgba(255, 122, 0, 0.65);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .pulse-stock {
+    animation: pulse-stock 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-stock {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, #f59e0b 45%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 10px color-mix(in srgb, #f59e0b 0%, transparent);
+    }
+  }
 }
 
-/* -----------------------------------------------
-   Paw animation keyframes - for cart interactions
------------------------------------------------- */
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);
   }
-
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
-
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
-
   100% {
     transform: translate(0px, 0px) scale(1);
   }
@@ -113,12 +241,10 @@
     transform: scale(0) rotate(-20deg);
     opacity: 1;
   }
-
   60% {
     transform: scale(1.4) rotate(10deg);
     opacity: 1;
   }
-
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 0;
@@ -130,7 +256,6 @@
     transform: translateY(0px) scale(1);
     opacity: 1;
   }
-
   100% {
     transform: translateY(-60px) scale(0.5);
     opacity: 0;
@@ -143,4 +268,38 @@
   font-size: 1.5rem;
   animation: paw-pop 0.6s ease-out forwards, float-up 0.6s ease-out forwards;
   z-index: 50;
+}
+
+/* ─── Marquee animations ─── */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+/* ─── Shine sweep (for CTA buttons) ─── */
+@keyframes shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shine-btn {
+  background-size: 200% auto;
+  animation: shine 3s linear infinite;
+}
+
+/* ─── Gradient text animation ─── */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
 }

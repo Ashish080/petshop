@@ -1,0 +1,236 @@
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0F1117;--card:#1C2030;--card2:#222636;--border:#2A2F3E;--text:#E8EAF0;--muted:#7A82A0;--accent:#6366F1;--green:#10B981;--amber:#F59E0B;--red:#EF4444;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:24px;min-height:100vh;}
+h2{font-size:17px;font-weight:700;margin-bottom:2px;}
+.pg-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.toolbar{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;}
+input,select,textarea{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:opacity .15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+.btn:hover{opacity:.85;}
+.pets-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+.pet-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s;}
+.pet-card:hover{border-color:rgba(99,102,241,.4);}
+.pet-img{height:160px;display:flex;align-items:center;justify-content:center;font-size:72px;position:relative;}
+.pet-img-badges{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px;}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;display:inline-block;}
+.b-avail{background:rgba(16,185,129,.2);color:#6ee7b7;}
+.b-sold{background:rgba(239,68,68,.2);color:#fca5a5;}
+.b-hold{background:rgba(245,158,11,.2);color:#fcd34d;}
+.b-cert{background:rgba(245,158,11,.15);color:#fcd34d;}
+.b-verify{background:rgba(16,185,129,.15);color:#6ee7b7;}
+.pet-body{padding:14px 16px;}
+.pet-name{font-size:15px;font-weight:700;margin-bottom:1px;}
+.pet-breed{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.pet-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.pm-item{background:var(--card2);border-radius:6px;padding:6px 8px;}
+.pm-label{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;}
+.pm-val{font-size:12px;font-weight:700;margin-top:1px;}
+.pet-price{font-size:18px;font-weight:800;color:var(--green);margin-bottom:10px;}
+.pet-actions{display:flex;gap:6px;}
+.pa-btn{flex:1;padding:7px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:none;text-align:center;}
+.pa-edit{background:rgba(99,102,241,.15);color:#a5b4fc;}
+.pa-del{background:rgba(239,68,68,.12);color:#fca5a5;}
+.pa-toggle{background:rgba(16,185,129,.12);color:#6ee7b7;}
+.panel-backdrop{display:none;position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:8;border-radius:14px;}
+.panel-backdrop.open{display:block;}
+.slide-panel{position:absolute;top:0;right:0;width:380px;height:100%;background:#1A1D2E;border-left:1px solid var(--border);padding:24px;z-index:10;overflow-y:auto;display:none;}
+.slide-panel.open{display:block;}
+.wrap{position:relative;}
+.close-btn{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.upload-box{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:14px;}
+.upload-box:hover{border-color:var(--accent);}
+.upload-icon{font-size:28px;margin-bottom:6px;}
+.upload-text{font-size:12px;color:var(--muted);}
+.upload-sub{font-size:11px;color:var(--muted);margin-top:3px;opacity:.6;}
+.img-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.img-thumb{height:56px;background:var(--card2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--border);}
+.toast{background:#10B981;color:#fff;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;display:none;margin-bottom:12px;text-align:center;}
+.filter-tabs{display:flex;gap:6px;margin-bottom:16px;}
+.ftab{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card2);color:var(--muted);}
+.ftab.active{background:rgba(99,102,241,.18);color:var(--accent);border-color:rgba(99,102,241,.4);}
+</style>
+
+<div class="wrap" id="mainWrap">
+<div class="panel-backdrop" id="backdrop" onclick="closePanel()"></div>
+
+<h2>🐶 Pet Listing Management</h2>
+<p class="pg-sub">Add · Edit · Toggle availability · Upload photos · Full CRUD</p>
+<div class="toast" id="toast">Listing saved!</div>
+
+<div class="toolbar">
+  <input type="text" placeholder="🔍 Search pet listings..." id="searchInput" oninput="renderGrid()" style="flex:1;min-width:180px;">
+  <select id="catFilter" onchange="renderGrid()"><option value="">All Types</option><option>Dogs</option><option>Cats</option><option>Birds</option></select>
+  <select id="statusFilter" onchange="renderGrid()"><option value="">All Status</option><option value="Available">Available</option><option value="On Hold">On Hold</option><option value="Sold">Sold</option></select>
+  <button class="btn btn-primary" onclick="openPanel(null)">+ Add New Pet</button>
+</div>
+
+<div class="filter-tabs">
+  <div class="ftab active" onclick="setTab(this,'')">All Listings</div>
+  <div class="ftab" onclick="setTab(this,'Dogs')">Dogs</div>
+  <div class="ftab" onclick="setTab(this,'Cats')">Cats</div>
+  <div class="ftab" onclick="setTab(this,'Birds')">Birds</div>
+</div>
+
+<div class="pets-grid" id="petsGrid"></div>
+
+<div class="slide-panel" id="addPanel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h2 style="font-size:15px;" id="panelTitle">Add New Pet Listing</h2>
+    <button class="close-btn" onclick="closePanel()">✕ Close</button>
+  </div>
+
+  <div class="upload-box" onclick="triggerUpload()">
+    <div class="upload-icon">📸</div>
+    <div class="upload-text">Click to upload pet photos</div>
+    <div class="upload-sub">JPG, PNG · Up to 5 photos · Max 5MB each</div>
+  </div>
+  <div class="img-preview" id="imgPreview">
+    <div class="img-thumb">🐶</div>
+    <div class="img-thumb" style="border-style:dashed;opacity:.4;">+</div>
+    <div class="img-thumb" style="border-style:dashed;opacity:.4;">+</div>
+    <div class="img-thumb" style="border-style:dashed;opacity:.4;">+</div>
+  </div>
+  <input type="file" id="fileInput" multiple accept="image/*" style="display:none;" onchange="previewImages(event)">
+
+  <div class="form-group"><label>Pet Name / Title *</label><input type="text" id="f-name" placeholder="e.g. Max — Golden Retriever Pup"></div>
+  <div class="form-row">
+    <div><label>Type</label><select id="f-type"><option>Dogs</option><option>Cats</option><option>Birds</option><option>Rabbits</option></select></div>
+    <div><label>Breed</label><input type="text" id="f-breed" placeholder="e.g. Golden Retriever"></div>
+  </div>
+  <div class="form-row">
+    <div><label>Age</label><input type="text" id="f-age" placeholder="45 Days"></div>
+    <div><label>Gender</label><select id="f-gender"><option>Male</option><option>Female</option></select></div>
+  </div>
+  <div class="form-row">
+    <div><label>Color / Coat</label><input type="text" id="f-color" placeholder="Golden"></div>
+    <div><label>Price ₹ *</label><input type="number" id="f-price" placeholder="28000"></div>
+  </div>
+  <div class="form-row">
+    <div><label>Status</label><select id="f-status"><option>Available</option><option>On Hold</option><option>Sold</option></select></div>
+    <div><label>Location</label><input type="text" id="f-loc" placeholder="Lucknow"></div>
+  </div>
+  <div class="form-group">
+    <label>Health Details</label>
+    <textarea id="f-health" style="width:100%;height:64px;resize:none;" placeholder="Vaccinated, dewormed, KCI certified..."></textarea>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:14px;">
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="f-cert" checked> KCI Certified</label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="f-vaccin" checked> Vaccinated</label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;"><input type="checkbox" id="f-diet" checked> Diet Plan</label>
+  </div>
+  <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="savePet()">Save Listing</button>
+</div>
+</div>
+
+<script>
+var activeTab='';
+var editIdx=null;
+var emojis={Dogs:'🐕',Cats:'😺',Birds:'🦜',Rabbits:'🐇'};
+var bgColors={Dogs:'linear-gradient(135deg,#1a1f3a,#2a3060)',Cats:'linear-gradient(135deg,#2a1a3a,#3a2060)',Birds:'linear-gradient(135deg,#1a2a1a,#2a4020)',Rabbits:'linear-gradient(135deg,#2a1a1a,#3a2020)'};
+var statusCls={Available:'b-avail','On Hold':'b-hold',Sold:'b-sold'};
+
+var pets=[
+  {name:'Max — Golden Retriever',type:'Dogs',breed:'Golden Retriever',age:'45 Days',gender:'Male',color:'Golden',price:28000,status:'Available',loc:'Lucknow',cert:true,vaccin:true,diet:true,health:'KCI Certified · All Vaccinations Done'},
+  {name:'Luna — Persian Cat',type:'Cats',breed:'Persian',age:'60 Days',gender:'Female',color:'White',price:12000,status:'Available',loc:'Lucknow',cert:false,vaccin:true,diet:true,health:'Vaccinated · Dewormed · Pure Breed'},
+  {name:'Storm — Husky Pup',type:'Dogs',breed:'Siberian Husky',age:'50 Days',gender:'Male',color:'Grey & White',price:35000,status:'On Hold',loc:'Lucknow',cert:true,vaccin:true,diet:true,health:'KCI Certified · Blue Eyes · Show Quality'},
+  {name:'Brownie — Labrador',type:'Dogs',breed:'Labrador Retriever',age:'55 Days',gender:'Male',color:'Chocolate',price:18000,status:'Available',loc:'Lucknow',cert:true,vaccin:true,diet:false,health:'IKC Certified · Vaccinated'},
+  {name:'Fluffy — Pomeranian',type:'Dogs',breed:'Pomeranian',age:'40 Days',gender:'Female',color:'Cream',price:14000,status:'Sold',loc:'Lucknow',cert:false,vaccin:true,diet:true,health:'Vaccinated · Toy Size'},
+  {name:'Rio — Cockatiel',type:'Birds',breed:'Cockatiel',age:'3 Months',gender:'Male',color:'Yellow & Grey',price:4500,status:'Available',loc:'Lucknow',cert:false,vaccin:false,diet:true,health:'Hand Tamed · Healthy'},
+];
+
+function renderGrid(){
+  var s=document.getElementById('searchInput').value.toLowerCase();
+  var c=document.getElementById('catFilter').value||activeTab;
+  var st=document.getElementById('statusFilter').value;
+  var list=pets.filter(function(p,i){
+    p._idx=i;
+    return(!s||p.name.toLowerCase().includes(s)||p.breed.toLowerCase().includes(s))&&(!c||p.type===c)&&(!st||p.status===st);
+  });
+  document.getElementById('petsGrid').innerHTML=list.map(function(p){
+    var idx=p._idx;
+    var bg=bgColors[p.type]||bgColors.Dogs;
+    var em=emojis[p.type]||'🐾';
+    return '<div class="pet-card">'
+      +'<div class="pet-img" style="background:'+bg+';">'+em
+      +'<div class="pet-img-badges">'
+      +(p.cert?'<span class="badge b-cert">KCI Cert</span>':'')
+      +'<span class="badge '+statusCls[p.status]+'">'+p.status+'</span>'
+      +'</div></div>'
+      +'<div class="pet-body">'
+      +'<div class="pet-name">'+p.name+'</div>'
+      +'<div class="pet-breed">'+p.breed+' · '+p.age+' · '+p.gender+'</div>'
+      +'<div class="pet-meta">'
+      +'<div class="pm-item"><div class="pm-label">Color</div><div class="pm-val">'+p.color+'</div></div>'
+      +'<div class="pm-item"><div class="pm-label">Location</div><div class="pm-val">'+p.loc+'</div></div>'
+      +'<div class="pm-item"><div class="pm-label">Vaccinated</div><div class="pm-val">'+(p.vaccin?'Yes ✓':'No')+'</div></div>'
+      +'<div class="pm-item"><div class="pm-label">Diet Plan</div><div class="pm-val">'+(p.diet?'Free ✓':'No')+'</div></div>'
+      +'</div>'
+      +'<div class="pet-price">₹'+Number(p.price).toLocaleString('en-IN')+'</div>'
+      +'<div class="pet-actions">'
+      +'<button class="pa-btn pa-edit" onclick="openPanel('+idx+')">Edit</button>'
+      +'<button class="pa-btn pa-toggle" onclick="toggleStatus('+idx+')">'+(p.status==='Available'?'Hold':'Avail')+'</button>'
+      +'<button class="pa-btn pa-del" onclick="deletePet('+idx+')">Delete</button>'
+      +'</div>'
+      +'</div></div>';
+  }).join('');
+}
+
+function setTab(el,cat){document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});el.classList.add('active');activeTab=cat;renderGrid();}
+
+function openPanel(idx){
+  editIdx=idx;
+  var p=idx!==null?pets[idx]:null;
+  document.getElementById('panelTitle').textContent=p?'Edit Pet Listing':'Add New Pet Listing';
+  document.getElementById('f-name').value=p?p.name:'';
+  document.getElementById('f-type').value=p?p.type:'Dogs';
+  document.getElementById('f-breed').value=p?p.breed:'';
+  document.getElementById('f-age').value=p?p.age:'';
+  document.getElementById('f-gender').value=p?p.gender:'Male';
+  document.getElementById('f-color').value=p?p.color:'';
+  document.getElementById('f-price').value=p?p.price:'';
+  document.getElementById('f-status').value=p?p.status:'Available';
+  document.getElementById('f-loc').value=p?p.loc:'Lucknow';
+  document.getElementById('f-health').value=p?p.health:'';
+  document.getElementById('f-cert').checked=p?p.cert:true;
+  document.getElementById('f-vaccin').checked=p?p.vaccin:true;
+  document.getElementById('f-diet').checked=p?p.diet:true;
+  document.getElementById('addPanel').classList.add('open');
+  document.getElementById('backdrop').classList.add('open');
+}
+
+function closePanel(){document.getElementById('addPanel').classList.remove('open');document.getElementById('backdrop').classList.remove('open');}
+
+function savePet(){
+  var name=document.getElementById('f-name').value;
+  if(!name)return;
+  var pet={name:name,type:document.getElementById('f-type').value,breed:document.getElementById('f-breed').value,age:document.getElementById('f-age').value,gender:document.getElementById('f-gender').value,color:document.getElementById('f-color').value,price:parseInt(document.getElementById('f-price').value)||0,status:document.getElementById('f-status').value,loc:document.getElementById('f-loc').value,health:document.getElementById('f-health').value,cert:document.getElementById('f-cert').checked,vaccin:document.getElementById('f-vaccin').checked,diet:document.getElementById('f-diet').checked};
+  if(editIdx!==null)pets[editIdx]=pet;else pets.unshift(pet);
+  closePanel();
+  var t=document.getElementById('toast');t.textContent=editIdx!==null?'Listing updated!':'New pet listing added!';t.style.display='block';setTimeout(function(){t.style.display='none';},2000);
+  renderGrid();
+}
+
+function toggleStatus(idx){var s=pets[idx].status;pets[idx].status=s==='Available'?'On Hold':s==='On Hold'?'Available':s;renderGrid();}
+function deletePet(idx){if(confirm('Delete this listing?')){pets.splice(idx,1);renderGrid();}}
+function triggerUpload(){document.getElementById('fileInput').click();}
+function previewImages(e){
+  var files=e.target.files;
+  var prev=document.getElementById('imgPreview');
+  prev.innerHTML='';
+  var count=Math.min(files.length,4);
+  for(var i=0;i<count;i++){
+    var div=document.createElement('div');div.className='img-thumb';div.textContent='📷';prev.appendChild(div);
+  }
+  for(var j=count;j<4;j++){var div=document.createElement('div');div.className='img-thumb';div.style.borderStyle='dashed';div.style.opacity='.4';div.textContent='+';prev.appendChild(div);}
+}
+
+renderGrid();
+</script>

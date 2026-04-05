@@ -1,9 +1,12 @@
 "use client";
 
+import { usePathname } from 'next/navigation';
 import { MessageCircle, Phone } from 'lucide-react';
 import { brandConfig } from '@/config/brand';
 
 export default function MobileStickyCtas() {
+    const pathname = usePathname();
+    if (pathname === '/auth/login' || pathname === '/auth/register') return null;
     const handleWhatsApp = () => {
         window.open(`https://wa.me/${brandConfig.whatsapp.replace(/[^0-9]/g, '')}?text=Hi, I am interested in purchasing a pet.`, '_blank');
     };

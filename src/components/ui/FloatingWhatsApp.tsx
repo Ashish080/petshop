@@ -1,7 +1,13 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { brandConfig } from '@/config/brand';
 import { themeConfig } from '@/config/theme';
 
 export default function FloatingWhatsApp() {
+    const pathname = usePathname();
+    if (pathname === '/auth/login' || pathname === '/auth/register') return null;
+
     const whatsappUrl = `https://wa.me/${brandConfig.whatsapp.replace(/\D/g, '')}`;
 
     return (

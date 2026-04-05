@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import type { IProduct } from '@/types';
+import type { Product as ProductType } from '@/types';
 import { ProductActions } from '@/components/products/ProductActions';
 import { Star, Truck, RotateCcw, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 
-async function getProduct(id: string): Promise<IProduct | null> {
+async function getProduct(id: string): Promise<ProductType | null> {
   try {
     const res = await fetch(`${process.env.NEXTAUTH_URL}/api/products/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
@@ -51,7 +51,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             )}
             {product.isLowStock && (
               <div className="absolute top-3 left-3">
-                <Badge label={`Only ${product.stock} left!`} variant="warning" />
+                <Badge variant="warning">{`Only ${product.stock} left!`}</Badge>
               </div>
             )}
           </div>
@@ -60,8 +60,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         {/* Product info */}
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge label={product.category} variant="info" />
-            {product.stock === 0 && <Badge label="Out of stock" variant="danger" />}
+            <Badge variant="info">{product.category}</Badge>
+            {product.stock === 0 && <Badge variant="danger">Out of stock</Badge>}
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 leading-tight">{product.name}</h1>

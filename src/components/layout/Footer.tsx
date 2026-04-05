@@ -1,118 +1,176 @@
+'use client';
+
 import Link from 'next/link';
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ArrowUpRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { brandConfig } from '@/config/brand';
 import { navigationConfig } from '@/config/navigation';
 import { siteContent } from '@/config/site-content';
-import { themeConfig } from '@/config/theme';
 
 export default function Footer() {
-    const { footer } = siteContent;
+  const pathname = usePathname();
+  const { footer } = siteContent;
 
-    return (
-        <footer className="bg-bg-page border-t border-card-border mt-auto transition-colors duration-300">
-            <div className={themeConfig.spacing.container + " pt-16 pb-8"}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-12 gap-10 xl:gap-16 mb-16">
+  if (pathname === '/auth/login' || pathname === '/auth/register') {
+    return null;
+  }
 
-                    <div className="xl:col-span-4">
-                        <Link href="/" className="inline-block mb-6">
-                            <span className="font-black text-4xl tracking-tighter text-brand-primary">
-                                {brandConfig.name}
-                            </span>
-                        </Link>
-                        <p className="mb-6 max-w-sm text-text-light font-medium">
-                            {brandConfig.description}
-                        </p>
-                        <div className="flex space-x-5">
-                            <a href={brandConfig.socialLinks.facebook} className="text-text-light hover:text-secondary transition-all hover:scale-110">
-                                <span className="sr-only">Facebook</span>
-                                <Facebook size={22} strokeWidth={2.5} />
-                            </a>
-                            <a href={brandConfig.socialLinks.instagram} className="text-text-light hover:text-brand-primary transition-all hover:scale-110">
-                                <span className="sr-only">Instagram</span>
-                                <Instagram size={22} strokeWidth={2.5} />
-                            </a>
-                            <a href={brandConfig.socialLinks.twitter} className="text-text-light hover:text-secondary transition-all hover:scale-110">
-                                <span className="sr-only">Twitter</span>
-                                <Twitter size={22} strokeWidth={2.5} />
-                            </a>
-                        </div>
-                    </div>
+  const socialLinks = [
+    { href: brandConfig.socialLinks.facebook, label: 'Facebook', icon: Facebook, color: '#1877f2' },
+    { href: brandConfig.socialLinks.instagram, label: 'Instagram', icon: Instagram, color: '#e1306c' },
+    { href: brandConfig.socialLinks.twitter, label: 'Twitter', icon: Twitter, color: '#1da1f2' },
+  ];
 
-                    <div>
-                        <h3 className="font-black text-lg mb-6 text-text-primary uppercase tracking-wider text-sm">Shop</h3>
-                        <ul className="space-y-4">
-                            {navigationConfig.footerNav.shop.map((item) => (
-                                <li key={item.title}>
-                                    <Link href={item.href} className="text-sm font-medium transition-all text-text-light hover:text-brand-primary">
-                                        {item.title}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+  return (
+    <footer className="relative overflow-hidden border-t border-[var(--card-border)] bg-[var(--bg-page)]" aria-label="Site footer">
+      {/* Subtle gradient at top */}
+      <div aria-hidden className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/30 to-transparent" />
+      
+      {/* Background blob */}
+      <div aria-hidden className="pointer-events-none absolute -bottom-40 left-1/2 -translate-x-1/2 h-[500px] w-[700px] rounded-full bg-[color-mix(in_srgb,var(--primary)_4%,transparent)] blur-[120px]" />
 
-                    <div>
-                        <h3 className="font-black text-lg mb-6 text-text-primary uppercase tracking-wider text-sm">Services</h3>
-                        <ul className="space-y-4">
-                            {navigationConfig.footerNav.services.map((item) => (
-                                <li key={item.title}>
-                                    <Link href={item.href} className="text-sm font-medium transition-all text-text-light hover:text-brand-primary">
-                                        {item.title}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="font-black text-lg mb-6 text-text-primary uppercase tracking-wider text-sm">Contact Us</h3>
-                        <ul className="space-y-4">
-                            <li className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-brand-primary/5 flex items-center justify-center text-brand-primary shrink-0">
-                                    <MapPin size={20} strokeWidth={2.5} />
-                                </div>
-                                <span className="text-sm text-text-light font-medium leading-relaxed">{brandConfig.address}</span>
-                            </li>
-                            <li className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-secondary/5 flex items-center justify-center text-secondary shrink-0">
-                                    <Phone size={20} strokeWidth={2.5} />
-                                </div>
-                                <span className="text-sm text-text-light font-medium">{brandConfig.phone}</span>
-                            </li>
-                            <li className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-accent/5 flex items-center justify-center text-accent shrink-0">
-                                    <Mail size={20} strokeWidth={2.5} />
-                                </div>
-                                <span className="text-sm text-text-light font-medium">{brandConfig.email}</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="xl:col-span-2">
-                        <h3 className="font-black text-text-primary uppercase tracking-[0.2em] text-[10px] mb-8">Administration</h3>
-                        <ul className="space-y-4">
-                            <li>
-                                <Link href="/admin/login" className="inline-flex items-center gap-2 text-xs font-black text-brand-primary hover:text-secondary transition-all uppercase tracking-widest bg-brand-primary/10 px-4 py-2 rounded-xl">
-                                    Admin CP 🔐
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div className="pt-8 border-t border-gray-200 dark:border-[#0f3460] flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm" style={{ color: themeConfig.colors.textLight }}>
-                        &copy; {new Date().getFullYear()} {brandConfig.name}. {footer.copyright}
-                    </p>
-                    <div className="flex gap-6">
-                        {navigationConfig.footerNav.legal.map((item) => (
-                            <Link key={item.title} href={item.href} className="text-sm hover:underline text-text-light hover:text-brand-primary">
-                                {item.title}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
+      <div className="relative z-10 mx-auto max-w-[110rem] px-[var(--space-f21)]">
+        {/* CTA band */}
+        <div className="py-[var(--space-f34)] border-b border-[var(--card-border)]">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 className="text-h3 mb-2 text-[var(--text-primary)]">Ready to find your perfect companion?</h3>
+              <p className="text-[var(--text-light)]">Visit us in Lucknow or browse online — we're here for you.</p>
             </div>
-        </footer>
-    );
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                href="/pets"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[var(--primary)] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_34px_-10px_rgba(255,122,0,0.55)] whitespace-nowrap"
+              >
+                Explore pets <ArrowUpRight size={16} aria-hidden />
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Main footer grid */}
+        <div className="grid grid-cols-1 gap-[var(--space-f34)] py-[var(--space-f34)] md:grid-cols-2 lg:grid-cols-12">
+          {/* Brand column */}
+          <div className="lg:col-span-4">
+            <Link href="/" className="group mb-[var(--space-f21)] inline-flex items-center gap-2.5">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[#e86800] text-sm font-black text-white">
+                K
+              </span>
+              <span className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+                {brandConfig.name}
+              </span>
+            </Link>
+            <p className="mb-[var(--space-f21)] max-w-xs text-sm leading-relaxed text-[var(--text-light)]">
+              {brandConfig.description}
+            </p>
+            <div className="flex gap-3">
+              {socialLinks.map(({ href, label, icon: Icon, color }) => (
+                <motion.a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="group flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--text-light)] transition-all"
+                  whileHover={{ y: -2, borderColor: color + '50', color: color }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon size={18} aria-hidden />
+                </motion.a>
+              ))}
+            </div>
+          </div>
+
+          {/* Shop */}
+          <div className="lg:col-span-2">
+            <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-light)]">Shop</h3>
+            <ul className="space-y-3">
+              {navigationConfig.footerNav.shop.map((item) => (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-[var(--text-light)] transition-colors hover:text-[var(--primary)]"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div className="lg:col-span-2">
+            <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-light)]">Services</h3>
+            <ul className="space-y-3">
+              {navigationConfig.footerNav.services.map((item) => (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-[var(--text-light)] transition-colors hover:text-[var(--primary)]"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div className="lg:col-span-4">
+            <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-light)]">Contact</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--primary)_10%,transparent)] text-[var(--primary)]">
+                  <MapPin size={15} aria-hidden />
+                </div>
+                <span className="text-sm leading-relaxed text-[var(--text-light)]">{brandConfig.address}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--secondary)_12%,transparent)] text-[var(--secondary)]">
+                  <Phone size={15} aria-hidden />
+                </div>
+                <a href={`tel:${brandConfig.phone}`} className="text-sm text-[var(--text-light)] hover:text-[var(--primary)] transition-colors">
+                  {brandConfig.phone}
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent)]">
+                  <Mail size={15} aria-hidden />
+                </div>
+                <a href={`mailto:${brandConfig.email}`} className="text-sm text-[var(--text-light)] hover:text-[var(--primary)] transition-colors">
+                  {brandConfig.email}
+                </a>
+              </li>
+            </ul>
+
+            <div className="mt-6">
+              <Link
+                href="/admin/login"
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-light)] transition-colors hover:border-[color-mix(in_srgb,var(--primary)_35%,transparent)] hover:text-[var(--primary)]"
+              >
+                🔐 Admin panel
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="flex flex-col gap-4 border-t border-[var(--card-border)] py-6 md:flex-row md:items-center md:justify-between">
+          <p className="text-caption text-[var(--text-light)]">
+            © {new Date().getFullYear()} {brandConfig.name}. {footer.copyright}
+          </p>
+          <div className="flex gap-6">
+            {navigationConfig.footerNav.legal.map((item) => (
+              <Link
+                key={item.title}
+                href={item.href}
+                className="text-caption text-[var(--text-light)] hover:text-[var(--primary)] transition-colors"
+              >
+                {item.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

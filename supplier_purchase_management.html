@@ -1,0 +1,186 @@
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0F1117;--card:#1C2030;--card2:#222636;--border:#2A2F3E;--text:#E8EAF0;--muted:#7A82A0;--accent:#6366F1;--green:#10B981;--amber:#F59E0B;--red:#EF4444;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:24px;min-height:100vh;}
+h2{font-size:17px;font-weight:700;margin-bottom:2px;}
+.pg-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.mc-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;margin-bottom:8px;}
+.mc-val{font-size:24px;font-weight:700;}
+.mc-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.card-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13px;font-weight:700;}
+.card-act{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;}
+.card-body{padding:16px 20px;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl td{padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);}
+.tbl tr:last-child td{border-bottom:none;}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;display:inline-block;}
+.b-active{background:rgba(16,185,129,.15);color:#6ee7b7;}
+.b-new{background:rgba(99,102,241,.15);color:#a5b4fc;}
+.b-paid{background:rgba(16,185,129,.15);color:#6ee7b7;}
+.b-pending{background:rgba(245,158,11,.15);color:#fcd34d;}
+.b-partial{background:rgba(59,130,246,.15);color:#93c5fd;}
+input,select,textarea{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;width:100%;}
+input:focus,select:focus{border-color:var(--accent);}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:opacity .15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+.btn:hover{opacity:.85;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.sup-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.sup-avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;margin-right:12px;}
+.sup-name{font-size:13px;font-weight:700;}
+.sup-meta{font-size:11px;color:var(--muted);}
+.sup-stat{text-align:right;}
+.sup-stat-val{font-size:14px;font-weight:700;color:var(--green);}
+.sup-stat-label{font-size:10px;color:var(--muted);}
+.toast{background:#10B981;color:#fff;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;display:none;margin-bottom:12px;text-align:center;}
+.toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+</style>
+
+<h2>🏪 Supplier & Purchase Management</h2>
+<p class="pg-sub">Manage vendors · Record purchases · Auto-update inventory</p>
+
+<div class="toast" id="toast">Purchase recorded! Stock updated automatically.</div>
+
+<div class="metrics">
+  <div class="mc"><div class="mc-label">Total Suppliers</div><div class="mc-val">8</div><div class="mc-sub">Active vendors</div></div>
+  <div class="mc"><div class="mc-label">This Month Purchases</div><div class="mc-val">₹94,200</div><div class="mc-sub">12 purchase orders</div></div>
+  <div class="mc"><div class="mc-label">Pending Payments</div><div class="mc-val" style="color:var(--amber);">₹28,500</div><div class="mc-sub">3 unpaid bills</div></div>
+  <div class="mc"><div class="mc-label">Top Supplier</div><div class="mc-val" style="font-size:16px;">Raj Breeders</div><div class="mc-sub">₹42,000 this month</div></div>
+</div>
+
+<div class="two-col">
+  <!-- SUPPLIERS LIST -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title">Registered Suppliers</span>
+      <span class="card-act" onclick="showAddSup()">+ Add Supplier</span>
+    </div>
+    <div class="card-body" style="padding:14px;">
+      <div id="supList"></div>
+    </div>
+  </div>
+
+  <!-- NEW PURCHASE FORM -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title">Record New Purchase</span></div>
+    <div class="card-body">
+      <div class="form-group"><label>Supplier *</label>
+        <select id="p-sup">
+          <option>Raj Breeders (Lucknow)</option>
+          <option>Royal Canin Distributor</option>
+          <option>Petzone Accessories</option>
+          <option>VetCare Pharma</option>
+          <option>Delhi Pet Mart</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Item / Product *</label><input type="text" id="p-item" placeholder="e.g. Golden Retriever Pup"></div>
+      <div class="form-row">
+        <div><label>SKU</label><input type="text" id="p-sku" placeholder="PET-001"></div>
+        <div><label>Category</label><select id="p-cat"><option>Pets</option><option>Food</option><option>Accessories</option><option>Medicine</option></select></div>
+      </div>
+      <div class="form-row">
+        <div><label>Quantity</label><input type="number" id="p-qty" value="1" min="1"></div>
+        <div><label>Unit Cost ₹</label><input type="number" id="p-cost" placeholder="0" oninput="calcTotal()"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Total Amount ₹</label><input type="text" id="p-total" placeholder="Auto-calculated" readonly style="background:var(--bg);"></div>
+        <div><label>Payment Status</label><select id="p-pay"><option>Paid</option><option>Pending</option><option>Partial</option></select></div>
+      </div>
+      <div class="form-group"><label>Invoice / Bill No.</label><input type="text" id="p-bill" placeholder="SUP-INV-0042"></div>
+      <div class="form-group"><label>Notes</label><textarea id="p-notes" style="height:56px;resize:none;" placeholder="Delivery details, breed quality notes..."></textarea></div>
+      <button class="btn btn-green" style="width:100%;padding:12px;" onclick="recordPurchase()">Record Purchase & Update Stock</button>
+    </div>
+  </div>
+</div>
+
+<!-- PURCHASE HISTORY -->
+<div class="card">
+  <div class="card-hd">
+    <span class="card-title">Purchase History</span>
+    <span style="display:flex;gap:8px;">
+      <select style="width:auto;padding:5px 10px;font-size:12px;" id="ph-filter" onchange="renderPurchases()">
+        <option value="">All Suppliers</option>
+        <option value="Raj Breeders">Raj Breeders</option>
+        <option value="Royal Canin">Royal Canin</option>
+        <option value="Petzone">Petzone</option>
+        <option value="VetCare">VetCare</option>
+      </select>
+    </span>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Date</th><th>Supplier</th><th>Item</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Bill No.</th><th>Payment</th></tr></thead>
+    <tbody id="phBody"></tbody>
+  </table>
+</div>
+
+<script>
+var suppliers=[
+  {name:'Raj Breeders',loc:'Lucknow',type:'Pets',color:'#6366F1',spent:42000,orders:5},
+  {name:'Royal Canin Dist.',loc:'Kanpur',type:'Pet Food',color:'#10B981',spent:22000,orders:3},
+  {name:'Petzone Accessories',loc:'Delhi',type:'Accessories',color:'#F59E0B',spent:8500,orders:2},
+  {name:'VetCare Pharma',loc:'Lucknow',type:'Medicine',color:'#3B82F6',spent:6200,orders:4},
+  {name:'Delhi Pet Mart',loc:'Delhi',type:'Pets',color:'#EC4899',spent:15500,orders:2},
+];
+
+var purchases=[
+  {date:'04 Apr 2026',sup:'Raj Breeders',item:'Golden Retriever Pup',qty:2,unit:18000,total:36000,bill:'RAJ-041',pay:'Paid'},
+  {date:'03 Apr 2026',sup:'Royal Canin Dist.',item:'RC Medium Adult 4kg',qty:10,unit:1800,total:18000,bill:'RC-087',pay:'Paid'},
+  {date:'02 Apr 2026',sup:'Petzone Accessories',item:'Retractable Leash 5m',qty:5,unit:350,total:1750,bill:'PZ-022',pay:'Pending'},
+  {date:'01 Apr 2026',sup:'VetCare Pharma',item:'Deworming Tablets',qty:20,unit:120,total:2400,bill:'VC-034',pay:'Paid'},
+  {date:'30 Mar 2026',sup:'Delhi Pet Mart',item:'Husky Pup (Blue Eyes)',qty:1,unit:22000,total:22000,bill:'DPM-011',pay:'Pending'},
+  {date:'28 Mar 2026',sup:'Raj Breeders',item:'Pomeranian Toy Female',qty:2,unit:8000,total:16000,bill:'RAJ-040',pay:'Partial'},
+];
+
+function renderSuppliers(){
+  document.getElementById('supList').innerHTML=suppliers.map(function(s){
+    return '<div class="sup-card"><div style="display:flex;align-items:center;"><div class="sup-avatar" style="background:'+s.color+';">'+s.name[0]+'</div><div><div class="sup-name">'+s.name+'</div><div class="sup-meta">'+s.loc+' · '+s.type+'</div></div></div><div class="sup-stat"><div class="sup-stat-val">₹'+Number(s.spent).toLocaleString('en-IN')+'</div><div class="sup-stat-label">'+s.orders+' orders</div></div></div>';
+  }).join('');
+}
+
+function renderPurchases(){
+  var f=document.getElementById('ph-filter').value;
+  var list=purchases.filter(function(p){return!f||p.sup.includes(f);});
+  var pc={Paid:'b-paid',Pending:'b-pending',Partial:'b-partial'};
+  document.getElementById('phBody').innerHTML=list.map(function(p){
+    return '<tr><td style="color:var(--muted);font-size:12px;">'+p.date+'</td><td style="font-weight:600;">'+p.sup+'</td><td>'+p.item+'</td><td style="font-weight:700;">'+p.qty+'</td><td style="color:var(--muted);">₹'+Number(p.unit).toLocaleString('en-IN')+'</td><td style="font-weight:700;color:var(--green);">₹'+Number(p.total).toLocaleString('en-IN')+'</td><td style="font-family:monospace;font-size:11px;color:var(--muted);">'+p.bill+'</td><td><span class="badge '+(pc[p.pay]||'b-new')+'">'+p.pay+'</span></td></tr>';
+  }).join('');
+}
+
+function calcTotal(){
+  var q=parseFloat(document.getElementById('p-qty').value)||0;
+  var c=parseFloat(document.getElementById('p-cost').value)||0;
+  document.getElementById('p-total').value=q&&c?'₹'+Math.round(q*c).toLocaleString('en-IN'):'';
+}
+
+function recordPurchase(){
+  var item=document.getElementById('p-item').value;
+  if(!item)return;
+  var now=new Date();
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var d=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+  var qty=parseInt(document.getElementById('p-qty').value)||1;
+  var cost=parseInt(document.getElementById('p-cost').value)||0;
+  purchases.unshift({date:d,sup:document.getElementById('p-sup').value.split(' (')[0],item:item,qty:qty,unit:cost,total:qty*cost,bill:document.getElementById('p-bill').value||'AUTO-'+Date.now().toString().slice(-5),pay:document.getElementById('p-pay').value});
+  var t=document.getElementById('toast');t.style.display='block';
+  setTimeout(function(){t.style.display='none';},2500);
+  document.getElementById('p-item').value='';
+  document.getElementById('p-cost').value='';
+  document.getElementById('p-total').value='';
+  document.getElementById('p-bill').value='';
+  renderPurchases();
+}
+
+function showAddSup(){alert('Slide-over panel: Add new supplier form would open here with name, contact, GST, category fields.');}
+
+renderSuppliers();renderPurchases();
+</script>

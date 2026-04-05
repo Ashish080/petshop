@@ -1,50 +1,69 @@
+'use client';
+
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/cards/ProductCard';
 import { productsData } from '@/data/products';
-import { themeConfig } from '@/config/theme';
+import { ScrollReveal } from '@/components/motion/ScrollReveal';
 
 export default function BestSellingProducts() {
-    const bestSellers = productsData.filter(product => product.isBestSeller).slice(0, 4);
+  const bestSellers = productsData.filter((product) => product.isBestSeller).slice(0, 8);
 
-    return (
-        <section className={themeConfig.spacing.section}>
-            <div className={themeConfig.spacing.container}>
-                <div className="flex justify-between items-end mb-10">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-3 text-text-primary">
-                            Best Selling Products
-                        </h2>
-                        <p className="max-w-2xl text-lg text-text-light">
-                            Discover our most loved products for your furry friends. High quality and trusted by pet parents.
-                        </p>
-                    </div>
-                    <Link
-                        href="/products"
-                        className="hidden md:flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity"
-                        style={{ color: themeConfig.colors.primary }}
-                    >
-                        View All Products <ArrowRight size={20} />
-                    </Link>
-                </div>
+  return (
+    <section className="py-[var(--space-f55)]">
+      <div className="mx-auto max-w-[110rem] px-[var(--space-f21)]">
+        <ScrollReveal className="mb-[var(--space-f34)] flex flex-col gap-[var(--space-f21)] md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <p className="mb-[var(--space-f13)] text-caption font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">
+              Store bestsellers
+            </p>
+            <h2 className="text-h2 mb-[var(--space-f13)] text-[var(--text-primary)]">
+              Products pets actually love
+            </h2>
+            <p className="text-lg text-[var(--text-light)]">
+              Premium nutrition, cozy bedding, engaging toys — curated by our vets for happy, healthy pets.
+            </p>
+          </div>
+          <Link
+            href="/products"
+            className="group hidden items-center gap-2 text-sm font-semibold text-[var(--primary)] md:inline-flex"
+          >
+            Shop catalog
+            <motion.span
+              animate={{ x: [0, 5, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <ArrowRight className="h-5 w-5" />
+            </motion.span>
+          </Link>
+        </ScrollReveal>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                    {bestSellers.map((product) => (
-                        <ProductCard key={product.id} {...product} />
-                    ))}
-                </div>
+        <div className="-mx-[var(--space-f21)] flex gap-[var(--space-f21)] overflow-x-auto overflow-y-visible pb-4 pt-2 snap-x snap-mandatory px-[var(--space-f21)] scrollbar-hide md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-4">
+          {bestSellers.map((product, i) => (
+            <motion.div
+              key={product.id}
+              className="min-w-[min(88vw,300px)] shrink-0 snap-center md:min-w-0"
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-10%' }}
+              transition={{ duration: 0.45, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <ProductCard {...product} />
+            </motion.div>
+          ))}
+        </div>
 
-                <div className="mt-10 md:hidden flex justify-center">
-                    <Link href="/products">
-                        <button
-                            className={`flex items-center gap-2 px-6 py-3 font-semibold border ${themeConfig.radius.md}`}
-                            style={{ color: themeConfig.colors.primary, borderColor: themeConfig.colors.primary }}
-                        >
-                            View All Products <ArrowRight size={18} />
-                        </button>
-                    </Link>
-                </div>
-            </div>
-        </section>
-    );
+        <div className="mt-[var(--space-f34)] flex justify-center md:hidden">
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--card-border)] bg-[var(--card-bg)] px-6 py-3 text-sm font-semibold text-[var(--text-primary)] shadow-sm"
+          >
+            Browse all products
+            <ArrowRight className="h-4 w-4 text-[var(--primary)]" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
 }

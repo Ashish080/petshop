@@ -3,11 +3,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Product } from '@/types';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
-import { Package, Search, AlertTriangle } from 'lucide-react';
+import { Package, Search, AlertTriangle, Pencil } from 'lucide-react';
+import type { Product } from '@/types';
+import { useCountUp } from '@/components/motion/useCountUp';
 
 function InventoryContent() {
   const { data: session, status } = useSession();
@@ -46,7 +47,7 @@ function InventoryContent() {
       const res = await fetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stock })
+        body: JSON.stringify({ stock }),
       });
 
       const data = await res.json();
@@ -59,7 +60,7 @@ function InventoryContent() {
     }
   };
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStock = showLowStockOnly ? p.isLowStock : true;
     return matchesSearch && matchesStock;
@@ -67,152 +68,203 @@ function InventoryContent() {
 
   const stats = {
     total: products.length,
-    lowStock: products.filter(p => p.isLowStock).length,
-    outOfStock: products.filter(p => p.stock === 0).length
+    lowStock: products.filter((p) => p.isLowStock).length,
+    outOfStock: products.filter((p) => p.stock === 0).length,
   };
 
+  const totalAnimated = useCountUp(stats.total, 900, 0, 0);
+  const lowAnimated = useCountUp(stats.lowStock, 900, 0, 0);
+  const outAnimated = useCountUp(stats.outOfStock, 900, 0, 0);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
+        <div className="h-12 w-12 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+        <p className="text-caption font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">Loading inventory…</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Inventory</h1>
-          <p className="text-gray-600">Track and manage stock levels</p>
-        </div>
+    <div className="space-y-[var(--space-f34)]">
+      <motion.header
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <p className="mb-2 text-caption font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">Stock intelligence</p>
+        <h1 className="text-h2 text-[var(--text-primary)]">Inventory</h1>
+        <p className="mt-2 max-w-2xl text-[var(--text-light)]">
+          Threshold-aware rows, low-stock pulse, and inline edits — tuned for fast ops.
+        </p>
+      </motion.header>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <p className="text-sm text-gray-500 mb-2">Total Products</p>
-            <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <p className="text-sm text-gray-500 mb-2">Low Stock</p>
-            <p className="text-3xl font-bold text-amber-500">{stats.lowStock}</p>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <p className="text-sm text-gray-500 mb-2">Out of Stock</p>
-            <p className="text-3xl font-bold text-red-500">{stats.outOfStock}</p>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-[var(--space-f21)] md:grid-cols-3">
+        {[
+          { label: 'Total SKUs', value: totalAnimated, tone: 'text-[var(--text-primary)]' },
+          { label: 'Low stock', value: lowAnimated, tone: 'text-amber-600 dark:text-amber-400' },
+          { label: 'Out of stock', value: outAnimated, tone: 'text-red-600 dark:text-red-400' },
+        ].map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05, duration: 0.4 }}
+            className="rounded-[var(--space-f21)] border border-[var(--card-border)] bg-[var(--card-bg)] p-6 shadow-[0_18px_50px_-28px_rgba(15,18,24,0.1)]"
+          >
+            <p className="text-caption font-semibold uppercase tracking-[0.14em] text-[var(--text-light)]">{s.label}</p>
+            <p className={`mt-2 text-4xl font-semibold tracking-tight ${s.tone}`}>{s.value}</p>
+          </motion.div>
+        ))}
+      </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <button
-              onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-              className={`px-4 py-2 rounded-xl font-medium flex items-center gap-2 ${
-                showLowStockOnly
-                  ? 'bg-amber-100 text-amber-700'
-                  : 'bg-gray-100 text-gray-700'
-              }`}
-            >
-              <AlertTriangle className="w-4 h-4" />
-              Low Stock Only
-            </button>
+      <div className="rounded-[var(--space-f21)] border border-[var(--card-border)] bg-[var(--card-bg)] p-6 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-light)]" />
+            <Input
+              placeholder="Search products…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
+          <motion.button
+            type="button"
+            onClick={() => setShowLowStockOnly(!showLowStockOnly)}
+            className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition-colors ${
+              showLowStockOnly
+                ? 'bg-amber-500/15 text-amber-800 ring-2 ring-amber-500/30 dark:text-amber-200'
+                : 'bg-[var(--bg-page)] text-[var(--text-primary)] ring-1 ring-[var(--card-border)]'
+            }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <AlertTriangle className="h-4 w-4" />
+            Low stock only
+          </motion.button>
         </div>
+      </div>
 
-        {/* Inventory Table */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Product</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Category</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Current Stock</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Threshold</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Status</th>
-                <th className="text-right py-4 px-6 text-sm font-medium text-gray-500">Actions</th>
+      <div className="overflow-hidden rounded-[var(--space-f21)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[0_24px_60px_-30px_rgba(15,18,24,0.1)]">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px]">
+            <thead>
+              <tr className="border-b border-[var(--card-border)] bg-[var(--bg-page)]/80 text-left">
+                <th className="px-6 py-4 text-caption font-semibold uppercase tracking-[0.12em] text-[var(--text-light)]">Product</th>
+                <th className="px-6 py-4 text-caption font-semibold uppercase tracking-[0.12em] text-[var(--text-light)]">Category</th>
+                <th className="px-6 py-4 text-caption font-semibold uppercase tracking-[0.12em] text-[var(--text-light)]">Stock</th>
+                <th className="px-6 py-4 text-caption font-semibold uppercase tracking-[0.12em] text-[var(--text-light)]">Threshold</th>
+                <th className="px-6 py-4 text-caption font-semibold uppercase tracking-[0.12em] text-[var(--text-light)]">Status</th>
+                <th className="px-6 py-4 text-right text-caption font-semibold uppercase tracking-[0.12em] text-[var(--text-light)]">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {filteredProducts.map((product) => (
-                <tr key={product._id} className="border-b border-gray-50">
-                  <td className="py-4 px-6">
-                    <p className="font-medium text-gray-900">{product.name}</p>
-                    {product.variants.length > 0 && (
-                      <p className="text-xs text-gray-500">{product.variants.length} variants</p>
-                    )}
-                  </td>
-                  <td className="py-4 px-6">
-                    <Badge variant="primary" className="capitalize">{product.category}</Badge>
-                  </td>
-                  <td className="py-4 px-6">
-                    {editingId === product._id ? (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          value={editStock}
-                          onChange={(e) => setEditStock(parseInt(e.target.value) || 0)}
-                          className="w-24"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => updateStock(product._id, editStock)}
-                          className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm font-medium"
+            <tbody className="divide-y divide-[var(--card-border)]">
+              <AnimatePresence initial={false}>
+                {filteredProducts.map((product) => {
+                  const low = product.isLowStock;
+                  const dead = product.stock === 0;
+                  return (
+                    <motion.tr
+                      key={product._id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className={`transition-colors hover:bg-[var(--bg-page)]/70 ${
+                        low && !dead ? 'pulse-stock bg-amber-500/[0.06]' : ''
+                      }`}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 shrink-0 text-[var(--text-light)]" />
+                          <div>
+                            <p className="font-semibold text-[var(--text-primary)]">{product.name}</p>
+                            {product.variants.length > 0 && (
+                              <p className="text-xs text-[var(--text-light)]">{product.variants.length} variants</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant="primary" className="capitalize">
+                          {product.category}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        {editingId === product._id ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              value={editStock}
+                              onChange={(e) => setEditStock(parseInt(e.target.value, 10) || 0)}
+                              className="w-24"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => updateStock(product._id, editStock)}
+                              className="rounded-xl bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        ) : (
+                          <span
+                            className={`font-semibold ${
+                              dead ? 'text-red-600' : low ? 'text-amber-600' : 'text-emerald-600'
+                            }`}
+                          >
+                            {product.stock}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-[var(--text-light)]">{product.lowStockThreshold}</td>
+                      <td className="px-6 py-4">
+                        <Badge
+                          variant={dead ? 'danger' : low ? 'warning' : 'success'}
                         >
-                          Save
-                        </button>
-                      </div>
-                    ) : (
-                      <span className={`font-semibold ${
-                        product.stock === 0 ? 'text-red-500' :
-                        product.isLowStock ? 'text-amber-500' : 'text-green-500'
-                      }`}>
-                        {product.stock}
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{product.lowStockThreshold}</td>
-                  <td className="py-4 px-6">
-                    <Badge variant={
-                      product.stock === 0 ? 'danger' :
-                      product.isLowStock ? 'warning' : 'success'
-                    }>
-                      {product.stock === 0 ? 'Out of Stock' :
-                       product.isLowStock ? 'Low Stock' : 'In Stock'}
-                    </Badge>
-                  </td>
-                  <td className="py-4 px-6 text-right">
-                    {editingId !== product._id && (
-                      <button
-                        onClick={() => {
-                          setEditingId(product._id);
-                          setEditStock(product.stock);
-                        }}
-                        className="px-4 py-2 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600"
-                      >
-                        Update Stock
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                          {dead ? 'Out of stock' : low ? 'Low stock' : 'In stock'}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {editingId !== product._id && (
+                          <motion.button
+                            type="button"
+                            onClick={() => {
+                              setEditingId(product._id);
+                              setEditStock(product.stock);
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_28px_-12px_rgba(255,122,0,0.5)]"
+                            whileHover={{ y: -1 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                            Update
+                          </motion.button>
+                        )}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
-    </>
+      </div>
+    </div>
   );
 }
 
 export default function AdminInventoryPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
         </div>
-      </div>
-    }>
+      }
+    >
       <InventoryContent />
     </Suspense>
   );

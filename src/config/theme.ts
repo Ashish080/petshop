@@ -1,15 +1,16 @@
 export const themeConfig = {
     colors: {
-        background: "#F1F2F6",    // Soft Cloud
-        primary: "#FF7B54",       // Coral Orange
-        secondary: "#70A1FF",     // Sky Blue
-        accent: "#FFD93D",        // Golden Honey
-        text: "#2D3436",          // Deep Charcoal
-        textLight: "#636E72",     // Muted Gray
+        background: "#FAF6F0",
+        primary: "#FF7A00",
+        secondary: "#5EB8A8",
+        accent: "#8EC5FF",
+        text: "#1A1D24",
+        textLight: "#5C6370",
     },
     spacing: {
-        container: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
-        section: "py-16 md:py-24",
+        container:
+            "max-w-[110rem] mx-auto px-[var(--space-f21)] sm:px-[var(--space-f34)]",
+        section: "py-[var(--space-f55)] md:py-[var(--space-f89)]",
     },
     radius: {
         sm: "rounded-md",

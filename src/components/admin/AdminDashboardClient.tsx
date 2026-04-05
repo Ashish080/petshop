@@ -1,340 +1,456 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-    ShoppingBag, 
-    Bell, 
-    PlusCircle, 
-    ArrowUpRight, 
-    Search, 
-    ExternalLink,
-    TrendingUp,
-    Users,
-    Package,
-    ClipboardList,
-    Clock,
-    X,
-    Check
+import {
+  ShoppingBag,
+  Bell,
+  PlusCircle,
+  ArrowUpRight,
+  Search,
+  ExternalLink,
+  TrendingUp,
+  Users,
+  Package,
+  ClipboardList,
+  Clock,
 } from 'lucide-react';
-import { themeConfig } from '@/config/theme';
-import { brandConfig } from '@/config/brand';
-import type { AdminStats, Order } from '@/types';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { StatsChart } from '@/components/admin/StatsChart';
+import { useCountUp } from '@/components/motion/useCountUp';
+import type { AdminStats, Order } from '@/types';
+
+function formatCurrency(num: number) {
+  return `₹${Number(num || 0).toLocaleString('en-IN')}`;
+}
+
+function MetricCard({
+  label,
+  value,
+  trend,
+  color,
+  bg,
+  icon: Icon,
+  delay,
+}: {
+  label: string;
+  value: string | number;
+  trend: string;
+  color: string;
+  bg: string;
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 21 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
+      className="group relative flex h-52 flex-col justify-between overflow-hidden rounded-[var(--space-f21)] border border-[var(--card-border)] bg-[var(--card-bg)] p-8 shadow-[0_20px_50px_-28px_rgba(15,18,24,0.12)]"
+    >
+      <div className={`absolute -right-4 -top-4 h-24 w-24 rounded-full ${bg} blur-2xl transition-transform group-hover:scale-125`} />
+      <div className="relative z-10 flex items-start justify-between">
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-light)]">{label}</h3>
+        <Icon size={22} className={color} />
+      </div>
+      <div className="relative z-10 mt-4">
+        <p className={`mb-2 text-4xl font-semibold tracking-tight ${color}`}>{value}</p>
+        <div className="flex items-center gap-1.5 border-t border-[var(--card-border)] pt-2">
+          <ArrowUpRight size={14} className={color} strokeWidth={3} />
+          <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--text-light)]">{trend}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export function AdminDashboardClient() {
-    const [stats, setStats] = useState<AdminStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [showQuickActions, setShowQuickActions] = useState(false);
-    const [notifications, setNotifications] = useState([
-        { id: 1, title: 'New Order', msg: 'Order #INV-2410 just arrived', time: '2 mins ago', read: false },
-        { id: 2, title: 'Low Stock', msg: 'Royal Canin is below limit', time: '1 hour ago', read: false },
-        { id: 3, title: 'Customer Query', msg: 'Rahul Verma sent a message', time: '3 hours ago', read: true },
-    ]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'New Order', msg: 'Order #INV-2410 just arrived', time: '2 mins ago', read: false },
+    { id: 2, title: 'Low Stock', msg: 'Royal Canin is below limit', time: '1 hour ago', read: false },
+    { id: 3, title: 'Customer Query', msg: 'Rahul Verma sent a message', time: '3 hours ago', read: true },
+  ]);
 
-    const fetchStats = async () => {
-        try {
-            const res = await fetch('/api/admin/stats');
-            const data = await res.json();
-            if (data.success) {
-                setStats(data.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch stats:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchStats();
-    }, []);
-
-    const formatCurrency = (num: number) => `₹${Number(num || 0).toLocaleString('en-IN')}`;
-
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Synchronizing Workspace...</p>
-            </div>
-        );
+  const fetchStats = async () => {
+    try {
+      const res = await fetch('/api/admin/stats');
+      const data = await res.json();
+      if (data.success) {
+        setStats(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const revenueDisplay = stats ? formatCurrency(stats.totalRevenue) : formatCurrency(1245000);
+  const productsEnd = stats?.totalProducts ?? 48;
+  const ordersEnd = stats?.totalOrders ?? 112;
+  const customersEnd = stats?.totalCustomers ?? 850;
+
+  const productsCount = useCountUp(productsEnd, 1100, 0, 0);
+  const ordersCount = useCountUp(ordersEnd, 1100, 0, 0);
+  const customersCount = useCountUp(customersEnd, 1100, 0, 0);
+
+  if (loading) {
     return (
-        <div className="animate-fade-in">
-            <header className="mb-12 flex flex-col lg:flex-row justify-between lg:items-center gap-6">
-                <div>
-                    <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-3 tracking-tighter">Command Center</h1>
-                    <p className="text-gray-500 font-bold text-xl max-w-xl opacity-80 italic">Real-time Operations Dashboard</p>
-                </div>
-
-                <div className="flex items-center gap-4 relative">
-                    {/* Notifications Bell */}
-                    <div className="relative">
-                        <button 
-                            onClick={() => setShowNotifications(!showNotifications)}
-                            className={`p-5 bg-white border-2 border-gray-100 rounded-3xl text-gray-400 hover:text-brand-primary hover:border-brand-primary/30 transition-all relative group shadow-sm ${showNotifications ? 'ring-4 ring-brand-primary/10 border-brand-primary text-brand-primary shadow-xl' : ''}`}
-                        >
-                            <Bell size={26} className="group-hover:rotate-12 transition-transform" />
-                            {notifications.some(n => !n.read) && (
-                                <span className="absolute top-5 right-5 w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-lg animate-bounce"></span>
-                            )}
-                        </button>
-                        
-                        {showNotifications && (
-                            <div className="absolute right-0 mt-4 w-96 bg-white border-2 border-gray-50 shadow-2xl z-50 rounded-[32px] overflow-hidden animate-slide-in-top">
-                                <div className="p-6 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
-                                    <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">Incoming Intel</h4>
-                                    <button 
-                                        onClick={() => setNotifications(n => n.map(i => ({...i, read: true})))}
-                                        className="text-[10px] font-black text-brand-primary hover:underline uppercase tracking-widest"
-                                    >
-                                        Acknowledge All
-                                    </button>
-                                </div>
-                                <div className="max-h-[400px] overflow-y-auto">
-                                    {notifications.map(n => (
-                                        <div key={n.id} className={`p-6 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer group ${!n.read ? 'bg-[#FF7B54]/[0.03]' : ''}`}>
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h5 className="font-black text-sm text-gray-900 group-hover:text-brand-primary transition-colors">{n.title}</h5>
-                                                <span className="text-[10px] font-black text-gray-400 uppercase">{n.time}</span>
-                                            </div>
-                                            <p className="text-xs font-bold text-gray-500 leading-relaxed">{n.msg}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                                <Link href="/admin/orders" className="block text-center p-5 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-brand-primary bg-gray-50/30 transition-colors border-t border-gray-50">
-                                    Access Command Logs
-                                </Link>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="relative">
-                        <button 
-                            onClick={() => setShowQuickActions(!showQuickActions)}
-                            className="flex items-center gap-4 px-10 py-5 bg-brand-primary text-white font-black rounded-3xl shadow-2xl shadow-brand-primary/40 hover:translate-y-[-4px] hover:shadow-brand-primary/60 active:scale-95 transition-all text-sm uppercase tracking-widest"
-                        >
-                            <PlusCircle size={24} strokeWidth={3} />
-                            Deploy Action
-                        </button>
-
-                        {showQuickActions && (
-                            <div className="absolute right-0 mt-4 w-72 bg-white border-2 border-gray-50 shadow-2xl z-50 rounded-[32px] overflow-hidden p-3 animate-slide-in-right">
-                                <Link href="/admin/billing" className="flex items-center gap-4 p-5 hover:bg-[#FF7B54]/5 rounded-2xl transition-all group">
-                                    <div className="w-12 h-12 bg-[#FF7B54]/10 rounded-2xl flex items-center justify-center text-brand-primary group-hover:scale-110 group-hover:rotate-6 transition-all">
-                                        <ClipboardList size={22} />
-                                    </div>
-                                    <div>
-                                        <h5 className="text-xs font-black text-gray-900 uppercase">New Invoice</h5>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Billing Module</p>
-                                    </div>
-                                </Link>
-                                <Link href="/admin/products" className="flex items-center gap-4 p-5 hover:bg-[#70A1FF]/5 rounded-2xl transition-all group">
-                                    <div className="w-12 h-12 bg-[#70A1FF]/10 rounded-2xl flex items-center justify-center text-[#70A1FF] group-hover:scale-110 group-hover:-rotate-6 transition-all">
-                                        <Package size={22} />
-                                    </div>
-                                    <div>
-                                        <h5 className="text-xs font-black text-gray-900 uppercase">Inventory</h5>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Stock Manager</p>
-                                    </div>
-                                </Link>
-                                <div className="border-t border-gray-50 my-3 mx-4"></div>
-                                <Link href="/" target="_blank" className="flex items-center justify-center gap-3 p-4 hover:text-brand-primary transition-colors text-gray-400 font-black text-[11px] uppercase tracking-[0.2em]">
-                                    <ExternalLink size={18} /> View Platform
-                                </Link>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
-
-            {/* Dynamic Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-12">
-                {[
-                    { 
-                        label: "Total Revenue", 
-                        value: formatCurrency(stats?.totalRevenue || 1245000), 
-                        trend: "+14.2% vs Last Month", 
-                        color: "text-[#FF7B54]", // Orange
-                        bg: "bg-[#FF7B54]/5",
-                        icon: TrendingUp 
-                    },
-                    { 
-                        label: "Active Pets", 
-                        value: stats?.totalProducts || 48, 
-                        trend: "+2 New vs Last Month", 
-                        color: "text-[#70A1FF]", // Blue
-                        bg: "bg-[#70A1FF]/5",
-                        icon: Package 
-                    },
-                    { 
-                        label: "Appointments", 
-                        value: stats?.totalOrders || 112, 
-                        trend: "+5 Today vs Last Month", 
-                        color: "text-[#FFD93D]", // Yellow
-                        bg: "bg-[#FFD93D]/5",
-                        icon: ShoppingBag 
-                    },
-                    { 
-                        label: "New Customers", 
-                        value: stats?.totalCustomers || 850, 
-                        trend: "+12% vs Last Month", 
-                        color: "text-[#2ECC71]", // Green
-                        bg: "bg-[#2ECC71]/5",
-                        icon: Users 
-                    },
-                ].map((stat, idx) => (
-                    <div key={idx} className="bg-white p-8 rounded-[32px] border-2 border-gray-50 shadow-xl relative overflow-hidden flex flex-col justify-between h-52 group hover:-translate-y-1 transition-all">
-                        <div className={`absolute -top-4 -right-4 w-24 h-24 ${stat.bg} rounded-full blur-2xl group-hover:scale-125 transition-transform`}></div>
-                        <div className="flex justify-between items-start relative z-10">
-                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">{stat.label}</h3>
-                            <stat.icon size={22} className={stat.color} />
-                        </div>
-                        <div className="relative z-10 mt-4">
-                            <p className={`text-4xl font-black mb-2 ${stat.color} tracking-tighter`}>{stat.value}</p>
-                            <div className="flex items-center gap-1.5 pt-2 border-t border-gray-50">
-                                <ArrowUpRight size={14} className={stat.color} strokeWidth={3} />
-                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">
-                                    {stat.trend}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
-                {/* Recent Orders Management */}
-                <div className="xl:col-span-8">
-                    <div className="bg-white rounded-[40px] p-10 border-2 border-gray-50 shadow-xl overflow-hidden">
-                        <div className="flex items-center justify-between mb-10">
-                            <h3 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                                <ClipboardList className="text-brand-primary" size={24} /> Recent Orders
-                            </h3>
-                            <Link href="/admin/orders" className="text-[10px] font-black text-brand-primary hover:underline uppercase tracking-widest flex items-center gap-2">
-                                Manager View <ArrowUpRight size={14} />
-                            </Link>
-                        </div>
-
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-gray-100 text-left">
-                                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Order ID</th>
-                                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Customer</th>
-                                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Total / Status</th>
-                                        <th className="pb-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-right">Activity</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {stats?.recentOrders && stats.recentOrders.length > 0 ? (
-                                        stats.recentOrders.map((order: Order) => (
-                                            <tr key={order._id} className="group hover:bg-gray-50 transition-colors">
-                                                <td className="py-6">
-                                                    <div className="font-extrabold text-gray-900 text-sm leading-tight">
-                                                        {order.orderNumber || `#${order._id.slice(-8).toUpperCase()}`}
-                                                    </div>
-                                                    <div className="text-[9px] font-bold text-gray-400 tracking-widest mt-1 uppercase">Ref: {order._id.slice(-6)}</div>
-                                                </td>
-                                                <td className="py-6">
-                                                    <div className="font-bold text-gray-800 text-xs">
-                                                        {(typeof order.user === 'object' && order.user?.name) || 'Walk-in Guest'}
-                                                    </div>
-                                                    <div className="text-[10px] text-gray-400 font-semibold italic">
-                                                        {(typeof order.user === 'object' && order.user?.email) || 'no-email@store.com'}
-                                                    </div>
-                                                </td>
-                                                <td className="py-6">
-                                                    <div className="font-black text-gray-900 text-sm">{formatCurrency(order.total)}</div>
-                                                    <span className={`inline-block mt-1 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                                                        order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-600'
-                                                    }`}>
-                                                        {order.paymentStatus}
-                                                    </span>
-                                                </td>
-                                                <td className="py-6 text-right">
-                                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-widest">
-                                                        {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                                                    </div>
-                                                    <div className="text-[9px] text-gray-400 font-bold">
-                                                        {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={4} className="py-12 text-center text-gray-300 font-black uppercase tracking-widest text-[10px]">
-                                                <Clock size={40} className="mx-auto mb-4 opacity-20" />
-                                                Operational Logs Empty
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Team/System Health Area */}
-                <div className="xl:col-span-4 space-y-8">
-                    <div className="bg-slate-900 p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
-                        <h3 className="text-xl font-black mb-6">Staff Control</h3>
-                        <div className="space-y-6">
-                            {[
-                                { name: "Kanha Admin", status: "Commander", img: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" },
-                                { name: "Bot Service", status: "Auto-Pilot / Active", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop" },
-                            ].map((staff, i) => (
-                                <div key={i} className="flex items-center gap-4 p-4 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
-                                    <div className="w-12 h-12 rounded-2xl overflow-hidden relative border-2 border-white/20">
-                                        <Image src={staff.img} alt={staff.name} fill className="object-cover" sizes="48px" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-sm text-white">{staff.name}</h4>
-                                        <p className="text-[10px] font-black tracking-widest text-brand-primary uppercase">{staff.status}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-[40px] p-10 border-2 border-gray-50 shadow-xl">
-                        <h3 className="text-lg font-black text-gray-900 mb-6">Service Health</h3>
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                    <span>Server Load</span>
-                                    <span>24%</span>
-                                </div>
-                                <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-emerald-500 w-[24%] rounded-full shadow-sm" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                    <span>DB Latency</span>
-                                    <span>99.9%</span>
-                                </div>
-                                <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-brand-primary w-[99.9%] rounded-full shadow-sm" />
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="mt-8 pt-8 border-t border-gray-100">
-                            <div className="flex items-center gap-3 text-emerald-600 font-black text-[10px] uppercase tracking-[0.2em] animate-pulse">
-                                <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-emerald-500/50 shadow-lg"></div>
-                                Environment Stable
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+        <div className="h-12 w-12 animate-spin rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+        <p className="text-caption font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">
+          Syncing workspace…
+        </p>
+      </div>
     );
+  }
+
+  return (
+    <div className="space-y-[var(--space-f34)]">
+      <motion.header
+        initial={{ opacity: 0, y: 21 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between"
+      >
+        <div>
+          <p className="mb-2 text-caption font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">
+            Live operations
+          </p>
+          <h1 className="text-h2 text-[var(--text-primary)]">Command overview</h1>
+          <p className="mt-2 max-w-xl text-[var(--text-light)]">Revenue, care traffic, and fulfillment in one calm surface.</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowNotifications(!showNotifications)}
+              className={`relative rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 text-[var(--text-light)] transition-all hover:border-[color-mix(in_srgb,var(--primary)_35%,transparent)] hover:text-[var(--primary)] ${
+                showNotifications ? 'ring-2 ring-[color-mix(in_srgb,var(--primary)_25%,transparent)]' : ''
+              }`}
+            >
+              <Bell size={22} />
+              {notifications.some((n) => !n.read) && (
+                <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full border-2 border-[var(--card-bg)] bg-red-500 shadow animate-pulse" />
+              )}
+            </button>
+
+            {showNotifications && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute right-0 z-50 mt-3 w-[min(100vw-2rem,24rem)] overflow-hidden rounded-3xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-2xl"
+              >
+                <div className="flex items-center justify-between border-b border-[var(--card-border)] bg-[var(--bg-page)]/80 px-5 py-4">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">Inbox</h4>
+                  <button
+                    type="button"
+                    onClick={() => setNotifications((n) => n.map((i) => ({ ...i, read: true })))}
+                    className="text-[10px] font-semibold uppercase tracking-widest text-[var(--primary)] hover:underline"
+                  >
+                    Mark read
+                  </button>
+                </div>
+                <div className="max-h-[360px] overflow-y-auto">
+                  {notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`cursor-pointer border-b border-[var(--card-border)] px-5 py-4 transition-colors hover:bg-[var(--bg-page)] ${
+                        !n.read ? 'bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]' : ''
+                      }`}
+                    >
+                      <div className="mb-1 flex justify-between gap-2">
+                        <h5 className="text-sm font-semibold text-[var(--text-primary)]">{n.title}</h5>
+                        <span className="shrink-0 text-[10px] font-medium uppercase text-[var(--text-light)]">{n.time}</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-[var(--text-light)]">{n.msg}</p>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/admin/orders"
+                  className="block border-t border-[var(--card-border)] bg-[var(--bg-page)]/50 px-5 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-light)] hover:text-[var(--primary)]"
+                >
+                  Open orders
+                </Link>
+              </motion.div>
+            )}
+          </div>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowQuickActions(!showQuickActions)}
+              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--primary)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.12em] text-white shadow-[0_18px_40px_-14px_rgba(255,122,0,0.55)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            >
+              <PlusCircle size={22} strokeWidth={2.5} />
+              Quick actions
+            </button>
+
+            {showQuickActions && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute right-0 z-50 mt-3 w-72 overflow-hidden rounded-3xl border border-[var(--card-border)] bg-[var(--card-bg)] p-2 shadow-2xl"
+              >
+                <Link
+                  href="/admin/billing"
+                  className="flex items-center gap-3 rounded-2xl p-4 transition-colors hover:bg-[color-mix(in_srgb,var(--primary)_8%,transparent)]"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--primary)_12%,transparent)] text-[var(--primary)]">
+                    <ClipboardList size={20} />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-semibold">New invoice</h5>
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--text-light)]">Billing</p>
+                  </div>
+                </Link>
+                <Link
+                  href="/admin/inventory"
+                  className="flex items-center gap-3 rounded-2xl p-4 transition-colors hover:bg-[color-mix(in_srgb,var(--secondary)_10%,transparent)]"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--secondary)_14%,transparent)] text-[var(--secondary)]">
+                    <Package size={20} />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-semibold">Stock</h5>
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--text-light)]">Inventory</p>
+                  </div>
+                </Link>
+                <div className="my-2 mx-3 border-t border-[var(--card-border)]" />
+                <Link
+                  href="/"
+                  target="_blank"
+                  className="flex items-center justify-center gap-2 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-light)] hover:text-[var(--primary)]"
+                >
+                  <ExternalLink size={16} /> Storefront
+                </Link>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </motion.header>
+
+      <motion.section
+        initial={{ opacity: 0, y: 13 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08, duration: 0.45 }}
+        className="rounded-[var(--space-f34)] border border-[var(--card-border)] bg-[var(--card-bg)] p-8 shadow-[0_24px_60px_-30px_rgba(15,18,24,0.15)]"
+      >
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h3 className="text-h3 text-[var(--text-primary)]">Throughput pulse</h3>
+            <p className="mt-1 text-sm text-[var(--text-light)]">Last 7 intervals · animated entry</p>
+          </div>
+          <div className="flex items-center gap-2 text-caption font-semibold uppercase tracking-[0.14em] text-[var(--text-light)]">
+            <Search size={14} /> Trend
+          </div>
+        </div>
+        <StatsChart />
+      </motion.section>
+
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Total revenue"
+          value={revenueDisplay}
+          trend="+14.2% vs last month"
+          color="text-[var(--primary)]"
+          bg="bg-[color-mix(in_srgb,var(--primary)_18%,transparent)]"
+          icon={TrendingUp}
+          delay={0}
+        />
+        <MetricCard
+          label="Active SKUs"
+          value={productsCount}
+          trend="+2 new vs last month"
+          color="text-[var(--secondary)]"
+          bg="bg-[color-mix(in_srgb,var(--secondary)_18%,transparent)]"
+          icon={Package}
+          delay={0.06}
+        />
+        <MetricCard
+          label="Orders"
+          value={ordersCount}
+          trend="+5 today"
+          color="text-amber-500"
+          bg="bg-amber-500/15"
+          icon={ShoppingBag}
+          delay={0.12}
+        />
+        <MetricCard
+          label="Customers"
+          value={customersCount}
+          trend="+12% vs last month"
+          color="text-emerald-500"
+          bg="bg-emerald-500/15"
+          icon={Users}
+          delay={0.18}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-12">
+        <div className="xl:col-span-8">
+          <div className="rounded-[var(--space-f34)] border border-[var(--card-border)] bg-[var(--card-bg)] p-8 shadow-[0_24px_60px_-30px_rgba(15,18,24,0.12)]">
+            <div className="mb-8 flex items-center justify-between gap-4">
+              <h3 className="text-h3 flex items-center gap-2 text-[var(--text-primary)]">
+                <ClipboardList className="text-[var(--primary)]" size={22} /> Recent orders
+              </h3>
+              <Link
+                href="/admin/orders"
+                className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)] hover:underline"
+              >
+                View all <ArrowUpRight size={14} />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--card-border)] text-left">
+                    <th className="pb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">Order</th>
+                    <th className="pb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">Customer</th>
+                    <th className="pb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">Total / status</th>
+                    <th className="pb-4 text-right text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">When</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--card-border)]">
+                  {stats?.recentOrders && stats.recentOrders.length > 0 ? (
+                    stats.recentOrders.map((order: Order) => (
+                      <motion.tr
+                        key={order._id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="group hover:bg-[var(--bg-page)]/80"
+                      >
+                        <td className="py-5">
+                          <div className="text-sm font-semibold text-[var(--text-primary)]">
+                            {order.orderNumber || `#${order._id.slice(-8).toUpperCase()}`}
+                          </div>
+                          <div className="mt-1 text-[9px] font-medium uppercase tracking-widest text-[var(--text-light)]">
+                            Ref {order._id.slice(-6)}
+                          </div>
+                        </td>
+                        <td className="py-5">
+                          <div className="text-xs font-medium text-[var(--text-primary)]">
+                            {(typeof order.user === 'object' && order.user?.name) || 'Walk-in guest'}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-light)]">
+                            {(typeof order.user === 'object' && order.user?.email) || '—'}
+                          </div>
+                        </td>
+                        <td className="py-5">
+                          <div className="text-sm font-semibold text-[var(--text-primary)]">{formatCurrency(order.total)}</div>
+                          <span
+                            className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest ${
+                              order.paymentStatus === 'paid' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-red-500/10 text-red-600'
+                            }`}
+                          >
+                            {order.paymentStatus}
+                          </span>
+                        </td>
+                        <td className="py-5 text-right">
+                          <div className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-light)]">
+                            {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                          </div>
+                          <div className="text-[9px] text-[var(--text-light)]">
+                            {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="py-16 text-center">
+                        <Clock className="mx-auto mb-3 h-10 w-10 opacity-20" />
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-light)]">No orders yet</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-8 xl:col-span-4">
+          <div className="relative overflow-hidden rounded-[var(--space-f34)] bg-[#12151c] p-8 text-white shadow-2xl">
+            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+            <h3 className="relative z-10 mb-6 text-lg font-semibold">Team</h3>
+            <div className="relative z-10 space-y-4">
+              {[
+                { name: 'Kanha Admin', status: 'Commander', img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop' },
+                { name: 'Bot Service', status: 'Autopilot', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop' },
+              ].map((staff, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
+                >
+                  <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-white/15">
+                    <Image src={staff.img} alt="" fill className="object-cover" sizes="48px" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">{staff.name}</h4>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">{staff.status}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[var(--space-f34)] border border-[var(--card-border)] bg-[var(--card-bg)] p-8 shadow-lg">
+            <h3 className="mb-6 text-lg font-semibold text-[var(--text-primary)]">Service health</h3>
+            <div className="space-y-6">
+              <div>
+                <div className="mb-2 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-[var(--text-light)]">
+                  <span>Load</span>
+                  <span>24%</span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-[var(--bg-page)]">
+                  <motion.div
+                    className="h-full rounded-full bg-emerald-500"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: '24%' }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="mb-2 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-[var(--text-light)]">
+                  <span>DB latency</span>
+                  <span>Stable</span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-[var(--bg-page)]">
+                  <motion.div
+                    className="h-full rounded-full bg-[var(--primary)]"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: '99%' }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-8 flex items-center gap-2 border-t border-[var(--card-border)] pt-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-600">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
+              Environment stable
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
