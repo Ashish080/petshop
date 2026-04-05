@@ -1,20 +1,22 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import type { IProduct } from '@/types';
+import type { Product } from '@/types';
 import { ProductActions } from '@/components/products/ProductActions';
 import { Star, Truck, RotateCcw, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 
-async function getProduct(id: string): Promise<IProduct | null> {
+async function getProduct(id: string): Promise<Product | null> {
   try {
     const res = await fetch(`${process.env.NEXTAUTH_URL}/api/products/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
-    return res.json();
+    const data = await res.json();
+    return data.product || null;
   } catch { return null; }
 }
 
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = await getProduct(params.id);
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const product = await getProduct(id);
   if (!product) notFound();
 
   const discount = product.price < 1500 ? 0 : Math.round(Math.random() * 15 + 5);
@@ -23,7 +25,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-400 mb-6 flex items-center gap-2">
+      <nav className="text-sm text-gray-600 mb-6 flex items-center gap-2">
         <a href="/" className="hover:text-orange-500">Home</a>
         <span>›</span>
         <a href="/products" className="hover:text-orange-500">Products</a>
@@ -37,7 +39,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         {/* Image gallery */}
         <div className="flex gap-3">
           <div className="flex flex-col gap-2">
-            {product.images.slice(0, 4).map((img, i) => (
+            {product.images.slice(0, 4).map((img: string, i: number) => (
               <div key={i} className="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-orange-400 transition-colors cursor-pointer">
                 <Image src={img} alt={`${product.name} ${i + 1}`} width={64} height={64} className="object-cover w-full h-full" />
               </div>
@@ -45,13 +47,20 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
           </div>
           <div className="flex-1 relative bg-gray-50 rounded-2xl overflow-hidden aspect-square">
             {product.images[0] ? (
-              <Image src={product.images[0]} alt={product.name} fill className="object-cover" priority />
+              <Image 
+                src={product.images[0]} 
+                alt={product.name} 
+                fill 
+                className="object-cover" 
+                priority 
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-8xl">🐾</div>
             )}
             {product.isLowStock && (
               <div className="absolute top-3 left-3">
-                <Badge label={`Only ${product.stock} left!`} variant="warning" />
+                <Badge variant="warning">Only {product.stock} left!</Badge>
               </div>
             )}
           </div>
@@ -60,8 +69,8 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
         {/* Product info */}
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge label={product.category} variant="info" />
-            {product.stock === 0 && <Badge label="Out of stock" variant="danger" />}
+            <Badge variant="info">{product.category}</Badge>
+            {product.stock === 0 && <Badge variant="danger">Out of stock</Badge>}
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 leading-tight">{product.name}</h1>
@@ -81,7 +90,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             </span>
             {originalPrice && (
               <>
-                <span className="text-lg text-gray-400 line-through">₹{originalPrice.toLocaleString('en-IN')}</span>
+                <span className="text-lg text-gray-600 line-through">₹{originalPrice.toLocaleString('en-IN')}</span>
                 <span className="text-sm text-green-600 font-semibold">{discount}% off</span>
               </>
             )}
@@ -102,7 +111,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
               <div key={label} className="flex flex-col items-center text-center gap-1 p-3 bg-gray-50 rounded-xl">
                 <Icon className="w-5 h-5 text-orange-500" />
                 <span className="text-xs font-medium text-gray-800">{label}</span>
-                <span className="text-xs text-gray-400">{sub}</span>
+                <span className="text-xs text-gray-600">{sub}</span>
               </div>
             ))}
           </div>

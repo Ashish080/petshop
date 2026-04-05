@@ -52,21 +52,23 @@ export default function ProductCard({ id, name, price, rating, reviews, images, 
                         Best Seller
                     </span>
                 )}
-                <button className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-text-light hover:text-brand-primary transition-colors z-10 border border-card-border">
-                    <Heart size={20} />
+                <button className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-lg text-zinc-400 hover:text-brand-primary transition-all z-10 border border-zinc-100 hover:scale-110 active:scale-95">
+                    <Heart size={20} fill={false ? "currentColor" : "none"} />
                 </button>
             </div>
 
             <div className="p-5">
                 {category && (
-                    <span className="text-[10px] font-black text-text-light uppercase tracking-widest mb-2 block capitalize">
+                    <span className="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em] mb-3 block capitalize">
                         {category}
                     </span>
                 )}
-                <div className="flex items-center gap-1 mb-2">
-                    <Star className="text-accent fill-accent" size={14} />
-                    <span className="text-xs font-black text-text-primary">{rating}</span>
-                    <span className="text-xs text-text-light">({reviews})</span>
+                <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-lg">
+                        <Star className="text-secondary fill-secondary" size={12} />
+                        <span className="text-xs font-black text-zinc-900">{rating}</span>
+                    </div>
+                    <span className="text-xs text-zinc-500 font-bold">({reviews} reviews)</span>
                 </div>
 
                 <Link href={`/products/${id}`}>

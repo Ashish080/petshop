@@ -20,12 +20,12 @@ export default async function AdminRootLayout({ children }: { children: React.Re
           </div>
           <div>
             <h2 className="font-black text-xl leading-tight tracking-tighter text-slate-900">KANHA PANEL</h2>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-black">OPS CONTROL v3.0</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600 font-black">OPS CONTROL v3.0</p>
           </div>
         </div>
         
         <nav className="flex-1 overflow-y-auto px-6 py-10 space-y-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6 px-2 opacity-50">Strategic Ops</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-6 px-2 opacity-50">Strategic Ops</p>
           
           <Link href="/admin" className="flex items-center gap-4 px-4 py-4 rounded-2xl text-xs font-black text-slate-800 hover:bg-[#FF7B54]/5 hover:text-[#FF7B54] transition-all group border border-transparent hover:border-[#FF7B54]/10">
             <LayoutDashboard size={20} /> Dashboard
@@ -45,7 +45,7 @@ export default async function AdminRootLayout({ children }: { children: React.Re
         </nav>
         
         <div className="p-6 border-t-2 border-gray-50">
-          <Link href="/" className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl text-xs font-black text-gray-400 hover:bg-gray-100 transition-all border-2 border-gray-50">
+          <Link href="/" className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl text-xs font-black text-gray-600 hover:bg-gray-100 transition-all border-2 border-gray-50">
             <Settings size={18} /> Storefront
           </Link>
         </div>

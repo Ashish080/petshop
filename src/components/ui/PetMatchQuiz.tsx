@@ -122,7 +122,7 @@ export default function PetMatchQuiz() {
                 >
                     <ArrowLeft size={20} />
                 </button>
-                <span className="text-sm font-bold text-gray-400 tracking-widest uppercase">
+                <span className="text-sm font-bold text-gray-600 tracking-widest uppercase">
                     Step {step + 1} of {questions.length}
                 </span>
                 <div className="w-9" /> {/* spacer for alignment */}

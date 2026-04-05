@@ -1,146 +1,117 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: var(--primary);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
-  --color-bg-page: var(--bg-page);
-  --color-text-primary: var(--text-primary);
-  --color-text-body: var(--text-body);
-  --color-text-light: var(--text-light);
-  --color-card-bg: var(--card-bg);
-  --color-card-border: var(--card-border);
-  --color-nav-bg: var(--nav-bg);
+  --color-brand-primary: #FF7A00;
+  --color-brand-secondary: #FFF9F3;
+  --color-accent-green: #D4EDDA;
+  --color-accent-blue: #D1ECF1;
+  --color-bg-page: #FDFDFD;
+  --color-text-primary: #1A1A1A;
+  --color-text-muted: #666666;
+  --color-glass: rgba(255, 255, 255, 0.7);
+  --color-glass-border: rgba(255, 255, 255, 0.4);
 }
 
-/* Tie Tailwind's dark: prefix to our data-theme attribute */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
-/* -----------------------------------------------
-   Base layer: playful + midnight mode foundations
-   Using a more vibrant palette: Coral, Sky Blue, Honey
------------------------------------------------- */
 @layer base {
   :root {
-    --bg-page: #F1F2F6;
-    --text-primary: #2D3436;
-    --text-body: #2D3436;
-    --text-light: #636E72;
-    --card-bg: #ffffff;
-    --card-border: #E1E2E6;
-    --nav-bg: #ffffff;
-    --primary: #FF7B54;
-    /* Coral */
-    --secondary: #70A1FF;
-    /* Sky Blue */
-    --accent: #FFD93D;
-    /* Honey */
+    --primary: 26 100% 50%; /* #FF7A00 */
+    --secondary: 33 100% 98%; /* #FFF9F3 */
+    --accent-green: 140 37% 88%;
+    --accent-blue: 190 38% 88%;
+    --bg-page: 0 0% 99%;
+    --text-primary: 0 0% 5%;
+    --text-muted: 0 0% 35%; /* Darker gray for better visibility */
   }
 
   [data-theme="dark"] {
-    --bg-page: #1A1D23;
-    --text-primary: #F1F2F6;
-    --text-body: #DFE4EA;
-    --text-light: #A4B0BE;
-    --card-bg: #242933;
-    --card-border: #3D4451;
-    --nav-bg: #1A1D23;
-    --primary: #FF7B54;
-    --secondary: #70A1FF;
-    --accent: #FFD93D;
+    --primary: 26 100% 60%;
+    --bg-page: 0 0% 5%;
+    --text-primary: 0 0% 98%;
+    --text-muted: 0 0% 75%; /* Lighter gray for dark mode visibility */
+    --color-glass: rgba(0, 0, 0, 0.5);
+    --color-glass-border: rgba(255, 255, 255, 0.1);
   }
 
   body {
     background-color: var(--bg-page);
-    color: var(--text-body);
+    color: var(--text-primary);
     font-family: 'Outfit', sans-serif;
-    transition: background-color 0.4s ease, color 0.4s ease;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* -----------------------------------------------
-   Blob animation (quiz page background)
------------------------------------------------- */
 @layer utilities {
-  .animate-blob {
-    animation: blob 7s infinite;
+  .glass {
+    background: var(--color-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
   }
 
-  .animation-delay-2000 {
-    animation-delay: 2s;
+  .neumorph-flat {
+    background: #fdfdfd;
+    box-shadow: 12px 12px 24px #e0e0e0, -12px -12px 24px #ffffff;
   }
 
-  .animation-delay-4000 {
-    animation-delay: 4s;
+  .neumorph-inset {
+    background: #fdfdfd;
+    box-shadow: inset 8px 8px 16px #e0e0e0, inset -8px -8px 16px #ffffff;
   }
 
-  /* Scroll fade-in utility */
-  .fade-in-up {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  .noise-bg::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
-  .fade-in-up.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* -----------------------------------------------
-   Paw animation keyframes - for cart interactions
------------------------------------------------- */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
+  .perspective-1000 {
+    perspective: 1000px;
   }
 
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-
-  100% {
-    transform: translate(0px, 0px) scale(1);
+  .mask-radial {
+    mask-image: radial-gradient(circle, black, transparent);
   }
 }
 
-@keyframes paw-pop {
-  0% {
-    transform: scale(0) rotate(-20deg);
-    opacity: 1;
-  }
-
-  60% {
-    transform: scale(1.4) rotate(10deg);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0;
-  }
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
 }
 
-@keyframes float-up {
-  0% {
-    transform: translateY(0px) scale(1);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(-60px) scale(0.5);
-    opacity: 0;
-  }
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-.paw-burst {
-  position: absolute;
-  pointer-events: none;
-  font-size: 1.5rem;
-  animation: paw-pop 0.6s ease-out forwards, float-up 0.6s ease-out forwards;
-  z-index: 50;
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 122, 0, 0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 122, 0, 0.4);
 }

@@ -9,21 +9,54 @@ import OffersBanner from "@/components/sections/OffersBanner";
 import Testimonials from "@/components/sections/Testimonials";
 import Guarantee from "@/components/sections/Guarantee";
 import BlogPreview from "@/components/sections/BlogPreview";
-import ScrollFadeIn from "@/components/ui/ScrollFadeIn";
+import { ScrollStorySection } from "@/components/ui/ScrollStory";
+import { HorizontalShowcase } from "@/components/sections/HorizontalShowcase";
 
 export default function Home() {
   return (
-    <>
+    <div className="noise-bg">
       <Hero />
-      <PetSearchFilter />
-      <ScrollFadeIn delay={100}><FeaturedPets /></ScrollFadeIn>
-      <ScrollFadeIn delay={100}><WhyChooseUs /></ScrollFadeIn>
-      <ScrollFadeIn delay={50}><OffersBanner /></ScrollFadeIn>
-      <ScrollFadeIn delay={100}><Testimonials /></ScrollFadeIn>
-      <ScrollFadeIn delay={50}><Guarantee /></ScrollFadeIn>
-      <ScrollFadeIn delay={100}><BestSellingProducts /></ScrollFadeIn>
-      <ScrollFadeIn delay={100}><Services /></ScrollFadeIn>
-      <ScrollFadeIn delay={100}><BlogPreview /></ScrollFadeIn>
-    </>
+      
+      <ScrollStorySection parallaxOffset={100} direction="up" className="!min-h-fit">
+        <PetSearchFilter />
+      </ScrollStorySection>
+
+      <ScrollStorySection parallaxOffset={150} direction="down">
+        <FeaturedPets />
+      </ScrollStorySection>
+
+      {/* Dynamic Collection Showcase (Vertical to Horizontal) */}
+      <HorizontalShowcase />
+
+      <ScrollStorySection parallaxOffset={80} direction="up">
+        <WhyChooseUs />
+      </ScrollStorySection>
+
+      <ScrollStorySection parallaxOffset={50} direction="down" className="!min-h-fit">
+        <OffersBanner />
+      </ScrollStorySection>
+
+      <ScrollStorySection parallaxOffset={120} direction="up">
+        <BestSellingProducts />
+      </ScrollStorySection>
+
+
+      <ScrollStorySection parallaxOffset={80} direction="down">
+        <Services />
+      </ScrollStorySection>
+
+      <ScrollStorySection parallaxOffset={100} direction="up">
+        <Testimonials />
+      </ScrollStorySection>
+
+      <ScrollStorySection parallaxOffset={40} direction="down">
+        <BlogPreview />
+      </ScrollStorySection>
+
+      <ScrollStorySection parallaxOffset={20} direction="up" className="!min-h-fit">
+        <Guarantee />
+      </ScrollStorySection>
+    </div>
   );
 }
+

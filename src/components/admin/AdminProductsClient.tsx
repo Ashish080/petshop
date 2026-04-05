@@ -60,7 +60,7 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-600 mt-1">
             {products.length} total · {products.filter(p => p.stock === 0).length} out of stock
           </p>
         </div>
@@ -74,7 +74,7 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
 
       {/* Search */}
       <div className="relative mb-6 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
         <input
           className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-orange-400"
           placeholder="Search products..."
@@ -88,11 +88,11 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">Product</th>
-              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">Category</th>
-              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">Price</th>
-              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide">Stock</th>
-              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden sm:table-cell">Variants</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Product</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wide hidden md:table-cell">Category</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Price</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Stock</th>
+              <th className="text-left px-5 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wide hidden sm:table-cell">Variants</th>
               <th className="px-5 py-4" />
             </tr>
           </thead>
@@ -105,12 +105,12 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
                       {product.images?.[0] ? (
                         <img src={product.images[0]} alt={product.name} className="w-10 h-10 object-cover rounded-xl" />
                       ) : (
-                        <Package className="w-5 h-5 text-gray-300" />
+                        <Package className="w-5 h-5 text-gray-500" />
                       )}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 line-clamp-1">{product.name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">ID: {product._id.slice(-6)}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">ID: {product._id.slice(-6)}</p>
                     </div>
                   </div>
                 </td>
@@ -121,20 +121,20 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
                   ₹{product.price.toLocaleString('en-IN')}
                 </td>
                 <td className="px-5 py-4">{stockBadge(product)}</td>
-                <td className="px-5 py-4 hidden sm:table-cell text-gray-400">
+                <td className="px-5 py-4 hidden sm:table-cell text-gray-600">
                   {product.variants?.length > 0 ? `${product.variants.length} variant${product.variants.length > 1 ? 's' : ''}` : '—'}
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => { setEditProduct(product); setPanelOpen(true); }}
-                      className="p-2 rounded-lg border border-gray-200 text-gray-400 hover:text-orange-500 hover:border-orange-300 transition-colors"
+                      className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:text-orange-500 hover:border-orange-300 transition-colors"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(product._id)}
-                      className="p-2 rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 transition-colors"
+                      className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:text-red-500 hover:border-red-300 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -144,7 +144,7 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-16 text-center text-gray-400">
+                <td colSpan={6} className="px-5 py-16 text-center text-gray-600">
                   <Package className="w-8 h-8 mx-auto mb-2 text-gray-200" />
                   No products found
                 </td>

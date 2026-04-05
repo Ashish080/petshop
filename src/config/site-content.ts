@@ -1,29 +1,29 @@
 export const siteContent = {
     hero: {
-        badge: "Welcome to",
-        headline: "The Best Care for Your Best Friend",
-        subheadline: "Discover premium products, expert care services, and lovely companions waiting for a home.",
-        primaryCta: { label: "Shop Products", href: "/products" },
-        secondaryCta: { label: "Meet Our Pets", href: "/pets" },
+        badge: "Lucknow's #1 Rated Pet Destination",
+        headline: "Beyond Pet Care — A Bond for Life.",
+        subheadline: "Experience Lucknow's most trusted shop for premium breed puppies, high-quality food, and expert pet care consultancy in Vineet Khand.",
+        primaryCta: { label: "Explore Supply", href: "/products" },
+        secondaryCta: { label: "Adopt Puppy", href: "/pets" },
         image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2069&auto=format&fit=crop"
     },
     services: {
-        title: "Our Premium Services",
-        subtitle: "Everything your pet needs under one roof",
+        title: "Expert Pet Solutions",
+        subtitle: "Comprehensive care from premium nutrition to professional grooming.",
     },
     whyChooseUs: {
-        title: "Why Choose Us",
-        subtitle: "We prioritize your pet's health and happiness",
+        title: "The Kanha Difference",
+        subtitle: "1300+ Five-Star reviews from Lucknow's pet parents.",
         reasons: [
-            { title: "Premium Quality", description: "Only the best products for your pets.", icon: "star" },
-            { title: "Expert Care", description: "Certified professionals handling your pets.", icon: "heart" },
-            { title: "24/7 Support", description: "We are always here when you need us.", icon: "clock" },
-            { title: "Safe & Clean", description: "Hygienic environment for all procedures.", icon: "shield" }
+            { title: "KCI Certified Breeds", description: "Authentic breed documentation and health history.", icon: "star" },
+            { title: "Veterinary Approved", description: "All products and services meet high medical standards.", icon: "heart" },
+            { title: "Same Day Delivery", description: "Fastest pet essential delivery in Gomti Nagar.", icon: "clock" },
+            { title: "Hygienic Environment", description: "Zero-odor, clean, and welcoming facility.", icon: "shield" }
         ]
     },
     footer: {
-        newsletterTitle: "Subscribe to our newsletter",
-        newsletterDescription: "Get the latest updates and offers directly in your inbox.",
-        copyright: "All rights reserved."
+        newsletterTitle: "Get Exclusive Member Offers",
+        newsletterDescription: "Join 5000+ local pet parents for weekly tips and shop discounts.",
+        copyright: "Crafted with love for Lucknow's furry friends."
     }
 };

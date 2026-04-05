@@ -22,7 +22,7 @@ export default async function OrdersPage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Your orders</h1>
       {orders.length === 0 ? (
-        <div className="text-center py-20 text-gray-300">
+        <div className="text-center py-20 text-gray-500">
           <Package className="w-12 h-12 mx-auto mb-3" />
           <p>No orders yet</p>
         </div>
@@ -32,7 +32,7 @@ export default async function OrdersPage() {
             <div key={order._id} className="bg-white rounded-2xl border border-gray-100 p-5">
               <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
                 <div>
-                  <p className="text-xs text-gray-400 font-mono">#{order._id.toString().slice(-8).toUpperCase()}</p>
+                  <p className="text-xs text-gray-600 font-mono">#{order._id.toString().slice(-8).toUpperCase()}</p>
                   <p className="text-sm text-gray-500 mt-0.5">
                     {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>

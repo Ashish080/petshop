@@ -77,7 +77,7 @@ export default function CheckoutPage() {
             <div key={s} className="flex items-center gap-3">
               <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 done ? 'bg-green-100 text-green-800' :
-                active ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-400'
+                active ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'
               }`}>
                 {done && <CheckCircle2 className="w-4 h-4" />}
                 {STEP_LABELS[s]}
@@ -176,7 +176,7 @@ export default function CheckoutPage() {
                   <input type="radio" name="payment" disabled />
                   <div>
                     <p className="font-medium text-gray-900 text-sm">UPI / Net banking</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Coming soon</p>
+                    <p className="text-xs text-gray-600 mt-0.5">Coming soon</p>
                   </div>
                 </label>
               </div>
@@ -200,7 +200,7 @@ export default function CheckoutPage() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Order placed!</h2>
               <p className="text-gray-500 mb-1">Order ID: <span className="font-mono text-gray-700">#{orderId.slice(-8).toUpperCase()}</span></p>
-              <p className="text-gray-400 text-sm mb-8">You'll receive a confirmation on your registered email.</p>
+              <p className="text-gray-600 text-sm mb-8">You'll receive a confirmation on your registered email.</p>
               <div className="flex gap-3 justify-center">
                 <Button variant="secondary" onClick={() => router.push('/orders')}>View orders</Button>
                 <Button onClick={() => router.push('/products')}>Continue shopping</Button>

@@ -95,7 +95,7 @@ export default function BillingPage() {
                     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                         <div className="bg-gray-50/80 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
                             <span className="font-bold text-sm text-gray-700 flex items-center gap-2">
-                                <User size={16} className="text-gray-400" /> Customer Details
+                                <User size={16} className="text-gray-600" /> Customer Details
                             </span>
                         </div>
                         <div className="p-5">
@@ -159,12 +159,12 @@ export default function BillingPage() {
                             <table className="w-full min-w-[700px]">
                                 <thead>
                                     <tr>
-                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-400 pb-3 w-[35%]">Item / Description</th>
-                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-400 pb-3 w-[12%]">HSN</th>
-                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-400 pb-3 w-[10%]">Qty</th>
-                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-400 pb-3 w-[15%]">Rate (₹)</th>
-                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-400 pb-3 w-[12%]">GST%</th>
-                                        <th className="text-right text-[10px] uppercase tracking-widest font-black text-gray-400 pb-3 w-[12%]">Total</th>
+                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-600 pb-3 w-[35%]">Item / Description</th>
+                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-600 pb-3 w-[12%]">HSN</th>
+                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-600 pb-3 w-[10%]">Qty</th>
+                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-600 pb-3 w-[15%]">Rate (₹)</th>
+                                        <th className="text-left text-[10px] uppercase tracking-widest font-black text-gray-600 pb-3 w-[12%]">GST%</th>
+                                        <th className="text-right text-[10px] uppercase tracking-widest font-black text-gray-600 pb-3 w-[12%]">Total</th>
                                         <th className="w-[4%]"></th>
                                     </tr>
                                 </thead>
@@ -301,12 +301,12 @@ export default function BillingPage() {
                         <div className="p-6 text-sm">
                             <div className="mb-6 flex justify-between pb-6 border-b border-gray-100">
                                 <div>
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Bill To</div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-1">Bill To</div>
                                     <div className="font-bold text-gray-900">{customerName || 'Walk-in Customer'}</div>
                                     <div className="text-xs text-gray-500 mt-1">{customerPhone}</div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Date</div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-1">Date</div>
                                     <div className="font-bold text-gray-900">{formatDate(invoiceDate)}</div>
                                     <div className={`mt-2 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded inline-block ${paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                         {paymentStatus}
@@ -317,9 +317,9 @@ export default function BillingPage() {
                             <table className="w-full text-xs">
                                 <thead>
                                     <tr className="border-b border-gray-100">
-                                        <th className="text-left py-2 font-black text-gray-400 uppercase tracking-widest w-1/2">Item</th>
-                                        <th className="text-left py-2 font-black text-gray-400 uppercase tracking-widest">Qty</th>
-                                        <th className="text-right py-2 font-black text-gray-400 uppercase tracking-widest">Total</th>
+                                        <th className="text-left py-2 font-black text-gray-600 uppercase tracking-widest w-1/2">Item</th>
+                                        <th className="text-left py-2 font-black text-gray-600 uppercase tracking-widest">Qty</th>
+                                        <th className="text-right py-2 font-black text-gray-600 uppercase tracking-widest">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>

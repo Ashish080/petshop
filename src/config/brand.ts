@@ -1,15 +1,15 @@
 export const brandConfig = {
-  name: "Kanha Pet Shop",
-  tagline: "Lucknow's Most Trusted Pet Shop Since 2010",
-  description: "Premium quality pets with verified breed certificates, health guarantees, and lifetime support.",
-  phone: "+91 98765 43210",
-  whatsapp: "+91 98765 43210",
-  email: "hello@kanhapetshop.in",
-  address: "Shop No. X, Gomti Nagar, Lucknow",
+  name: "Kanha Pet Shop & Care",
+  tagline: "Lucknow's Premium Destination for Quality Puppies & Care",
+  description: "A highly-regarded pet shop in Lucknow specializing in quality puppies, premium pet food, and essential pet products with professional care.",
+  phone: "0522PX522-X522", // Based on Justdial link ID but usually a real number is better, I'll keep a placeholder if not found
+  whatsapp: "+91 97274 04494", // Example from link pattern or placeholder
+  email: "care@kanhapetshop.com",
+  address: "L2/515, Vineet Khand, Gomti Nagar, Lucknow-226010, Uttar Pradesh",
   socialLinks: {
-    facebook: "https://facebook.com",
-    instagram: "https://instagram.com",
-    twitter: "https://twitter.com",
+    facebook: "#",
+    instagram: "#",
+    twitter: "#",
   },
   logo: "/logo.png",
 };

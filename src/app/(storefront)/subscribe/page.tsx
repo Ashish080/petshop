@@ -74,7 +74,7 @@ export default function SubscribePage() {
                                             <p className="text-sm text-gray-500">Pack of 30</p>
                                         </div>
                                     </div>
-                                    <span className="text-gray-400 font-medium">$12.50</span>
+                                    <span className="text-gray-600 font-medium">$12.50</span>
                                 </label>
                             </div>
 
@@ -88,19 +88,19 @@ export default function SubscribePage() {
                                             <option>Every 6 Weeks</option>
                                             <option>Every 8 Weeks</option>
                                         </select>
-                                        <ChevronDown className="absolute right-4 top-3.5 text-gray-400 pointer-events-none" size={20} />
+                                        <ChevronDown className="absolute right-4 top-3.5 text-gray-600 pointer-events-none" size={20} />
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wide mb-1">Total</p>
-                                    <p className="text-3xl font-extrabold" style={{ color: themeConfig.colors.primary }}>$39.09 <span className="text-sm line-through text-gray-400 font-medium ml-1">$45.99</span></p>
+                                    <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">Total</p>
+                                    <p className="text-3xl font-extrabold" style={{ color: themeConfig.colors.primary }}>$39.09 <span className="text-sm line-through text-gray-600 font-medium ml-1">$45.99</span></p>
                                 </div>
                             </div>
 
                             <button className="w-full py-4 rounded-xl font-bold text-white shadow-lg shadow-black/10 transition-transform hover:-translate-y-1 block max-w-sm ml-auto" style={{ backgroundColor: themeConfig.colors.text }}>
                                 Start Subscription
                             </button>
-                            <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
+                            <p className="text-center text-xs text-gray-600 mt-4 flex items-center justify-center gap-1">
                                 <CheckCircle2 size={12} /> Cancel or pause anytime. No hidden fees.
                             </p>
                         </div>

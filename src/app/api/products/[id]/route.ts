@@ -30,7 +30,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         _id: undefined
       }
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'CastError') {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 404 });
+    }
     console.error('Error fetching product:', error);
     return NextResponse.json(
       { error: 'Failed to fetch product' },
