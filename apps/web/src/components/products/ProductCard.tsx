@@ -13,7 +13,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
@@ -54,7 +54,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Content */}
       <div className="p-4">
         {/* Category */}
-        <Badge variant="primary" className="mb-2 capitalize">
+        <Badge variant="brand" className="mb-2 capitalize">
           {product.category}
         </Badge>
 

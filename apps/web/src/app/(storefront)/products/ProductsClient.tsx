@@ -1,28 +1,129 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import ProductCard from '@/components/cards/ProductCard';
-import { themeConfig } from '@/config/theme';
-import { Sparkles, ShoppingBag, Search } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Sparkles, ShoppingBag, Search, Dog } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/States';
+import { motionPresets } from '@/lib/motion';
+import { useCartStore, useCartUIStore } from '@/store/cartStore';
 import type { Product } from '@/types';
+import toast from 'react-hot-toast';
 
-const CATEGORIES = ['All Products', 'Food', 'Accessories', 'Toys', 'Health', 'Grooming'];
+const CATEGORIES = ['All', 'Food', 'Accessories', 'Toys', 'Health', 'Grooming'];
+
+const PERSONALITY_TAGS = [
+  "Corgi Approved 🐕",
+  "For Heavy Chewers 🦴",
+  "Instant Zoomies ⚡",
+  "Extra Fluffy ☁️",
+  "Tail-Wagging Good 🐾"
+];
+
+const FrictionlessProductCard = ({ product, index }: { product: Product, index: number }) => {
+   const addItem = useCartStore((s) => s.addItem);
+   const { openCart } = useCartUIStore();
+   
+   // Create rhythmic asymmetry (e.g. every 5th item is featured huge)
+   const isFeatured = index % 5 === 0;
+   
+   // Randomly assign a personality tag to some products for emotional tone
+   const personalityTag = isFeatured ? PERSONALITY_TAGS[index % PERSONALITY_TAGS.length] : null;
+
+   const handleAdd = (e: React.MouseEvent) => {
+     e.preventDefault();
+     e.stopPropagation();
+     addItem({
+       product: product._id,
+       name: product.name,
+       price: product.price,
+       image: product.images?.[0] ?? '',
+       quantity: 1,
+       stock: product.stock || 10,
+     });
+     openCart();
+     toast.success(`${product.name} added to stash! 🐾`, { icon: '✨' });
+   };
+
+   return (
+     <motion.div
+        layout
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+        className={`relative group bg-bg-elevated rounded-[--radius-2xl] overflow-hidden border border-border hover:border-brand-muted hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all duration-500 will-change-transform ${
+            isFeatured ? 'col-span-1 md:col-span-2 row-span-2' : 'col-span-1'
+        }`}
+     >
+        <Link href={`/products/${product._id}`} className="block h-full">
+            <div className={`relative w-full ${isFeatured ? 'h-64 sm:h-80 md:h-96' : 'h-60'} bg-bg-secondary flex items-center justify-center p-4`}>
+                {product.images?.[0] ? (
+                    <Image 
+                       src={product.images[0]} 
+                       alt={product.name} 
+                       fill 
+                       className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                       sizes={isFeatured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 100vw, 25vw"}
+                    />
+                ) : (
+                    <span className="text-6xl opacity-20">🐾</span>
+                )}
+                
+                {/* Personality Tags overlay */}
+                {personalityTag && (
+                   <motion.div 
+                      initial={{ y: -10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-[0_10px_20px_rgba(0,0,0,0.1)] z-10"
+                   >
+                      <span className="text-label-sm font-black uppercase tracking-widest text-text-primary bg-gradient-to-r from-brand to-accent bg-clip-text text-transparent">
+                          {personalityTag}
+                      </span>
+                   </motion.div>
+                )}
+
+                {/* Instant Quick-Add Frosted Overlay */}
+                <div className="absolute inset-0 bg-transparent group-hover:bg-bg-primary/20 backdrop-blur-[0px] group-hover:backdrop-blur-[2px] transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center pointer-events-none">
+                    <motion.button 
+                       whileTap={{ scale: 0.9 }}
+                       onClick={handleAdd}
+                       className="pointer-events-auto bg-text-primary text-bg-primary px-6 py-4 rounded-[--radius-full] font-black text-label-sm uppercase tracking-widest shadow-2xl flex items-center gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-brand"
+                    >
+                       <ShoppingBag size={18} /> Quick Add
+                    </motion.button>
+                </div>
+            </div>
+
+            <div className="p-6 flex flex-col justify-between">
+                <div>
+                   <p className="text-[10px] font-black uppercase tracking-widest text-text-tertiary mb-1.5">{product.category}</p>
+                   <h3 className={`font-black text-text-primary tracking-tight leading-tight mb-2 ${isFeatured ? 'text-h2' : 'text-h4'}`}>
+                      {product.name}
+                   </h3>
+                </div>
+                <div className="flex items-end justify-between mt-4">
+                   <p className={`font-black text-text-primary ${isFeatured ? 'text-h3' : 'text-h4'}`}>₹{product.price.toLocaleString('en-IN')}</p>
+                </div>
+            </div>
+        </Link>
+     </motion.div>
+   );
+};
 
 export default function ProductsClient({ initialProducts }: { initialProducts: Product[] }) {
-    const [selectedCategory, setSelectedCategory] = useState('All Products');
-    const [sortOrder, setSortOrder] = useState<'newest' | 'price-low' | 'price-high'>('newest');
+    const [selectedCategory, setSelectedCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredProducts = useMemo(() => {
         let result = [...initialProducts];
 
-        // Filter by category
-        if (selectedCategory !== 'All Products') {
+        if (selectedCategory !== 'All') {
             result = result.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
         }
 
-        // Filter by search
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             result = result.filter(p => 
@@ -31,167 +132,93 @@ export default function ProductsClient({ initialProducts }: { initialProducts: P
             );
         }
 
-        // Sort
-        switch (sortOrder) {
-            case 'price-low':
-                result.sort((a, b) => a.price - b.price);
-                break;
-            case 'price-high':
-                result.sort((a, b) => b.price - a.price);
-                break;
-            default: // newest uses createdAt if available, else original db order
-                result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-                break;
-        }
+        // Apply a deterministic sort just to handle masonry nicely
+        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         return result;
-    }, [initialProducts, selectedCategory, searchQuery, sortOrder]);
+    }, [initialProducts, selectedCategory, searchQuery]);
 
     return (
-        <div className="py-12 md:py-24 min-h-screen bg-bg-page transition-colors duration-300 relative overflow-hidden">
-            {/* Background Accent */}
-            <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="pt-32 pb-24 min-h-[90vh] bg-bg-primary transition-colors duration-[--duration-normal] relative overflow-hidden">
+            {/* Playful Blur Background Accent */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand/10 to-transparent rounded-full blur-[100px] pointer-events-none" />
 
-            <div className={themeConfig.spacing.container + " relative z-10 px-6"}>
+            <div className="container-app relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6">
 
-                {/* Product Header */}
-                <div className="mb-20 text-center lg:text-left flex flex-col lg:flex-row items-end justify-between gap-12">
-                    <div className="max-w-2xl">
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-secondary/10 text-secondary font-black text-xs uppercase tracking-[0.3em] mb-8 border border-secondary/20 shadow-sm"
-                        >
-                            <Sparkles size={16} fill="currentColor" className="animate-pulse" />
-                            Premium Pet Supplies
-                        </motion.div>
-                        <motion.h1 
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-5xl md:text-8xl font-black text-zinc-900 tracking-tighter leading-[0.8] mb-8"
-                        >
-                            HAPPY ESSENTIALS <br />
-                            FOR <span className="text-brand-primary">HAPPY PAWS.</span>
-                        </motion.h1>
-                        <motion.p 
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-xl text-zinc-500 font-bold max-w-lg leading-relaxed"
-                        >
-                            Curated excellence for your companions. Every product is vetted for safety, nutrition, and ultimate joy.
-                        </motion.p>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row items-center gap-5 w-full lg:w-auto">
-                        <div className="relative w-full md:w-64 group">
-                             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-brand-primary transition-colors" size={20} />
-                             <input 
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-16 pr-6 py-6 bg-white border border-zinc-100 rounded-[32px] font-bold text-zinc-900 focus:ring-[12px] focus:ring-brand-primary/5 focus:border-brand-primary/20 transition-all outline-none"
-                                placeholder="Search inventory..."
-                             />
-                        </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto">
-                            <select 
-                                value={sortOrder}
-                                onChange={(e) => setSortOrder(e.target.value as any)}
-                                className="flex-1 md:w-auto py-6 px-10 bg-white border border-zinc-100 rounded-[32px] font-black text-sm text-zinc-900 outline-none hover:bg-zinc-50 transition-all cursor-pointer shadow-sm appearance-none"
-                            >
-                                <option value="newest">Sort: Newest First</option>
-                                <option value="price-low">Price: Low to High</option>
-                                <option value="price-high">Price: High to Low</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Category Pills */}
-                <div className="flex flex-wrap gap-4 mb-16 px-2 overflow-x-auto pb-4 scrollbar-hide">
-                    {CATEGORIES.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`px-10 py-5 rounded-[28px] font-black text-sm tracking-widest uppercase transition-all border-2 whitespace-nowrap ${
-                                selectedCategory === cat 
-                                ? 'bg-zinc-900 border-zinc-900 text-white shadow-2xl shadow-zinc-900/30 -translate-y-1' 
-                                : 'bg-white border-zinc-100 text-zinc-500 hover:border-zinc-300 hover:text-zinc-900'
-                            }`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Product Grid */}
-                <AnimatePresence mode="popLayout">
-                    <motion.div 
-                        layout
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12"
+                {/* Highly Emotional Header */}
+                <div className="mb-16 flex flex-col items-center text-center max-w-3xl mx-auto">
+                    <motion.div {...motionPresets.fadeUp} className="mb-4 text-5xl">🛍️🐕</motion.div>
+                    <motion.h1 
+                        {...motionPresets.fadeUp}
+                        transition={{ delay: 0.1 }}
+                        className="text-display min-[400px]:text-[5rem] text-text-primary tracking-tighter leading-[0.9] mb-6 font-black"
                     >
-                        {filteredProducts.map((product) => (
-                            <motion.div
-                                key={product._id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                <ProductCard 
-                                    id={product._id as string} 
-                                    name={product.name} 
-                                    price={product.price}
-                                    images={product.images || []}
-                                    image={product.images?.[0]}
-                                    category={product.category}
-                                    rating={product.rating || 5}
-                                    reviews={product.reviewCount || 0}
-                                />
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                </AnimatePresence>
+                        Boutique Quality <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-accent pb-2">For Your Pet.</span>
+                    </motion.h1>
+                    <motion.p 
+                        {...motionPresets.fadeUp}
+                        transition={{ delay: 0.2 }}
+                        className="text-body-lg text-text-secondary leading-relaxed font-medium"
+                    >
+                        We’ve meticulously selected every single item here so you can shop blindfolded. The absolute best nutrition, toys, and luxury for your best friend.
+                    </motion.p>
+                </div>
+
+                {/* Filter Controls */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
+                    <div className="flex gap-2 p-1.5 bg-bg-secondary w-full md:w-auto overflow-x-auto rounded-[--radius-full] border border-border scrollbar-hide">
+                        {CATEGORIES.map((cat) => {
+                            const isActive = selectedCategory === cat;
+                            return (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`relative px-6 py-3 rounded-[--radius-full] text-label-sm font-black uppercase tracking-wider transition-colors whitespace-nowrap z-10 ${
+                                        isActive ? 'text-bg-primary' : 'text-text-secondary hover:text-text-primary'
+                                    }`}
+                                >
+                                    {isActive && (
+                                       <motion.div 
+                                          layoutId="productTab" 
+                                          className="absolute inset-0 bg-text-primary rounded-[--radius-full]" 
+                                          transition={{ type: "spring", stiffness: 300, damping: 25 }} 
+                                       />
+                                    )}
+                                    <span className="relative z-20">{cat}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="relative w-full md:w-80 group">
+                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-brand transition-colors" size={18} />
+                         <input 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-12 pr-5 py-4 bg-bg-secondary border border-border rounded-[--radius-full] text-body-sm font-medium text-text-primary focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none"
+                            placeholder="Search Treats, Toys, Accessories..."
+                         />
+                    </div>
+                </div>
+
+                {/* Asymmetric Product Grid */}
+                <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 min-h-[50vh]">
+                   <AnimatePresence mode="popLayout">
+                       {filteredProducts.map((product, idx) => (
+                           <FrictionlessProductCard key={product._id} product={product} index={idx} />
+                       ))}
+                   </AnimatePresence>
+                </motion.div>
 
                 {filteredProducts.length === 0 && (
-                    <div className="py-40 text-center flex flex-col items-center">
-                        <div className="w-24 h-24 bg-zinc-50 rounded-[40px] flex items-center justify-center text-zinc-200 mb-8">
-                             <Search size={40} />
-                        </div>
-                        <h3 className="text-3xl font-black text-zinc-900 tracking-tighter mb-4">No Inventory Matches.</h3>
-                        <p className="text-zinc-500 font-bold text-lg mb-8">Try adjusting your search or category filters.</p>
-                        <button onClick={() => {setSelectedCategory('All Products'); setSearchQuery('');}} className="px-10 py-4 bg-zinc-900 text-white font-black rounded-2xl">
-                             Clear All Filters
-                        </button>
-                    </div>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center py-20 text-center">
+                        <Dog size={64} strokeWidth={1} className="text-text-tertiary mb-6" />
+                        <h3 className="text-h2 font-black text-text-primary tracking-tight mb-3">No Treats Found!</h3>
+                        <p className="text-body-lg text-text-secondary mb-8">We dug everywhere but couldn't find matches for your search.</p>
+                        <Button variant="secondary" size="lg" onClick={() => {setSelectedCategory('All'); setSearchQuery('');}}>Reset Filters</Button>
+                    </motion.div>
                 )}
-
-                {/* Newsletter Hook */}
-                <div className="mt-32 p-16 lg:p-24 bg-zinc-50 rounded-[64px] border border-zinc-100/50 text-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 via-transparent to-secondary/10 opacity-30 group-hover:opacity-60 transition-opacity"></div>
-                    <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-                        <div className="w-20 h-20 bg-white rounded-[32px] flex items-center justify-center text-brand-primary mb-10 shadow-xl shadow-brand-primary/10">
-                            <ShoppingBag size={40} strokeWidth={2.5} />
-                        </div>
-                        <h3 className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tighter mb-6 leading-none italic">CAN'T FIND <br />THE JOY?</h3>
-                        <p className="text-zinc-600 font-black text-lg mb-12 uppercase tracking-widest opacity-80">
-                            We restock every Tuesday! ⚡ <br /> Sign up for first priority notification.
-                        </p>
-                        <div className="w-full flex flex-col sm:flex-row gap-4 p-3 bg-white rounded-[40px] border border-zinc-100 shadow-2xl shadow-zinc-200/50">
-                            <input
-                                type="email"
-                                placeholder="commander@email.com"
-                                className="flex-1 bg-transparent px-8 py-5 outline-none font-bold text-zinc-900 placeholder:text-zinc-400"
-                            />
-                            <button className="px-12 py-5 bg-zinc-900 text-white font-black text-lg rounded-[32px] shadow-2xl shadow-zinc-900/10 hover:scale-105 active:scale-95 transition-all">
-                                Keep Me Updated 🐾
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     );

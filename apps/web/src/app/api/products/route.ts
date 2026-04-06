@@ -2,25 +2,41 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
 import Product from '@/models/Product';
 import { auth } from '@/auth';
+import redis from '@/lib/redis';
 
-// GET /api/products - List products with filtering and pagination
+// GET /api/products - List products with High-Speed Redis Caching
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
-    
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const search = searchParams.get('search');
+    const category = searchParams.get('category') || 'all';
+    const search = searchParams.get('search') || 'none';
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '12');
+    const limit = parseInt(searchParams.get('limit') || '24'); // Match default limit
 
-    const query: Record<string, unknown> = { isActive: true };
-
-    if (category) {
-      query.category = category;
+    // 1. Attempt to fetch from Redis Ram Cache first
+    const cacheKey = `platform:products:${category}:${search.slice(0,20)}:${page}:${limit}`;
+    try {
+       const cachedResponse = await redis.get(cacheKey);
+       if (cachedResponse) {
+          // Add a custom header to prove it hit the cache
+          const res = NextResponse.json(JSON.parse(cachedResponse));
+          res.headers.set('X-Cache', 'HIT');
+          return res;
+       }
+    } catch (e) {
+       console.warn('[REDIS_WARNING] Cache fetch failed, falling back to DB');
     }
 
-    if (search) {
+    // 2. Cache Miss - Hit MongoDB
+    await connectDB();
+    
+    const query: Record<string, unknown> = { isActive: true };
+
+    if (category !== 'all') {
+      query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+    }
+
+    if (search !== 'none') {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
@@ -47,16 +63,26 @@ export async function GET(request: NextRequest) {
       isLowStock: p.stock > 0 && p.stock <= p.lowStockThreshold
     }));
 
-    return NextResponse.json({
+    const responsePayload = {
       success: true,
       data: formattedProducts,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+      metrics: {
+         source: "mongodb",
+         docCount: products.length
       }
-    });
+    };
+
+    // 3. Save to Redis Cache in background (don't await if you don't have to)
+    try {
+       await redis.set(cacheKey, JSON.stringify(responsePayload), 'EX', 3600); // 1 hr cache
+    } catch (e) {
+       console.warn('[REDIS_WARNING] Failed to write cache');
+    }
+
+    const res = NextResponse.json(responsePayload);
+    res.headers.set('X-Cache', 'MISS');
+    return res;
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(
@@ -66,7 +92,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/products - Create product (Admin only)
+// POST /api/products - Create product and Invalidate Cache
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
@@ -82,7 +108,6 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    // Validation
     if (!data.name || !data.price || !data.category) {
       return NextResponse.json(
         { success: false, error: 'Name, price and category are required' },
@@ -101,6 +126,18 @@ export async function POST(request: NextRequest) {
       isActive: true,
       tags: data.tags || []
     });
+
+    // INVALIDATE CACHE 
+    // Whenever a new product is added, we must flush the catalog memory
+    try {
+       const keys = await redis.keys('platform:products:*');
+       if (keys.length > 0) {
+          await redis.del(...keys);
+          console.log(`[REDIS] Invalidated ${keys.length} product cache keys!`);
+       }
+    } catch (e) {
+       console.warn('[REDIS_WARNING] Failed to invalidate cache on POST');
+    }
 
     const formattedProduct = {
       ...product.toObject(),

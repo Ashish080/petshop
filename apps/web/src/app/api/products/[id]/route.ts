@@ -61,7 +61,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const product = await Product.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!product) {
@@ -105,7 +105,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const product = await Product.findByIdAndUpdate(
       id,
       { $set: { isActive: false } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!product) {

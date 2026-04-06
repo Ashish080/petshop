@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IActivity extends Document {
-  type: 'view' | 'add-to-cart' | 'checkout-start';
+  type: 'view' | 'add-to-cart' | 'checkout-start' | 'search';
   userEmail?: string;
   productId?: string;
   productName?: string;
@@ -13,7 +13,7 @@ const ActivitySchema = new Schema<IActivity>({
   type: { 
     type: String, 
     required: true, 
-    enum: ['view', 'add-to-cart', 'checkout-start'],
+    enum: ['view', 'add-to-cart', 'checkout-start', 'search'],
     index: true 
   },
   userEmail: { type: String, index: true },

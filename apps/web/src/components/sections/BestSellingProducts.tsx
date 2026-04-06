@@ -1,36 +1,35 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/cards/ProductCard';
-import { themeConfig } from '@/config/theme';
 import { connectDB } from '@/lib/mongoose';
 import ProductModel from '@/models/Product';
+import { Button } from '@/components/ui/Button';
 
 export default async function BestSellingProducts() {
     await connectDB();
     const products = await ProductModel.find({ isActive: true }).limit(4).lean();
 
     return (
-        <section className={themeConfig.spacing.section}>
-            <div className={themeConfig.spacing.container}>
+        <section className="section-padding">
+            <div className="container-app">
                 <div className="flex justify-between items-end mb-10">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-3 text-text-primary">
+                        <h2 className="text-h1 mb-3">
                             Best Selling Products
                         </h2>
-                        <p className="max-w-2xl text-lg text-text-light">
+                        <p className="text-body-lg max-w-2xl">
                             Discover our most loved products for your furry friends. High quality and trusted by pet parents.
                         </p>
                     </div>
                     <Link
                         href="/products"
-                        className="hidden md:flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity"
-                        style={{ color: themeConfig.colors.primary }}
+                        className="hidden md:flex items-center gap-2 text-label-lg text-brand hover:text-brand-hover transition-colors"
                     >
-                        View All Products <ArrowRight size={20} />
+                        View All Products <ArrowRight size={18} />
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {products.map((product) => (
                         <ProductCard 
                             key={product._id.toString()} 
@@ -48,12 +47,9 @@ export default async function BestSellingProducts() {
 
                 <div className="mt-10 md:hidden flex justify-center">
                     <Link href="/products">
-                        <button
-                            className={`flex items-center gap-2 px-6 py-3 font-semibold border ${themeConfig.radius.md}`}
-                            style={{ color: themeConfig.colors.primary, borderColor: themeConfig.colors.primary }}
-                        >
-                            View All Products <ArrowRight size={18} />
-                        </button>
+                        <Button variant="outline" iconRight={<ArrowRight size={16} />}>
+                            View All Products
+                        </Button>
                     </Link>
                 </div>
             </div>

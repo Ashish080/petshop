@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import type { Product } from '@/types';
 import { ProductActions } from '@/components/products/ProductActions';
+import { ProductGallery } from '../../../../components/products/ProductGallery';
+import { Recommendations } from '@/components/products/Recommendations';
+import { RecentlyViewed } from '@/components/products/RecentlyViewed';
 import { Star, Truck, RotateCcw, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ActivityTracker } from '@/components/analytics/ActivityTracker';
@@ -24,100 +27,88 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const originalPrice = discount ? Math.round(product.price / (1 - discount / 100)) : null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 lg:py-16 relative">
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-600 mb-6 flex items-center gap-2">
-        <a href="/" className="hover:text-orange-500">Home</a>
-        <span>›</span>
-        <a href="/products" className="hover:text-orange-500">Products</a>
-        <span>›</span>
-        <a href={`/products?category=${product.category}`} className="hover:text-orange-500 capitalize">{product.category}</a>
-        <span>›</span>
-        <span className="text-gray-600 truncate max-w-xs">{product.name}</span>
+      <nav className="text-label-sm text-text-tertiary mb-8 flex items-center gap-2 uppercase tracking-widest font-bold">
+        <a href="/" className="hover:text-brand transition-colors">Home</a>
+        <span className="opacity-50">/</span>
+        <a href="/products" className="hover:text-brand transition-colors">Shop</a>
+        <span className="opacity-50">/</span>
+        <a href={`/products?category=${product.category}`} className="hover:text-brand transition-colors">{product.category}</a>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Image gallery */}
-        <div className="flex gap-3">
-          <div className="flex flex-col gap-2">
-            {product.images.slice(0, 4).map((img: string, i: number) => (
-              <div key={i} className="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-orange-400 transition-colors cursor-pointer">
-                <Image src={img} alt={`${product.name} ${i + 1}`} width={64} height={64} className="object-cover w-full h-full" />
-              </div>
-            ))}
-          </div>
-          <div className="flex-1 relative bg-gray-50 rounded-2xl overflow-hidden aspect-square">
-            {product.images[0] ? (
-              <Image 
-                src={product.images[0]} 
-                alt={product.name} 
-                fill 
-                className="object-cover" 
-                priority 
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-8xl">🐾</div>
-            )}
-            {product.isLowStock && (
-              <div className="absolute top-3 left-3">
-                <Badge variant="warning">Only {product.stock} left!</Badge>
-              </div>
-            )}
-          </div>
+      <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 relative items-start">
+        {/* Pinned Image Gallery */}
+        <div className="w-full lg:w-[50%] lg:sticky lg:top-28">
+           <ProductGallery images={product.images} name={product.name} />
         </div>
 
-        {/* Product info */}
-        <div className="flex flex-col gap-5">
+        {/* Product Information (Scrolls natively) */}
+        <div className="w-full lg:w-[50%] flex flex-col gap-6 lg:pb-32">
+          
+          {/* Tags */}
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="info">{product.category}</Badge>
-            {product.stock === 0 && <Badge variant="danger">Out of stock</Badge>}
+            <Badge variant="info" size="sm">{product.category}</Badge>
+            {product.stock === 0 && <Badge variant="danger" size="sm">Out of stock</Badge>}
+            {product.isLowStock && product.stock > 0 && <Badge variant="warning" size="sm">Only {product.stock} left!</Badge>}
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 leading-tight">{product.name}</h1>
+          <h1 className="text-display font-black text-text-primary leading-[0.95] tracking-tight">{product.name}</h1>
 
+          {/* Social Proof */}
           <div className="flex items-center gap-2">
             <div className="flex items-center">
               {[1,2,3,4,5].map(s => (
-                <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`} />
+                <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-warning text-warning' : 'text-border'}`} />
               ))}
             </div>
-            <span className="text-sm text-gray-500">{product.rating.toFixed(1)} · {product.reviewCount} reviews</span>
+            <span className="text-label-sm font-bold text-text-secondary">{product.rating.toFixed(1)} · {product.reviewCount} Reviews</span>
           </div>
 
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold text-gray-900">
+          {/* Price Header */}
+          <div className="flex items-baseline gap-4 mt-2 mb-4">
+            <span className="text-h1 font-black text-text-primary tracking-tight">
               ₹{product.price.toLocaleString('en-IN')}
             </span>
             {originalPrice && (
-              <>
-                <span className="text-lg text-gray-600 line-through">₹{originalPrice.toLocaleString('en-IN')}</span>
-                <span className="text-sm text-green-600 font-semibold">{discount}% off</span>
-              </>
+              <div className="flex items-center gap-3">
+                 <span className="text-h4 text-text-tertiary line-through font-medium">₹{originalPrice.toLocaleString('en-IN')}</span>
+                 <Badge variant="success" size="sm">Save {discount}%</Badge>
+              </div>
             )}
           </div>
 
-          <p className="text-gray-600 leading-relaxed">{product.description}</p>
+          <p className="text-body-lg text-text-secondary leading-relaxed mb-6">{product.description}</p>
 
-          {/* Client-side interactive part */}
+          <div className="h-px bg-border w-full mb-2" />
+
+          {/* Client-side Variant Selector & Add to Cart */}
           <ProductActions product={product} />
 
-          {/* Info strips */}
-          <div className="border-t border-gray-100 pt-4 grid grid-cols-3 gap-4">
+          {/* Trust Value Props */}
+          <div className="border-t border-border mt-8 pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { icon: Truck, label: 'Free delivery', sub: 'Orders over ₹499' },
-              { icon: RotateCcw, label: '7-day returns', sub: 'Hassle-free' },
-              { icon: Shield, label: 'Authentic', sub: '100% genuine' },
+              { icon: Truck, label: 'Free Delivery', sub: 'Orders over ₹499' },
+              { icon: RotateCcw, label: '7-Day Return', sub: 'Hassle-free process' },
+              { icon: Shield, label: 'Quality Guarantee', sub: 'Tested for safety' },
             ].map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="flex flex-col items-center text-center gap-1 p-3 bg-gray-50 rounded-xl">
-                <Icon className="w-5 h-5 text-orange-500" />
-                <span className="text-xs font-medium text-gray-800">{label}</span>
-                <span className="text-xs text-gray-600">{sub}</span>
+              <div key={label} className="flex flex-col gap-2 p-4 bg-bg-secondary rounded-[--radius-xl] border border-border items-start">
+                <Icon className="w-6 h-6 text-brand" />
+                <div>
+                   <h4 className="text-label-sm font-bold text-text-primary uppercase tracking-wider">{label}</h4>
+                   <p className="text-[10px] text-text-tertiary font-bold tracking-widest uppercase mt-0.5">{sub}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Discovery & Recommendations Sections */}
+      <Recommendations category={product.category} currentProductId={product._id} />
+      <RecentlyViewed excludeId={product._id} />
+
+      <ActivityTracker type="view" productId={product._id} productName={product.name} category={product.category} />
     </div>
   );
 }

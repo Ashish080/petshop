@@ -1,32 +1,32 @@
-import { themeConfig } from '@/config/theme';
 import { ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 
 export default function Guarantee() {
     return (
-        <section className="bg-amber-50 dark:bg-amber-900/10 border-y border-amber-200/50 py-16 lg:py-20">
-            <div className={`${themeConfig.spacing.container} flex flex-col lg:flex-row items-center gap-10 lg:gap-16`}>
-                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-amber-400 rounded-full flex items-center justify-center flex-shrink-0 shadow-xl shadow-amber-400/20">
-                    <ShieldCheck size={56} className="text-white" strokeWidth={1.5} />
+        <section className="bg-warning-muted border-y border-warning/20 py-16 lg:py-20">
+            <div className="container-app flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+                <div className="w-20 h-20 sm:w-28 sm:h-28 bg-warning rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <ShieldCheck size={48} className="text-white" strokeWidth={1.5} />
                 </div>
                 
                 <div className="flex-1 text-center lg:text-left">
-                    <h2 className="text-3xl sm:text-4xl font-black text-text-primary mb-4 font-serif">
+                    <h2 className="text-h2 text-text-primary mb-4">
                         Our 100% Health & Authenticity Guarantee
                     </h2>
-                    <p className="text-lg text-text-light font-medium mb-8 max-w-3xl">
-                        Every pet from Kanha comes with a written health guarantee. If your pet shows any health issues within 7 days, we cover the vet expenses — no questions asked. We stand behind every animal we sell.
+                    <p className="text-body-lg mb-8 max-w-3xl">
+                        Every pet from Kanha comes with a written health guarantee. If your pet shows any health issues within 7 days, we cover the vet expenses — no questions asked.
                     </p>
                     
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6">
+                    <div className="flex flex-wrap justify-center lg:justify-start gap-3">
                         {[
                             "7-Day Health Guarantee",
                             "Pure Breed Certified",
                             "Vaccination Records",
                             "Lifetime Breeder Support"
                         ].map((point, i) => (
-                            <div key={i} className="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-500 text-sm bg-amber-100/50 dark:bg-amber-900/30 px-4 py-2 rounded-lg">
-                                <CheckCircle2 size={18} /> {point}
-                            </div>
+                            <Badge key={i} variant="warning" size="lg" dot>
+                                {point}
+                            </Badge>
                         ))}
                     </div>
                 </div>

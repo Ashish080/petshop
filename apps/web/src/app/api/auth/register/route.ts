@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import connectDB from '@/lib/mongoose';
 import User from '@/models/User';
+import redis from '@/lib/redis';
 
 /**
  * FIXED: Security Loophole - Registering as Rider/Admin
@@ -12,9 +13,31 @@ import User from '@/models/User';
  */
 export async function POST(request: NextRequest) {
   try {
+    // === Security: Redis Rate Limiting (Anti-Bot & Credential Stuffing) ===
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    const rateLimitKey = `security:ratelimit:register:${ip}`;
+    
+    try {
+      const requestCount = await redis.incr(rateLimitKey);
+      if (requestCount === 1) {
+         // Window: 1 hour
+         await redis.expire(rateLimitKey, 3600);
+      }
+      if (requestCount > 5) {
+         console.warn(`[SECURITY] Blocked mass registration from IP: ${ip}`);
+         return NextResponse.json(
+            { success: false, error: 'Maximum account creation limit reached. Please try again later.' },
+            { status: 429 }
+         );
+      }
+    } catch (e) {
+      console.warn('[REDIS_WARNING] Rate limiter bypassed due to connection failure.');
+    }
+    // ======================================================================
+
     await connectDB();
     
-    const { name, email, password, phone } = await request.json();
+    const { name, email, password, phone, referralCode } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -44,12 +67,21 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL;
     const role = (adminEmail && email.toLowerCase() === adminEmail.toLowerCase()) ? 'admin' : 'user';
 
+    // Referral Logic
+    let referredBy = undefined;
+    if (referralCode) {
+       const referrer = await User.findOne({ referralCode: referralCode.trim().toUpperCase() });
+       if (referrer) referredBy = referrer.email;
+    }
+
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password,
       role,
-      phone: phone?.trim()
+      phone: phone?.trim(),
+      referredBy,
+      referralCode: Math.random().toString(36).substring(2, 8).toUpperCase()
     });
 
     return NextResponse.json({

@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} min-h-screen flex flex-col bg-gray-50`}>
+      <body className={`${outfit.className} min-h-screen flex flex-col bg-bg-primary text-text-primary`}>
         <ThemeProvider>
           <Providers>
             {children}

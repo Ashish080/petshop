@@ -39,7 +39,7 @@ export async function PATCH(request: NextRequest) {
     const order = await Order.findByIdAndUpdate(
       orderId,
       { $set: updateData },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!order) {

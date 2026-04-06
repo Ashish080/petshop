@@ -1,5 +1,4 @@
 import { brandConfig } from '@/config/brand';
-import { themeConfig } from '@/config/theme';
 
 export default function FloatingWhatsApp() {
     const whatsappUrl = `https://wa.me/${brandConfig.whatsapp.replace(/\D/g, '')}`;
@@ -9,14 +8,14 @@ export default function FloatingWhatsApp() {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={`fixed bottom-6 right-6 z-50 p-4 transition-transform hover:scale-110 flex items-center justify-center ${themeConfig.radius.full} ${themeConfig.shadows.hover}`}
+            className="fixed bottom-6 right-6 z-50 p-4 transition-all duration-[--duration-fast] hover:scale-110 active:scale-95 flex items-center justify-center rounded-full shadow-lg"
             style={{ backgroundColor: '#25D366', color: 'white' }}
             aria-label="Chat on WhatsApp"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="28"
-                height="28"
+                width="26"
+                height="26"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

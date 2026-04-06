@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { ShoppingBag, Check } from 'lucide-react';
-import { themeConfig } from '@/config/theme';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 
 interface Pet {
     id: string;
@@ -22,7 +22,6 @@ export default function AdoptPetButton({ pet }: { pet: Pet }) {
     const router = useRouter();
 
     const handleAdopt = () => {
-        // Enforce login check (simplified)
         const user = localStorage.getItem('userEmail');
         if (!user) {
             router.push('/login');
@@ -33,7 +32,6 @@ export default function AdoptPetButton({ pet }: { pet: Pet }) {
         const myPetsRaw = localStorage.getItem(storageKey);
         let myPets = myPetsRaw ? JSON.parse(myPetsRaw) : [];
 
-        // Don't add if already exists
         if (!myPets.find((p: any) => p.id === pet.id)) {
             const petWithRecords = {
                 ...pet,
@@ -45,7 +43,6 @@ export default function AdoptPetButton({ pet }: { pet: Pet }) {
             myPets.push(petWithRecords);
             localStorage.setItem(storageKey, JSON.stringify(myPets));
 
-            // LOG FOR ADMIN
             const transRaw = localStorage.getItem('allTransactions');
             let transactions = transRaw ? JSON.parse(transRaw) : [];
             transactions.unshift({
@@ -66,22 +63,15 @@ export default function AdoptPetButton({ pet }: { pet: Pet }) {
     };
 
     return (
-        <button
+        <Button
             onClick={handleAdopt}
             disabled={purchased}
-            className={`w-full py-5 flex items-center justify-center gap-3 font-black text-xl transition-all ${purchased ? 'bg-green-500 text-white' : 'bg-secondary text-white hover:-translate-y-1 hover:shadow-xl active:scale-95 shadow-lg shadow-brand-primary/25'} ${themeConfig.radius.lg}`}
+            variant={purchased ? 'success' : 'primary'}
+            size="lg"
+            fullWidth
+            icon={purchased ? <Check size={22} strokeWidth={3} /> : <ShoppingBag size={22} strokeWidth={3} />}
         >
-            {purchased ? (
-                <>
-                    <Check size={24} strokeWidth={3} />
-                    Added to Passport!
-                </>
-            ) : (
-                <>
-                    <ShoppingBag size={24} strokeWidth={3} />
-                    Adopt {pet.name} Now
-                </>
-            )}
-        </button>
+            {purchased ? 'Added to Passport!' : `Adopt ${pet.name} Now`}
+        </Button>
     );
 }

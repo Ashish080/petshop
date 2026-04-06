@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const product = await Product.findByIdAndUpdate(
       productId, 
       { $inc: { stock: delta } }, 
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!product) {

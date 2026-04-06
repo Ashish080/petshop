@@ -131,22 +131,22 @@ export default function UserDashboardClient() {
   ];
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FDFDFD]">
+    <div className="min-h-screen flex items-center justify-center bg-bg-primary">
         <div className="flex flex-col items-center gap-6">
-            <div className="w-20 h-20 bg-white border border-zinc-100 rounded-[32px] flex items-center justify-center animate-pulse shadow-2xl">
-                <Heart size={32} className="text-[#FF7B54]" fill="#FF7B54" />
+            <div className="w-20 h-20 bg-bg-elevated border border-border rounded-[--radius-2xl] flex items-center justify-center animate-pulse shadow-md">
+                <Heart size={32} className="text-brand fill-brand" />
             </div>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Opening Passport...</p>
+            <p className="text-overline opacity-70">Opening Passport...</p>
         </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] flex">
+    <div className="min-h-screen bg-bg-primary flex">
       {/* SIDEBAR */}
-      <aside className="w-80 border-r border-[#F0F0F0] hidden lg:flex flex-col p-8 bg-white/50 backdrop-blur-xl shrink-0">
-        <div className="bg-[#FFF4F0] p-6 rounded-[32px] mb-12 border border-[#FFE8E0] flex items-center gap-4">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#FF7B54] shadow-sm relative overflow-hidden">
+      <aside className="w-80 border-r border-border hidden lg:flex flex-col p-8 bg-bg-secondary/50 backdrop-blur-xl shrink-0">
+        <div className="bg-brand-muted p-6 rounded-[--radius-2xl] mb-12 border border-border flex items-center gap-4">
+            <div className="w-12 h-12 bg-bg-elevated rounded-[--radius-lg] flex items-center justify-center text-brand shadow-sm relative overflow-hidden">
                 {profileData.image ? (
                     <img src={profileData.image} className="w-full h-full object-cover" />
                 ) : (
@@ -154,27 +154,27 @@ export default function UserDashboardClient() {
                 )}
             </div>
             <div>
-                <h4 className="font-black text-sm text-zinc-900 tracking-tight truncate w-32">{profileData.name || 'Valued Guest'}</h4>
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#FF7B54]/60">Pet Owner</p>
+                <h4 className="font-bold text-label-lg text-text-primary tracking-tight truncate w-32">{profileData.name || 'Valued Guest'}</h4>
+                <p className="text-overline text-brand opacity-80">Pet Owner</p>
             </div>
         </div>
 
         <nav className="flex-1 space-y-4">
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-6 px-4">My Center</p>
+            <p className="text-overline mb-6 px-4">My Center</p>
             {menuItems.map((item) => {
                 const isOrders = item.label === 'My Orders';
                 return (
                 <button 
                     key={item.label}
                     onClick={() => isOrders ? (window.location.href = '/orders') : setActiveTab(item.label)}
-                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl transition-all group ${activeTab === item.label ? 'bg-[#FF7B54] text-white shadow-xl shadow-[#FF7B54]/20' : 'text-zinc-500 hover:bg-zinc-50'}`}
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-[--radius-xl] transition-all group ${activeTab === item.label ? 'bg-brand text-white shadow-md shadow-brand/20' : 'text-text-secondary hover:bg-bg-tertiary'}`}
                 >
                     <div className="flex items-center gap-4">
                         <item.icon size={20} className={activeTab === item.label ? 'stroke-[3]' : 'group-hover:scale-110 transition-transform'} />
-                        <span className="text-[11px] font-black uppercase tracking-widest">{item.label}</span>
+                        <span className="text-label-sm font-bold uppercase tracking-wider">{item.label}</span>
                     </div>
                     {item.badge && (
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black ${activeTab === item.label ? 'bg-white text-[#FF7B54]' : 'bg-indigo-600 text-white'}`}>
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${activeTab === item.label ? 'bg-white text-brand' : 'bg-info text-white'}`}>
                             {item.badge}
                         </span>
                     )}
@@ -185,25 +185,25 @@ export default function UserDashboardClient() {
 
         <button 
             onClick={() => signOut()}
-            className="flex items-center gap-4 px-6 py-4 text-rose-500 font-black text-[11px] uppercase tracking-widest hover:bg-rose-50 rounded-2xl transition-all"
+            className="flex items-center gap-4 px-6 py-4 text-danger font-bold text-label-sm uppercase tracking-wider hover:bg-danger/10 rounded-[--radius-xl] transition-all"
         >
             <LogOut size={20} /> Logout
         </button>
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-8 lg:p-16 max-w-7xl mx-auto overflow-y-auto">
+      <main className="flex-1 p-8 lg:p-16 max-w-7xl mx-auto overflow-y-auto custom-scrollbar">
         <header className="flex justify-between items-end mb-12">
             <div>
-                <h1 className="text-5xl font-black text-zinc-900 tracking-tighter italic mb-4">
+                <h1 className="text-display min-h-[1.5em] text-text-primary tracking-tighter italic mb-2">
                     {activeTab === 'Profile Settings' ? 'Security & Identity' : 'My Pets Passport'}
                 </h1>
-                <p className="text-zinc-400 font-bold text-lg">
+                <p className="text-text-secondary font-semibold text-lg">
                     {activeTab === 'Profile Settings' ? 'Manage your secure mission credentials.' : 'Welcome back to the fur-mily portal.'}
                 </p>
             </div>
             {activeTab === 'My Pets' && (
-                <button className="bg-[#FF7B54] text-white rounded-2xl px-8 py-4 font-black text-[11px] uppercase tracking-widest flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#FF7B54]/20">
+                <button className="bg-brand text-white rounded-[--radius-xl] px-8 py-4 font-bold text-label-sm uppercase tracking-wider flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-md shadow-brand/20">
                     <Plus size={18} /> Add New Pet
                 </button>
             )}
@@ -226,13 +226,13 @@ export default function UserDashboardClient() {
                                     <button 
                                         key={pet.name}
                                         onClick={() => setSelectedPet(pet.name)}
-                                        className={`px-8 py-3 rounded-2xl flex items-center gap-3 transition-all border ${selectedPet === pet.name ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-600/20' : 'bg-white text-zinc-500 border-zinc-100'}`}
+                                        className={`px-8 py-3 rounded-[--radius-xl] flex items-center gap-3 transition-all border ${selectedPet === pet.name ? 'bg-info text-white border-info shadow-md shadow-info/20' : 'bg-bg-elevated text-text-secondary border-border hover:bg-bg-secondary'}`}
                                     >
-                                        <img src={pet.image} className="w-6 h-6 rounded-lg object-cover" />
-                                        <span className="text-xs font-black uppercase tracking-widest">{pet.name}</span>
+                                        <img src={pet.image} className="w-6 h-6 rounded-[--radius-sm] object-cover" />
+                                        <span className="text-label-sm font-bold uppercase tracking-wider">{pet.name}</span>
                                     </button>
                                 ))}
-                                <button className="w-10 h-10 rounded-xl border-2 border-dashed border-zinc-200 flex items-center justify-center text-zinc-300 hover:border-[#FF7B54] hover:text-[#FF7B54] transition-all">
+                                <button className="w-12 h-12 rounded-[--radius-xl] border-2 border-dashed border-border flex items-center justify-center text-text-tertiary hover:border-brand hover:text-brand transition-all">
                                     <Plus size={20} />
                                 </button>
                             </div>
@@ -240,28 +240,28 @@ export default function UserDashboardClient() {
                             <section className="grid grid-cols-1 xl:grid-cols-12 gap-12">
                                 {/* PROFILE CARD */}
                                 <div className="xl:col-span-4 space-y-8">
-                                    <div className="bg-white rounded-[60px] p-12 border border-[#F0F0F0] shadow-[0_50px_100px_rgba(0,0,0,0.04)] text-center relative overflow-hidden group">
-                                        <div className="w-48 h-48 bg-[#FFF4F0] rounded-[56px] mx-auto mb-8 p-1.5 border border-[#FFE8E0] relative group-hover:scale-105 transition-transform duration-700">
+                                    <div className="bg-bg-elevated rounded-[--radius-3xl] p-12 border border-border shadow-sm text-center relative overflow-hidden group">
+                                        <div className="w-48 h-48 bg-brand-muted rounded-[--radius-3xl] mx-auto mb-8 p-1.5 border border-brand/20 relative group-hover:scale-105 transition-transform duration-700">
                                             <img 
                                                 src={pets.find(p => p.name === selectedPet)?.image} 
-                                                className="w-full h-full object-cover rounded-[48px]" 
+                                                className="w-full h-full object-cover rounded-[--radius-2xl]" 
                                             />
-                                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-full border border-zinc-100 shadow-sm text-[#FF7B54]">
+                                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-bg-elevated px-4 py-2 rounded-full border border-border shadow-sm text-brand">
                                                 <Heart size={14} fill="currentColor" />
                                             </div>
                                         </div>
                                         
-                                        <h2 className="text-4xl font-black text-zinc-900 tracking-tighter mb-2 italic">{selectedPet}</h2>
-                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FF7B54] mb-8">{pets.find(p => p.name === selectedPet)?.breed} • {pets.find(p => p.name === selectedPet)?.age}</p>
+                                        <h2 className="text-h2 font-bold text-text-primary tracking-tighter mb-2 italic">{selectedPet}</h2>
+                                        <p className="text-overline text-brand mb-8">{pets.find(p => p.name === selectedPet)?.breed} • {pets.find(p => p.name === selectedPet)?.age}</p>
                                         
                                         <div className="grid grid-cols-2 gap-4">
-                                            <div className="bg-zinc-50 rounded-[32px] p-6 border border-zinc-100">
-                                                <span className="block text-[8px] font-black uppercase tracking-widest text-zinc-400 mb-1">Weight</span>
-                                                <span className="text-sm font-black text-zinc-900 italic">{pets.find(p => p.name === selectedPet)?.weight}</span>
+                                            <div className="bg-bg-secondary rounded-[--radius-xl] p-6 border border-border">
+                                                <span className="text-overline block mb-1">Weight</span>
+                                                <span className="text-label-lg font-bold text-text-primary italic">{pets.find(p => p.name === selectedPet)?.weight}</span>
                                             </div>
-                                            <div className="bg-zinc-50 rounded-[32px] p-6 border border-zinc-100">
-                                                <span className="block text-[8px] font-black uppercase tracking-widest text-zinc-400 mb-1">Gender</span>
-                                                <span className="text-sm font-black text-zinc-900 italic">{pets.find(p => p.name === selectedPet)?.gender}</span>
+                                            <div className="bg-bg-secondary rounded-[--radius-xl] p-6 border border-border">
+                                                <span className="text-overline block mb-1">Gender</span>
+                                                <span className="text-label-lg font-bold text-text-primary italic">{pets.find(p => p.name === selectedPet)?.gender}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -270,36 +270,36 @@ export default function UserDashboardClient() {
                                 {/* ACTION CARDS & HISTORY */}
                                 <div className="xl:col-span-8 space-y-12">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="bg-white p-10 rounded-[48px] border border-zinc-100 shadow-xl shadow-zinc-500/5 flex items-center gap-8 group hover:border-[#FF7B54]/20 transition-all">
-                                            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center border border-rose-100 shrink-0 group-hover:scale-110 transition-transform">
+                                        <div className="bg-bg-elevated p-10 rounded-[--radius-2xl] border border-border shadow-sm flex items-center gap-8 group hover:border-danger hover:shadow-md transition-all">
+                                            <div className="w-16 h-16 bg-danger-muted text-danger rounded-[--radius-xl] flex items-center justify-center border border-danger/20 shrink-0 group-hover:scale-110 transition-transform">
                                                 <Syringe size={28} />
                                             </div>
                                             <div>
-                                                <span className="block text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-1">Vaccination</span>
-                                                <h4 className="text-xl font-black text-zinc-900 tracking-tight italic">Rabies Booster</h4>
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-rose-500 mt-1">Due in 14 days</p>
+                                                <span className="text-overline block mb-1">Vaccination</span>
+                                                <h4 className="text-h4 font-bold text-text-primary tracking-tight italic">Rabies Booster</h4>
+                                                <p className="text-overline text-danger mt-1">Due in 14 days</p>
                                             </div>
                                         </div>
-                                        <div className="bg-white p-10 rounded-[48px] border border-zinc-100 shadow-xl shadow-zinc-500/5 flex items-center gap-8 group hover:border-indigo-600/20 transition-all">
-                                            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center border border-indigo-100 shrink-0 group-hover:scale-110 transition-transform">
+                                        <div className="bg-bg-elevated p-10 rounded-[--radius-2xl] border border-border shadow-sm flex items-center gap-8 group hover:border-info hover:shadow-md transition-all">
+                                            <div className="w-16 h-16 bg-info-muted text-info rounded-[--radius-xl] flex items-center justify-center border border-info/20 shrink-0 group-hover:scale-110 transition-transform">
                                                 <Calendar size={28} />
                                             </div>
                                             <div>
-                                                <span className="block text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-1">Grooming</span>
-                                                <h4 className="text-xl font-black text-zinc-900 tracking-tight italic">Spa Day</h4>
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300 mt-1">Oct 24th, 10 AM</p>
+                                                <span className="text-overline block mb-1">Grooming</span>
+                                                <h4 className="text-h4 font-bold text-text-primary tracking-tight italic">Spa Day</h4>
+                                                <p className="text-overline text-text-secondary mt-1">Oct 24th, 10 AM</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* MEDICAL HISTORY */}
-                                    <div className="bg-white rounded-[56px] border border-zinc-100 shadow-[0_50px_100px_rgba(0,0,0,0.05)] overflow-hidden">
-                                        <div className="px-10 py-8 border-b border-zinc-50 flex justify-between items-center bg-zinc-50/10">
+                                    <div className="bg-bg-elevated rounded-[--radius-3xl] border border-border shadow-sm overflow-hidden">
+                                        <div className="px-10 py-8 border-b border-border flex justify-between items-center bg-bg-secondary">
                                             <div className="flex items-center gap-3 italic">
-                                                <Clipboard size={22} className="text-[#FF7B54]" />
-                                                <h3 className="text-2xl font-black text-zinc-900 tracking-tighter">Medical History</h3>
+                                                <Clipboard size={22} className="text-brand" />
+                                                <h3 className="text-h3 font-bold text-text-primary tracking-tighter">Medical History</h3>
                                             </div>
-                                            <button className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-[#FF7B54] transition-colors">Download PDF</button>
+                                            <button className="text-overline hover:text-brand transition-colors">Download PDF</button>
                                         </div>
                                         
                                         <div className="p-10 space-y-6">
@@ -307,22 +307,22 @@ export default function UserDashboardClient() {
                                                 { date: 'Aug 12', title: 'Annual Checkup', provider: 'Vet: Dr. Smith • General' },
                                                 { date: 'May 04', title: 'Deworming', provider: 'Vet: Nurse Joy • Vaccine' }
                                             ].map((item, i) => (
-                                                <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-8 bg-zinc-50/50 rounded-[32px] border border-zinc-100 group hover:border-emerald-500 transition-all">
+                                                <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-8 bg-bg-secondary rounded-[--radius-2xl] border border-border group hover:border-success transition-all">
                                                     <div className="flex items-center gap-8 mb-4 md:mb-0">
-                                                        <div className="w-14 h-14 bg-white rounded-2xl flex flex-col items-center justify-center shadow-sm border border-zinc-100">
-                                                            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{item.date.split(' ')[0]}</span>
-                                                            <span className="text-lg font-black text-zinc-900 italic leading-none">{item.date.split(' ')[1]}</span>
+                                                        <div className="w-14 h-14 bg-bg-elevated rounded-[--radius-lg] flex flex-col items-center justify-center shadow-sm border border-border">
+                                                            <span className="text-[9px] font-bold uppercase tracking-wider text-text-tertiary">{item.date.split(' ')[0]}</span>
+                                                            <span className="text-label-lg font-bold text-text-primary italic leading-none mt-0.5">{item.date.split(' ')[1]}</span>
                                                         </div>
                                                         <div>
-                                                            <h5 className="font-black text-zinc-900 text-lg italic tracking-tight">{item.title}</h5>
-                                                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">{item.provider}</p>
+                                                            <h5 className="font-bold text-text-primary text-lg italic tracking-tight">{item.title}</h5>
+                                                            <p className="text-overline mt-1">{item.provider}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-6">
-                                                        <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-100">
+                                                        <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-success-muted text-success rounded-full text-[9px] font-bold uppercase tracking-wider border border-success/20">
                                                             <CheckCircle size={10} /> Completed
                                                         </span>
-                                                        <button className="w-12 h-12 bg-white rounded-2xl border border-zinc-100 flex items-center justify-center text-zinc-300 group-hover:text-emerald-500 transition-all shadow-sm">
+                                                        <button className="w-12 h-12 bg-bg-elevated rounded-[--radius-lg] border border-border flex items-center justify-center text-text-tertiary group-hover:text-success transition-all shadow-sm">
                                                             <ChevronRight size={20} />
                                                         </button>
                                                     </div>
@@ -339,21 +339,21 @@ export default function UserDashboardClient() {
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                             {/* Profile Identity Component */}
                             <div className="lg:col-span-5 space-y-8">
-                                <section className="bg-white rounded-[48px] p-10 border border-zinc-100 shadow-[0_30px_60px_rgba(0,0,0,0.03)] h-full">
+                                <section className="bg-bg-elevated rounded-[--radius-3xl] p-10 border border-border shadow-sm h-full">
                                     <div className="text-center mb-10">
                                         <div className="relative inline-block group">
-                                            <div className="w-40 h-40 bg-[#FFF4F0] rounded-[48px] p-1 overflow-hidden border-2 border-zinc-50 border-dashed hover:border-[#FF7B54] transition-colors">
+                                            <div className="w-40 h-40 bg-brand-muted rounded-[--radius-3xl] p-1 overflow-hidden border-2 border-dashed border-border hover:border-brand transition-colors">
                                                 {profileData.image ? (
-                                                    <img src={profileData.image} className="w-full h-full object-cover rounded-[40px]" />
+                                                    <img src={profileData.image} className="w-full h-full object-cover rounded-[--radius-2xl]" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-[#FF7B54]">
+                                                    <div className="w-full h-full flex items-center justify-center text-brand">
                                                         <UserIcon size={48} />
                                                     </div>
                                                 )}
                                             </div>
                                             <button 
                                                 onClick={() => fileInputRef.current?.click()}
-                                                className="absolute -bottom-2 -right-2 w-12 h-12 bg-[#FF7B54] text-white rounded-2xl flex items-center justify-center shadow-xl shadow-[#FF7B54]/20 border-4 border-white hover:scale-110 transition-all"
+                                                className="absolute -bottom-2 -right-2 w-12 h-12 bg-brand text-white rounded-[--radius-lg] flex items-center justify-center shadow-lg border-4 border-bg-elevated hover:scale-110 transition-all"
                                             >
                                                 <Camera size={20} />
                                             </button>
@@ -365,33 +365,33 @@ export default function UserDashboardClient() {
                                                 accept="image/*"
                                             />
                                         </div>
-                                        <h3 className="text-2xl font-black text-zinc-900 tracking-tighter italic mt-6">Display Identity</h3>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#FF7B54] mt-1">This is how the fleet sees you.</p>
+                                        <h3 className="text-h3 font-bold text-text-primary tracking-tighter italic mt-6">Display Identity</h3>
+                                        <p className="text-overline text-brand mt-1">This is how the fleet sees you.</p>
                                     </div>
 
                                     <form onSubmit={handleUpdateProfile} className="space-y-6">
                                         <div className="space-y-1.5 px-1">
-                                            <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Full Legal Name</label>
+                                            <label className="text-overline ml-1">Full Legal Name</label>
                                             <div className="relative">
-                                                <UserIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" />
+                                                <UserIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled" />
                                                 <input 
                                                     type="text"
                                                     value={profileData.name}
                                                     onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                                                    className="w-full bg-zinc-50 border border-zinc-100 rounded-3xl py-5 pl-14 pr-6 text-sm font-black text-zinc-900 focus:outline-none focus:ring-4 focus:ring-[#FF7B54]/5 focus:border-[#FF7B54] transition-all"
+                                                    className="w-full bg-bg-secondary border border-border rounded-[--radius-xl] py-5 pl-14 pr-6 text-body-sm font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-brand/10 focus:border-brand transition-all"
                                                     placeholder="John Doe"
                                                 />
                                             </div>
                                         </div>
                                         <div className="space-y-1.5 px-1">
-                                            <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Avatar Link (Photo URL)</label>
+                                            <label className="text-overline ml-1">Avatar Link (Photo URL)</label>
                                             <div className="relative">
-                                                <ArrowRight size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" />
+                                                <ArrowRight size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled" />
                                                 <input 
                                                     type="text"
                                                     value={profileData.image}
                                                     onChange={(e) => setProfileData({ ...profileData, image: e.target.value })}
-                                                    className="w-full bg-zinc-50 border border-zinc-100 rounded-3xl py-5 pl-14 pr-6 text-sm font-black text-zinc-900 focus:outline-none focus:ring-4 focus:ring-[#FF7B54]/5 focus:border-[#FF7B54] transition-all"
+                                                    className="w-full bg-bg-secondary border border-border rounded-[--radius-xl] py-5 pl-14 pr-6 text-body-sm font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-brand/10 focus:border-brand transition-all"
                                                     placeholder="https://..."
                                                 />
                                             </div>
@@ -399,7 +399,7 @@ export default function UserDashboardClient() {
                                         <button 
                                             type="submit"
                                             disabled={updating}
-                                            className="w-full bg-zinc-900 text-white rounded-[32px] py-5 font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-zinc-800 transition-all disabled:opacity-50"
+                                            className="w-full bg-text-primary text-text-inverse rounded-[--radius-xl] py-5 font-bold text-label-sm uppercase tracking-wider flex items-center justify-center gap-3 hover:bg-text-secondary transition-all disabled:opacity-50"
                                         >
                                             <Save size={18} /> {updating ? 'Syncing...' : 'Sync Identity'}
                                         </button>
@@ -409,65 +409,65 @@ export default function UserDashboardClient() {
 
                             {/* Credential Shield Component */}
                             <div className="lg:col-span-7">
-                                <section className="bg-white rounded-[48px] p-10 border border-zinc-100 shadow-[0_30px_60px_rgba(0,0,0,0.03)] h-full">
+                                <section className="bg-bg-elevated rounded-[--radius-3xl] p-10 border border-border shadow-sm h-full">
                                     <div className="flex items-center gap-6 mb-12">
-                                        <div className="w-16 h-16 bg-zinc-900 text-white rounded-3xl flex items-center justify-center shadow-xl shadow-zinc-900/10">
+                                        <div className="w-16 h-16 bg-text-primary text-text-inverse rounded-[--radius-xl] flex items-center justify-center shadow-lg">
                                             <ShieldCheck size={28} />
                                         </div>
                                         <div>
-                                            <h3 className="text-3xl font-black text-zinc-900 tracking-tighter italic">Credential Shield</h3>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#FF7B54]">Secure credential rotation node.</p>
+                                            <h3 className="text-h3 font-bold text-text-primary tracking-tighter italic">Credential Shield</h3>
+                                            <p className="text-overline text-brand">Secure credential rotation node.</p>
                                         </div>
                                     </div>
 
                                     <form onSubmit={handlePasswordChange} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="md:col-span-2 space-y-1.5 px-1">
-                                            <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Identity Secret (Current Password)</label>
+                                            <label className="text-overline ml-1">Identity Secret (Current Password)</label>
                                             <div className="relative">
-                                                <Key size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" />
+                                                <Key size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled" />
                                                 <input 
                                                     type={passwordState.showCurrent ? "text" : "password"}
                                                     value={passwordState.current}
                                                     onChange={(e) => setPasswordState({ ...passwordState, current: e.target.value })}
-                                                    className="w-full bg-zinc-50 border border-zinc-100 rounded-3xl py-5 pl-14 pr-14 text-sm font-black text-zinc-900 focus:outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500 transition-all"
+                                                    className="w-full bg-bg-secondary border border-border rounded-[--radius-xl] py-5 pl-14 pr-14 text-body-sm font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-danger/10 focus:border-danger transition-all"
                                                 />
                                                 <button 
                                                     type="button"
                                                     onClick={() => setPasswordState({ ...passwordState, showCurrent: !passwordState.showCurrent })}
-                                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-rose-500 transition-colors"
+                                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-text-disabled hover:text-danger transition-colors"
                                                 >
                                                     {passwordState.showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
                                                 </button>
                                             </div>
                                         </div>
                                         <div className="space-y-1.5 px-1">
-                                            <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">New Node Key</label>
+                                            <label className="text-overline ml-1">New Node Key</label>
                                             <div className="relative">
-                                                <LockIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" />
+                                                <LockIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled" />
                                                 <input 
                                                     type={passwordState.showNew ? "text" : "password"}
                                                     value={passwordState.new}
                                                     onChange={(e) => setPasswordState({ ...passwordState, new: e.target.value })}
-                                                    className="w-full bg-zinc-50 border border-zinc-100 rounded-3xl py-5 pl-14 pr-14 text-sm font-black text-zinc-900 focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 transition-all"
+                                                    className="w-full bg-bg-secondary border border-border rounded-[--radius-xl] py-5 pl-14 pr-14 text-body-sm font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-info/10 focus:border-info transition-all"
                                                 />
                                                 <button 
                                                     type="button"
                                                     onClick={() => setPasswordState({ ...passwordState, showNew: !passwordState.showNew })}
-                                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-indigo-600 transition-colors"
+                                                    className="absolute right-5 top-1/2 -translate-y-1/2 text-text-disabled hover:text-info transition-colors"
                                                 >
                                                     {passwordState.showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                                                 </button>
                                             </div>
                                         </div>
                                         <div className="space-y-1.5 px-1">
-                                            <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest ml-1">Confirm Node Key</label>
+                                            <label className="text-overline ml-1">Confirm Node Key</label>
                                             <div className="relative">
-                                                <LockIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-300" />
+                                                <LockIcon size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled" />
                                                 <input 
                                                     type={passwordState.showNew ? "text" : "password"}
                                                     value={passwordState.confirm}
                                                     onChange={(e) => setPasswordState({ ...passwordState, confirm: e.target.value })}
-                                                    className="w-full bg-zinc-50 border border-zinc-100 rounded-3xl py-5 pl-14 pr-14 text-sm font-black text-zinc-900 focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 transition-all"
+                                                    className="w-full bg-bg-secondary border border-border rounded-[--radius-xl] py-5 pl-14 pr-14 text-body-sm font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-info/10 focus:border-info transition-all"
                                                 />
                                             </div>
                                         </div>
@@ -476,14 +476,14 @@ export default function UserDashboardClient() {
                                                 <button 
                                                     type="submit"
                                                     disabled={updating}
-                                                    className="w-full bg-indigo-600 text-white rounded-[32px] py-6 font-black text-[11px] uppercase tracking-[0.3em] shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50"
+                                                    className="w-full bg-info text-white rounded-[--radius-xl] py-6 font-bold text-label-sm uppercase tracking-wider shadow-md hover:bg-info-hover hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50"
                                                 >
                                                     Rotate Security Credentials
                                                 </button>
                                                 <button 
                                                     type="button"
                                                     onClick={() => toast.error('Check your registered email for reset instructions.')}
-                                                    className="text-[9px] font-black uppercase tracking-widest text-[#FF7B54] hover:text-[#e66c4a] transition-colors"
+                                                    className="text-label-sm font-bold uppercase tracking-wider text-brand hover:text-brand-hover transition-colors"
                                                 >
                                                     Forgot Node Keychain Access?
                                                 </button>
@@ -497,10 +497,10 @@ export default function UserDashboardClient() {
 
 
                     {(activeTab === 'Appointments' || activeTab === 'Alerts') && (
-                        <div className="bg-white rounded-[60px] border border-zinc-100 shadow-2xl p-32 text-center">
-                            <Activity size={64} className="mx-auto text-zinc-50 mb-8 animate-pulse" />
-                            <h3 className="text-4xl font-black text-zinc-900 tracking-tighter italic mb-4">{activeTab} Node Offline</h3>
-                            <p className="text-zinc-400 font-bold text-lg max-w-md mx-auto">This intelligence module is currently being provisioned for your elite pet care experience.</p>
+                        <div className="bg-bg-elevated rounded-[--radius-3xl] border border-border shadow-sm p-32 text-center">
+                            <Activity size={64} className="mx-auto text-text-disabled mb-8 animate-pulse" />
+                            <h3 className="text-h2 font-bold text-text-primary tracking-tighter italic mb-4">{activeTab} Node Offline</h3>
+                            <p className="text-text-secondary font-semibold text-lg max-w-md mx-auto">This intelligence module is currently being provisioned for your elite pet care experience.</p>
                         </div>
                     )}
 

@@ -69,24 +69,24 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-bg-secondary flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Package className="w-8 h-8 text-orange-500" />
+          <div className="w-16 h-16 bg-brand-muted rounded-[--radius-lg] flex items-center justify-center mx-auto mb-4">
+            <Package className="w-8 h-8 text-brand" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-          <p className="text-gray-600 mt-2">Join us and start shopping</p>
+          <h1 className="text-h2 text-text-primary">Create Account</h1>
+          <p className="text-body-sm text-text-secondary mt-2">Join us and start shopping</p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-8">
+        <div className="bg-bg-elevated rounded-[--radius-xl] border border-border p-8 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <label className="block text-label-lg text-text-primary mb-1">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
                 <Input
                   type="text"
                   value={formData.name}
@@ -99,9 +99,9 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-label-lg text-text-primary mb-1">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
                 <Input
                   type="email"
                   value={formData.email}
@@ -114,7 +114,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
+              <label className="block text-label-lg text-text-primary mb-1">Phone (Optional)</label>
               <Input
                 type="tel"
                 value={formData.phone}
@@ -124,9 +124,9 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-label-lg text-text-primary mb-1">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
@@ -138,7 +138,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -146,9 +146,9 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <label className="block text-label-lg text-text-primary mb-1">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
@@ -165,15 +165,16 @@ export default function RegisterPage() {
               disabled={loading}
               variant="primary"
               size="lg"
-              className="w-full"
+              fullWidth
+              loading={loading}
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
 
-          <p className="text-center text-sm text-gray-600 mt-6">
+          <p className="text-center text-body-sm text-text-secondary mt-6">
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-orange-500 font-medium hover:underline">
+            <Link href="/auth/login" className="text-brand font-semibold hover:underline">
               Sign In
             </Link>
           </p>

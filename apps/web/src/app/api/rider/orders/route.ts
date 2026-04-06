@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest) {
         { 
           orderStatus: 'accepted'
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!order) {

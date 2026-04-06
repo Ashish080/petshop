@@ -56,7 +56,7 @@ export async function PATCH(
     const order = await Order.findOneAndUpdate(
       guardConditions,
       { $set: { orderStatus: targetStatus } },
-      { new: true, lean: true }
+      { returnDocument: 'after', lean: true }
     );
 
     if (!order) {

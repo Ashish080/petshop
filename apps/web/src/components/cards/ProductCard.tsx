@@ -2,11 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, Heart } from 'lucide-react';
+import { Star, Heart, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { themeConfig } from '@/config/theme';
-import CartPawButton from '@/components/ui/CartPawButton';
 import { useCartStore } from '@/store/cartStore';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/400x400';
 
@@ -38,8 +38,9 @@ export default function ProductCard({ id, name, price, rating, reviews, images, 
     };
 
     return (
-        <div className={`bg-white dark:bg-card-bg group overflow-hidden transition-all duration-500 hover:-translate-y-2 border border-card-border ${themeConfig.radius.lg} ${themeConfig.shadows.soft} hover:${themeConfig.shadows.hover}`}>
-            <div className="relative h-56 w-full overflow-hidden bg-bg-page/50 p-4">
+        <div className="bg-bg-tertiary group overflow-hidden transition-all duration-[--duration-slow] ease-[--ease-out-expo] hover:-translate-y-1.5 border border-border hover:border-border-hover rounded-[--radius-lg] shadow-xs hover:shadow-sm">
+            {/* Image Area */}
+            <div className="relative h-56 w-full overflow-hidden bg-bg-secondary">
                 <Image
                     src={coverSrc}
                     alt={name}
@@ -48,42 +49,49 @@ export default function ProductCard({ id, name, price, rating, reviews, images, 
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
                 {isBestSeller && (
-                    <span className="absolute top-4 left-4 px-3 py-1 bg-secondary text-white text-[10px] font-black uppercase tracking-widest rounded-full">
-                        Best Seller
-                    </span>
+                    <div className="absolute top-3 left-3">
+                        <Badge variant="brand" size="sm">Best Seller</Badge>
+                    </div>
                 )}
-                <button className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-lg text-zinc-400 hover:text-brand-primary transition-all z-10 border border-zinc-100 hover:scale-110 active:scale-95">
-                    <Heart size={20} fill={false ? "currentColor" : "none"} />
+                <button className="absolute top-3 right-3 p-2 bg-bg-elevated rounded-full shadow-sm text-text-disabled hover:text-danger transition-all z-10 border border-border hover:scale-110 active:scale-95">
+                    <Heart size={18} fill="none" />
                 </button>
             </div>
 
+            {/* Content */}
             <div className="p-5">
                 {category && (
-                    <span className="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em] mb-3 block capitalize">
+                    <span className="text-overline text-brand mb-2 block capitalize">
                         {category}
                     </span>
                 )}
-                <div className="flex items-center gap-2 mb-3">
-                    <div className="flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-lg">
-                        <Star className="text-secondary fill-secondary" size={12} />
-                        <span className="text-xs font-black text-zinc-900">{rating}</span>
+
+                {/* Rating */}
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1 bg-warning-muted px-2 py-0.5 rounded-[--radius-sm]">
+                        <Star className="text-warning fill-warning" size={12} />
+                        <span className="text-label text-text-primary">{rating}</span>
                     </div>
-                    <span className="text-xs text-zinc-500 font-bold">({reviews} reviews)</span>
+                    <span className="text-body-xs">({reviews} reviews)</span>
                 </div>
 
+                {/* Title */}
                 <Link href={`/products/${id}`}>
-                    <h3 className="text-base font-black mb-1 line-clamp-2 min-h-[40px] hover:text-brand-primary transition-colors text-text-primary leading-tight">
+                    <h3 className="text-h6 text-text-primary mb-1 line-clamp-2 min-h-[2.5rem] hover:text-brand transition-colors leading-snug">
                         {name}
                     </h3>
                 </Link>
 
+                {/* Price + CTA */}
                 <div className="flex items-center justify-between mt-4">
-                    <span className="text-lg font-black text-brand-primary">₹{price.toLocaleString('en-IN')}</span>
-                    <CartPawButton
-                        className={`p-2.5 transition-all flex items-center justify-center hover:scale-110 active:scale-90 shadow-md ${themeConfig.radius.lg}`}
-                        style={{ backgroundColor: `${themeConfig.colors.secondary}`, color: 'white' }}
-                        ariaLabel="Add to cart"
-                        onAddToCart={handleAddToCart}
+                    <span className="text-h4 text-stat text-brand">₹{price.toLocaleString('en-IN')}</span>
+                    <Button
+                        size="sm"
+                        variant="primary"
+                        icon={<ShoppingBag size={16} />}
+                        onClick={handleAddToCart}
+                        aria-label="Add to cart"
+                        className="!px-3"
                     />
                 </div>
             </div>

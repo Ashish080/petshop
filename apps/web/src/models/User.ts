@@ -9,8 +9,12 @@ export interface IUser extends Document {
   phone?: string;
   avatar?: string;
   image?: string;
+  lifetimeSpend: number;
+  membershipTier: 'silver' | 'gold' | 'platinum';
   createdAt: Date;
   updatedAt: Date;
+  referralCode: string;
+  referredBy?: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -33,16 +37,33 @@ const UserSchema = new Schema<IUser>({
   },
   phone: String,
   avatar: String,
-  image: String
+  image: String,
+  lifetimeSpend: { type: Number, default: 0 },
+  membershipTier: { 
+    type: String, 
+    enum: ['silver', 'gold', 'platinum'], 
+    default: 'silver' 
+  },
+  referralCode: { type: String, unique: true, index: true },
+  referredBy: { type: String, index: true }
 }, {
   timestamps: true
 });
 
 UserSchema.pre('save', async function () {
   const doc = this as IUser;
-  if (!doc.isModified('password')) return;
-  const salt = await bcrypt.genSalt(10);
-  doc.password = await bcrypt.hash(doc.password, salt);
+  
+  // 1. Password Hashing
+  if (doc.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    doc.password = await bcrypt.hash(doc.password, salt);
+  }
+
+  // 2. Referral Code Generation
+  if (!doc.referralCode) {
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    doc.referralCode = `${doc.name?.split(' ')[0]?.toUpperCase() || 'PET'}-${random}`;
+  }
 });
 
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {

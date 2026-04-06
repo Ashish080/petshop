@@ -38,6 +38,7 @@ export interface IOrder extends Document {
   };
   createdAt: Date;
   updatedAt: Date;
+  notes?: string;
 }
 
 const OrderItemSchema = new Schema({
@@ -88,7 +89,8 @@ const OrderSchema = new Schema<IOrder>({
     state: { type: String, required: true },
     zipCode: { type: String, required: true },
     country: { type: String, required: true }
-  }
+  },
+  notes: { type: String }
 }, {
   timestamps: true
 });

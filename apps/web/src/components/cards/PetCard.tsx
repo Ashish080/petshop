@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle2, Award, Heart, MessageCircle, Star, Sparkles } from 'lucide-react';
+import { Heart, MessageCircle, Star, Sparkles } from 'lucide-react';
 import { brandConfig } from '@/config/brand';
 import { motion } from 'framer-motion';
+import { Badge } from '@/components/ui/Badge';
+import { interactions, easing, duration } from '@/lib/motion';
 
 interface PetCardProps {
     id: string;
@@ -22,10 +23,11 @@ export default function PetCard({ id, name, breed, age, image, healthStatus, pri
 
     return (
         <motion.div 
-            whileHover={{ y: -10 }}
-            className="bg-white dark:bg-card-bg border border-zinc-100 rounded-[40px] overflow-hidden hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] transition-all duration-500 group relative"
+            whileHover={{ y: -6, transition: { duration: duration.normal, ease: easing.outExpo } }}
+            className="bg-bg-tertiary border border-border rounded-[--radius-xl] overflow-hidden hover:shadow-sm hover:border-border-hover transition-all duration-[--duration-slow] group relative"
         >
-            <div className="relative h-72 w-full overflow-hidden bg-zinc-50">
+            {/* Image */}
+            <div className="relative h-72 w-full overflow-hidden bg-bg-secondary">
                 <Image
                     src={image}
                     alt={`Photo of ${breed}`}
@@ -34,55 +36,57 @@ export default function PetCard({ id, name, breed, age, image, healthStatus, pri
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
                 
-                {/* Status Badges */}
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
-                    <div className="bg-white/90 backdrop-blur-md text-zinc-900 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-xl border border-white/20 flex items-center gap-2">
-                        <Sparkles size={12} className="text-brand-primary" /> Premium
-                    </div>
+                {/* Status Badge */}
+                <div className="absolute top-4 left-4">
+                    <Badge variant="brand" size="lg" className="glass">
+                        <Sparkles size={12} /> Premium
+                    </Badge>
                 </div>
 
-                <button className="absolute top-6 right-6 p-3 bg-white/90 backdrop-blur-md rounded-full shadow-xl text-zinc-400 hover:text-red-500 hover:scale-110 transition-all border border-white/20">
-                    <Heart size={20} />
+                {/* Wishlist */}
+                <button className="absolute top-4 right-4 p-2.5 glass rounded-full text-text-disabled hover:text-danger hover:scale-110 transition-all">
+                    <Heart size={18} />
                 </button>
             </div>
 
-            <div className="p-8">
-                <div className="flex justify-between items-start mb-4">
+            {/* Content */}
+            <div className="p-6">
+                <div className="flex justify-between items-start mb-3">
                     <div>
-                        <h3 className="text-3xl font-black text-zinc-900 tracking-tighter leading-none mb-2">{name}</h3>
-                        <p className="text-xs font-black text-brand-primary uppercase tracking-widest">{breed}</p>
+                        <h3 className="text-h3 text-text-primary tracking-tight leading-none mb-1">{name}</h3>
+                        <p className="text-overline text-brand">{breed}</p>
                     </div>
-                    <div className="flex items-center gap-1 bg-zinc-50 px-3 py-1.5 rounded-2xl border border-zinc-100">
-                        <Star size={14} className="text-amber-500 fill-amber-500" />
-                        <span className="text-sm font-black text-zinc-900">4.9</span>
+                    <div className="flex items-center gap-1 bg-bg-secondary px-2.5 py-1 rounded-[--radius-md] border border-border">
+                        <Star size={14} className="text-warning fill-warning" />
+                        <span className="text-label text-text-primary">4.9</span>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-8">
+                {/* Health Tags */}
+                <div className="flex flex-wrap gap-1.5 mb-6">
                     {['Health OK', 'KCI Cert', 'Vaccinated'].map((tag) => (
-                        <span key={tag} className="text-[10px] font-black text-zinc-500 uppercase tracking-widest bg-zinc-50 px-3 py-1 rounded-full border border-zinc-100">
-                            {tag}
-                        </span>
+                        <Badge key={tag} variant="default" size="sm">{tag}</Badge>
                     ))}
                 </div>
 
-                <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
+                {/* Price + Actions */}
+                <div className="flex items-center justify-between pt-5 border-t border-border">
                     <div>
-                        <div className="text-2xl font-black text-zinc-900 tracking-tight">₹{price?.toLocaleString('en-IN') || '25,000'}</div>
-                        <div className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Live In Lucknow</div>
+                        <div className="text-h3 text-stat text-text-primary tracking-tight">₹{price?.toLocaleString('en-IN') || '25,000'}</div>
+                        <div className="text-overline mt-0.5">Live In Lucknow</div>
                     </div>
                     
                     <div className="flex gap-2">
-                        <Link href="/contact" className="p-4 bg-zinc-100 rounded-3xl text-zinc-900 hover:bg-zinc-200 transition-all">
-                             <MessageCircle size={24} />
+                        <Link href="/contact" className="p-3 bg-bg-secondary rounded-[--radius-lg] text-text-secondary hover:bg-bg-inset transition-all">
+                             <MessageCircle size={20} />
                         </Link>
                         <Link 
                             href={waLink}
                             target="_blank"
-                            className="bg-zinc-900 text-white p-4 rounded-3xl hover:bg-brand-primary transition-all shadow-xl shadow-zinc-900/10 hover:scale-110 active:scale-95 group"
+                            className="bg-text-primary text-text-inverse p-3 rounded-[--radius-lg] hover:bg-brand transition-all shadow-xs hover:scale-105 active:scale-95 group/btn"
                         >
                             <span className="sr-only">Inquire via WhatsApp</span>
-                            <Sparkles size={24} className="group-hover:rotate-12 transition-transform" />
+                            <Sparkles size={20} className="group-hover/btn:rotate-12 transition-transform" />
                         </Link>
                     </div>
                 </div>
@@ -90,4 +94,3 @@ export default function PetCard({ id, name, breed, age, image, healthStatus, pri
         </motion.div>
     );
 }
-

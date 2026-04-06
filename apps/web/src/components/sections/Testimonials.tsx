@@ -4,97 +4,98 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Star, Quote, ShieldCheck, MapPin } from 'lucide-react';
 import { testimonialsData } from '@/data/testimonials';
-import { themeConfig } from '@/config/theme';
+import { staggerVariants, staggerItemVariants, scrollRevealVariants } from '@/lib/motion';
 
 export default function Testimonials() {
     return (
-        <section className="py-24 md:py-40 bg-white overflow-hidden relative">
-            {/* Visual Accents */}
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-200 to-transparent opacity-20" />
+        <section className="section-padding bg-bg-primary overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
             
-            <div className={themeConfig.spacing.container}>
-                {/* Section Branding: High Contrast */}
-                <div className="grid lg:grid-cols-2 gap-20 items-end mb-24 md:mb-32">
+            <div className="container-app">
+                {/* Section Header */}
+                <div className="grid lg:grid-cols-2 gap-16 items-end mb-16 md:mb-24">
                     <motion.div 
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        variants={scrollRevealVariants}
+                        initial="offscreen"
+                        whileInView="onscreen"
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-zinc-900 text-white font-black text-[10px] uppercase tracking-[0.4em] mb-10 shadow-2xl">
-                           <ShieldCheck size={14} className="text-brand-primary" strokeWidth={3} /> Verified on Justdial
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[--radius-full] bg-text-primary text-text-inverse text-label-sm uppercase tracking-wider mb-8 shadow-lg">
+                           <ShieldCheck size={14} className="text-brand" /> Verified on Justdial
                         </div>
                         
-                        <h2 className="text-7xl md:text-[8rem] font-black text-zinc-900 tracking-tighter leading-[0.75] mb-12 uppercase italic">
+                        <h2 className="text-display md:text-[5rem] text-text-primary tracking-tighter leading-[0.85] uppercase mb-8">
                             WHAT PET <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-orange-500 to-amber-500">PARENTS</span> <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand via-orange-400 to-amber-500">PARENTS</span> <br />
                             SAY.
                         </h2>
                     </motion.div>
 
                     <motion.div
-                        initial={{ opacity: 0, x: 30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        variants={scrollRevealVariants}
+                        initial="offscreen"
+                        whileInView="onscreen"
                         viewport={{ once: true }}
-                        className="lg:col-span-1 border-l-8 border-brand-primary pl-10"
+                        className="lg:col-span-1 border-l-4 border-brand pl-8"
                     >
                         <div className="flex items-center gap-2 mb-6">
-                            {[1,2,3,4,5].map(i => <Star key={i} size={20} fill="#FF7A00" className="text-brand-primary" />)}
+                            {[1,2,3,4,5].map(i => <Star key={i} size={18} fill="currentColor" className="text-brand" />)}
                         </div>
-                        <p className="text-2xl text-zinc-400 font-bold max-w-sm leading-relaxed uppercase tracking-tight">
-                            Don't just take our word for it — join Lucknow's <span className="text-zinc-900 italic">most loved</span> pet community.
+                        <p className="text-h4 text-text-tertiary max-w-sm leading-relaxed font-normal">
+                            Don't just take our word for it — join Lucknow's <span className="text-text-primary font-semibold italic">most loved</span> pet community.
                         </p>
                     </motion.div>
                 </div>
 
-                {/* Bento Grid Gallery */}
-                <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+                {/* Testimonial Grid */}
+                <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
                     {testimonialsData.map((testimonial, i) => (
                         <motion.div
                             key={testimonial.id}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
+                            variants={staggerItemVariants}
+                            initial="hidden"
+                            whileInView="visible"
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
                             className="break-inside-avoid relative group"
                         >
-                            <div className="bg-zinc-50 border border-zinc-100 p-10 md:p-12 rounded-[50px] transition-all duration-700 hover:bg-white hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] hover:border-brand-primary/20 cursor-default">
-                                {/* Floating Quote Mark */}
-                                <div className="absolute top-10 right-10 opacity-5 group-hover:opacity-20 transition-opacity">
-                                    <Quote size={80} className="text-brand-primary rotate-180" />
+                            <div className="bg-bg-secondary border border-border p-8 md:p-10 rounded-[--radius-xl] transition-all duration-[--duration-slow] hover:bg-bg-tertiary hover:shadow-md hover:border-brand/20 cursor-default">
+                                {/* Quote Mark */}
+                                <div className="absolute top-8 right-8 opacity-5 group-hover:opacity-15 transition-opacity">
+                                    <Quote size={60} className="text-brand rotate-180" />
                                 </div>
 
-                                {/* Content: Emotional & Bold */}
-                                <div className="flex items-center gap-2 mb-8 text-brand-primary">
+                                {/* Stars */}
+                                <div className="flex items-center gap-1.5 mb-6 text-brand">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={16} fill="currentColor" fillOpacity={i < testimonial.rating ? 1 : 0.2} />
+                                        <Star key={i} size={14} fill="currentColor" fillOpacity={i < testimonial.rating ? 1 : 0.2} />
                                     ))}
                                 </div>
                                 
-                                <p className="text-2xl italic mb-12 relative z-10 text-zinc-900 font-black leading-[1.1] tracking-tight">
+                                <p className="text-h4 italic mb-8 relative z-10 text-text-primary leading-snug">
                                     "{testimonial.content}"
                                 </p>
 
-                                {/* Profile Bar */}
-                                <div className="flex items-center justify-between pt-10 border-t border-zinc-100">
-                                    <div className="flex items-center gap-5">
-                                        <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 border-2 border-white shadow-xl ring-2 ring-zinc-100">
+                                {/* Profile */}
+                                <div className="flex items-center justify-between pt-6 border-t border-border">
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-bg-primary shadow-sm ring-2 ring-border">
                                             <Image
                                                 src={testimonial.avatar}
                                                 alt={testimonial.name}
                                                 fill
                                                 className="object-cover transition-transform group-hover:scale-110 duration-700"
-                                                sizes="56px"
+                                                sizes="48px"
                                             />
                                         </div>
                                         <div>
-                                            <h4 className="font-black text-zinc-900 text-lg uppercase tracking-tight">{testimonial.name}</h4>
-                                            <div className="flex items-center gap-1 text-[9px] font-black text-zinc-400 uppercase tracking-widest">
-                                                <MapPin size={10} className="text-brand-primary" /> Lucknow, UP
+                                            <h4 className="text-label-lg text-text-primary">{testimonial.name}</h4>
+                                            <div className="flex items-center gap-1 text-overline">
+                                                <MapPin size={10} className="text-brand" /> Lucknow, UP
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-zinc-300 group-hover:text-brand-primary transition-colors">
-                                        <ShieldCheck size={20} />
+                                    <div className="w-9 h-9 rounded-[--radius-md] bg-bg-elevated flex items-center justify-center text-text-disabled group-hover:text-brand transition-colors">
+                                        <ShieldCheck size={18} />
                                     </div>
                                 </div>
                             </div>
@@ -105,4 +106,3 @@ export default function Testimonials() {
         </section>
     );
 }
-

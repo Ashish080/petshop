@@ -1,7 +1,6 @@
 'use client';
-
 import { useEffect, useRef } from 'react';
-import { useMotionValue, useSpring, useTransform, animate } from 'framer-motion';
+import { useMotionValue, useSpring, useTransform, animate, motion } from 'framer-motion';
 
 export function AnimatedCounter({ value, prefix = "", suffix = "" }: { value: number, prefix?: string, suffix?: string }) {
   const count = useMotionValue(0);
@@ -16,5 +15,3 @@ export function AnimatedCounter({ value, prefix = "", suffix = "" }: { value: nu
 
   return <motion.span>{rounded}</motion.span>;
 }
-
-import { motion } from 'framer-motion';

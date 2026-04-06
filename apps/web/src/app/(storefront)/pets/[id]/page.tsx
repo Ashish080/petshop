@@ -1,10 +1,10 @@
 import { petsData } from '@/data/pets';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { themeConfig } from '@/config/theme';
 import { ShieldCheck, Calendar, Phone, MessageCircle, Heart, Share2, Info } from 'lucide-react';
 import { brandConfig } from '@/config/brand';
 import AdoptPetButton from '@/components/ui/AdoptPetButton';
+import { Badge } from '@/components/ui/Badge';
 
 export default async function PetDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
@@ -15,13 +15,13 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
     }
 
     return (
-        <div className="py-12 md:py-20 bg-bg-page min-h-screen transition-colors duration-300">
-            <div className={themeConfig.spacing.container}>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16">
+        <div className="py-12 md:py-20 bg-bg-primary min-h-screen transition-colors duration-[--duration-normal]">
+            <div className="container-app">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
 
                     {/* Media Column */}
-                    <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-                        <div className={`relative h-[400px] md:h-[600px] w-full overflow-hidden shadow-2xl border border-card-border group ${themeConfig.radius.lg}`}>
+                    <div className="lg:col-span-7 xl:col-span-8 space-y-4">
+                        <div className="relative h-[400px] md:h-[600px] w-full overflow-hidden shadow-md border border-border group rounded-[--radius-xl]">
                             <Image
                                 src={pet.image}
                                 alt={pet.name}
@@ -32,26 +32,25 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
                             />
 
                             {/* Overlay Controls */}
-                            <div className="absolute top-6 right-6 flex flex-col gap-3">
-                                <button className="p-3 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full text-text-primary hover:text-brand-primary transition-all hover:scale-110 shadow-lg">
-                                    <Heart size={20} className="hover:fill-brand-primary" />
+                            <div className="absolute top-4 right-4 flex flex-col gap-2">
+                                <button className="p-2.5 glass rounded-full text-text-primary hover:text-brand transition-all hover:scale-110 shadow-sm">
+                                    <Heart size={18} />
                                 </button>
-                                <button className="p-3 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full text-text-primary hover:text-secondary transition-all hover:scale-110 shadow-lg">
-                                    <Share2 size={20} />
+                                <button className="p-2.5 glass rounded-full text-text-primary hover:text-accent transition-all hover:scale-110 shadow-sm">
+                                    <Share2 size={18} />
                                 </button>
                             </div>
 
-                            {/* Status Overlay */}
-                            <div className="absolute bottom-6 left-6 inline-flex items-center gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-full font-black text-sm shadow-xl animate-bounce-slow">
-                                <ShieldCheck size={18} strokeWidth={3} />
-                                {pet.healthStatus}
+                            {/* Status Badge */}
+                            <div className="absolute bottom-4 left-4">
+                                <Badge variant="success" size="lg" dot>{pet.healthStatus}</Badge>
                             </div>
                         </div>
 
-                        {/* Gallery Thumbnails Mockup */}
-                        <div className="grid grid-cols-4 gap-4">
+                        {/* Gallery Thumbnails */}
+                        <div className="grid grid-cols-4 gap-3">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className={`relative aspect-square overflow-hidden border-2 border-transparent hover:border-brand-primary transition-all cursor-pointer bg-white/10 ${themeConfig.radius.md}`}>
+                                <div key={i} className="relative aspect-square overflow-hidden border-2 border-transparent hover:border-brand transition-all cursor-pointer rounded-[--radius-md]">
                                     <Image
                                         src={pet.image}
                                         alt={`View ${i}`}
@@ -60,7 +59,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
                                         sizes="150px"
                                     />
                                     {i === 4 && (
-                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-black">
+                                        <div className="absolute inset-0 bg-overlay flex items-center justify-center text-white font-semibold">
                                             +5
                                         </div>
                                     )}
@@ -71,66 +70,66 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
 
                     {/* Content Column */}
                     <div className="lg:col-span-5 xl:col-span-4 flex flex-col">
-                        <div className={`bg-white dark:bg-card-bg border border-card-border p-8 lg:p-10 sticky top-28 ${themeConfig.radius.lg} ${themeConfig.shadows.soft}`}>
-                            <div className="mb-8">
-                                <h1 className="text-4xl md:text-5xl font-black mb-3 text-text-primary leading-tight">
+                        <div className="bg-bg-tertiary border border-border p-8 sticky top-28 rounded-[--radius-xl] shadow-xs">
+                            <div className="mb-6">
+                                <h1 className="text-h1 text-text-primary mb-2 leading-tight">
                                     {pet.name}
                                 </h1>
-                                <p className="text-xl text-secondary font-black tracking-tight">
+                                <p className="text-h5 text-accent">
                                     {pet.breed} • {pet.age}
                                 </p>
                             </div>
 
                             {/* Detail Grid */}
-                            <div className="grid grid-cols-2 gap-4 mb-10">
-                                <div className="bg-bg-page/50 dark:bg-white/5 p-4 rounded-2xl border border-card-border/50">
-                                    <span className="text-xs font-black uppercase tracking-widest text-text-light block mb-1">Gender</span>
-                                    <span className="font-black text-text-primary">{pet.gender}</span>
+                            <div className="grid grid-cols-2 gap-3 mb-8">
+                                <div className="bg-bg-secondary p-4 rounded-[--radius-lg] border border-border/50">
+                                    <span className="text-overline block mb-1">Gender</span>
+                                    <span className="text-label-lg text-text-primary">{pet.gender}</span>
                                 </div>
-                                <div className="bg-bg-page/50 dark:bg-white/5 p-4 rounded-2xl border border-card-border/50">
-                                    <span className="text-xs font-black uppercase tracking-widest text-text-light block mb-1">Species</span>
-                                    <span className="font-black text-text-primary">{pet.species}</span>
+                                <div className="bg-bg-secondary p-4 rounded-[--radius-lg] border border-border/50">
+                                    <span className="text-overline block mb-1">Species</span>
+                                    <span className="text-label-lg text-text-primary">{pet.species}</span>
                                 </div>
-                                <div className="bg-bg-page/50 dark:bg-white/5 p-4 rounded-2xl border border-card-border/50 col-span-2 flex items-center gap-3">
-                                    <Calendar className="text-secondary" size={20} />
+                                <div className="bg-bg-secondary p-4 rounded-[--radius-lg] border border-border/50 col-span-2 flex items-center gap-3">
+                                    <Calendar className="text-accent" size={18} />
                                     <div>
-                                        <span className="text-xs font-black uppercase tracking-widest text-text-light block">Vaccinated</span>
-                                        <span className="font-black text-text-primary">Up to date</span>
+                                        <span className="text-overline block">Vaccinated</span>
+                                        <span className="text-label-lg text-text-primary">Up to date</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Description */}
-                            <div className="mb-10">
-                                <h3 className="flex items-center gap-2 text-lg font-black mb-3 text-text-primary">
-                                    <Info size={20} className="text-brand-primary" />
+                            <div className="mb-8">
+                                <h3 className="flex items-center gap-2 text-h5 mb-3">
+                                    <Info size={18} className="text-brand" />
                                     About {pet.name}
                                 </h3>
-                                <p className="text-text-light leading-relaxed font-medium italic">
+                                <p className="text-body-sm italic leading-relaxed">
                                     "{pet.description}"
                                 </p>
                             </div>
 
-                            {/* Action Buttons */}
-                            <div className="space-y-4 pt-6 border-t border-card-border/50">
+                            {/* Actions */}
+                            <div className="space-y-4 pt-6 border-t border-border">
                                 <AdoptPetButton pet={pet} />
 
-                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                <div className="grid grid-cols-2 gap-3 mt-4">
                                     <a
                                         href={`tel:${brandConfig.phone}`}
-                                        className={`flex flex-col items-center justify-center p-4 border border-card-border hover:bg-bg-page transition-all ${themeConfig.radius.lg}`}
+                                        className="flex flex-col items-center justify-center p-4 border border-border hover:bg-bg-secondary transition-all rounded-[--radius-lg]"
                                     >
-                                        <Phone size={20} className="mb-2 text-brand-primary" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-text-light">Call Store</span>
+                                        <Phone size={18} className="mb-2 text-brand" />
+                                        <span className="text-overline">Call Store</span>
                                     </a>
                                     <a
                                         href={brandConfig.whatsapp}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className={`flex flex-col items-center justify-center p-4 border border-card-border hover:bg-bg-page transition-all ${themeConfig.radius.lg}`}
+                                        className="flex flex-col items-center justify-center p-4 border border-border hover:bg-bg-secondary transition-all rounded-[--radius-lg]"
                                     >
-                                        <MessageCircle size={20} className="mb-2 text-green-500" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-text-light">WhatsApp</span>
+                                        <MessageCircle size={18} className="mb-2 text-success" />
+                                        <span className="text-overline">WhatsApp</span>
                                     </a>
                                 </div>
                             </div>
