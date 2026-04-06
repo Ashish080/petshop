@@ -1,42 +1,44 @@
-import Link from 'next/link';
-import { Dog, Cat, Fish, Bird, ShoppingBag, Scissors } from 'lucide-react';
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Bird, Bone, Cat, Dog, Fish, Rabbit, ChevronRight } from "lucide-react";
 
 const categories = [
-    { name: 'Dogs', icon: Dog, href: '/pets?species=dog', color: 'text-brand', bg: 'bg-brand-muted' },
-    { name: 'Cats', icon: Cat, href: '/pets?species=cat', color: 'text-info', bg: 'bg-info-muted' },
-    { name: 'Birds', icon: Bird, href: '/pets?species=bird', color: 'text-success', bg: 'bg-success-muted' },
-    { name: 'Fish', icon: Fish, href: '/pets?species=fish', color: 'text-accent', bg: 'bg-accent-muted' },
-    { name: 'Hamsters', icon: ShoppingBag, href: '/pets?species=hamster', color: 'text-warning', bg: 'bg-warning-muted' },
-    { name: 'Rabbits', icon: Scissors, href: '/pets?species=rabbit', color: 'text-accent', bg: 'bg-accent-muted' },
+  { name: "Dogs", href: "/pets?species=dog", icon: Dog },
+  { name: "Cats", href: "/pets?species=cat", icon: Cat },
+  { name: "Birds", href: "/pets?species=bird", icon: Bird },
+  { name: "Fish", href: "/pets?species=fish", icon: Fish },
+  { name: "Small Pets", href: "/pets?species=hamster", icon: Bone },
+  { name: "Rabbits", href: "/pets?species=rabbit", icon: Rabbit },
 ];
 
 export default function CategoryGrid() {
-    return (
-        <section className="section-padding">
-            <div className="container-app">
-                <div className="text-center mb-10">
-                    <h2 className="text-h1 mb-3">Shop by Category</h2>
-                    <p className="text-body-lg max-w-2xl mx-auto">
-                        Find exactly what you're looking for, from new companions to everyday essentials.
-                    </p>
-                </div>
+  return (
+    <section className="py-24 bg-[#050505]">
+      <div className="container-app">
+        <div className="flex items-center gap-4 mb-16">
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-brand">Taxonomy</span>
+            <div className="h-[1px] flex-1 bg-white/5" />
+        </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {categories.map((category) => {
-                        const Icon = category.icon;
-                        return (
-                            <Link key={category.name} href={category.href} className="group block">
-                                <div className="bg-bg-tertiary p-6 flex flex-col items-center justify-center text-center transition-all duration-[--duration-slow] ease-[--ease-out-expo] hover:-translate-y-1.5 border border-border hover:border-border-hover rounded-[--radius-lg] shadow-xs hover:shadow-sm">
-                                    <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${category.bg} ${category.color}`}>
-                                        <Icon size={28} strokeWidth={1.5} />
-                                    </div>
-                                    <h3 className="text-label-lg text-text-primary group-hover:text-brand transition-colors">{category.name}</h3>
-                                </div>
-                            </Link>
-                        );
-                    })}
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-px bg-white/5 border border-white/5 rounded-[32px] overflow-hidden">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <Link key={category.name} href={category.href} className="group relative bg-[#050505] p-12 transition-all hover:bg-white/[0.02]">
+                <div className="flex flex-col items-center text-center">
+                    <div className="mb-6 text-white/20 group-hover:text-brand transition-colors transform group-hover:scale-110 duration-500">
+                        <Icon size={40} strokeWidth={1} />
+                    </div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 group-hover:text-white transition-colors">
+                      {category.name}
+                    </h3>
+                    <ChevronRight size={14} className="mt-4 text-white/10 group-hover:text-brand group-hover:translate-x-1 transition-all" />
                 </div>
-            </div>
-        </section>
-    );
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
 }

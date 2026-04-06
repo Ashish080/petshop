@@ -1,25 +1,22 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
+import { Suspense, useState } from 'react';
+import { motion } from 'framer-motion';
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, LogIn, ArrowRight, Truck, Zap } from 'lucide-react';
+import { ArrowRight, Lock, Mail, ShieldCheck, Truck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 
 function RiderLoginForm() {
   const router = useRouter();
-  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
 
-  useEffect(() => {
-    if (session?.user?.role === 'rider') router.push('/rider');
-  }, [session, router]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
 
     try {
@@ -30,90 +27,126 @@ function RiderLoginForm() {
       });
 
       if (result?.error) {
-        toast.error('Identity Verification Failed');
-      } else {
-        toast.success('Clearance Granted!');
-        router.push('/rider');
-        router.refresh();
+        toast.error('We could not verify those rider credentials.');
+        return;
       }
+
+      toast.success('Signed in.');
+      router.push('/rider');
+      router.refresh();
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      console.error(error);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-6 relative overflow-hidden" data-theme="dark">
-      <div className="absolute inset-0 opacity-10"></div>
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[140px] -ml-64 -mb-64"></div>
-
-      <div className="w-full max-w-xl bg-bg-secondary/40 backdrop-blur-3xl rounded-[--radius-xl] border border-border p-12 md:p-20 relative z-10 shadow-lg overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-        
-        <div className="text-center mb-12">
-            <div className="w-24 h-24 bg-bg-tertiary rounded-[--radius-xl] border border-border flex items-center justify-center mx-auto mb-8 backdrop-blur-3xl relative overflow-hidden group-hover:scale-105 transition-transform duration-700">
-                <Truck size={32} className="text-accent relative z-10" />
-                <div className="absolute inset-0 bg-accent/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            <h2 className="text-h1 text-text-primary tracking-tighter italic mb-3">Clearance Portal</h2>
-            <p className="text-overline">Tactical Rider Node Deployment</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2 group/input">
-                <label className="text-overline transition-colors group-focus-within/input:text-accent">Tactical ID / Email</label>
-                <div className="relative">
-                    <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-text-disabled group-focus-within/input:text-accent transition-colors" size={18} />
-                    <input 
-                        type="email" required placeholder="agent@petshop-fleet.com"
-                        className="w-full pl-16 pr-6 py-5 bg-bg-primary/50 border border-border rounded-[--radius-xl] text-body-sm font-semibold text-text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all placeholder:text-text-disabled"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
+    <div className="min-h-screen px-4 py-8 md:px-6 md:py-10" data-theme="dark">
+      <div className="hero-aurora fixed inset-0 pointer-events-none opacity-60" />
+      <div className="container-app relative z-10">
+        <div className="premium-shell mx-auto grid max-w-5xl overflow-hidden rounded-[40px] lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="relative overflow-hidden bg-[#0F172A] px-8 py-10 text-white md:px-10 md:py-12">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(63,124,255,0.28),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,107,0,0.16),transparent_30%)]" />
+            <div className="relative z-10 flex h-full flex-col justify-between">
+              <div>
+                <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2">
+                  <Truck size={16} />
+                  <span className="text-kicker text-white/70">Rider workspace</span>
                 </div>
-            </div>
 
-            <div className="space-y-2 group/input">
-                <div className="flex justify-between items-end mb-1 px-1">
-                    <label className="text-overline transition-colors group-focus-within/input:text-accent">Access Key / Pass</label>
-                </div>
-                <div className="relative">
-                    <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-text-disabled group-focus-within/input:text-accent transition-colors" size={18} />
-                    <input 
-                        type="password" required placeholder="••••••••"
-                        className="w-full pl-16 pr-6 py-5 bg-bg-primary/50 border border-border rounded-[--radius-xl] text-body-sm font-semibold text-text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all placeholder:text-text-disabled"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    />
-                </div>
-            </div>
-
-            <div className="pt-8">
-                <Button
-                    type="submit"
-                    disabled={loading}
-                    variant="primary"
-                    size="lg"
-                    fullWidth
-                    loading={loading}
-                    iconRight={!loading ? <ArrowRight size={20} /> : undefined}
-                    className="bg-accent hover:bg-accent-hover shadow-lg"
+                <motion.h1
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35 }}
+                  className="mt-10 text-[clamp(2.6rem,5vw,4.2rem)] font-black leading-[0.95] tracking-[-0.05em]"
                 >
-                    {loading ? 'Establishing...' : 'Establish Secure Uplink'}
-                </Button>
-            </div>
-        </form>
+                  Next stop.
+                  <br />
+                  Zero friction.
+                </motion.h1>
+              </div>
 
-        <div className="mt-16 flex flex-col items-center gap-6 pt-12 border-t border-border">
-            <div className="flex items-center gap-4 text-text-disabled">
-                <div className="h-px w-12 bg-border"></div>
-                <span className="text-label-sm font-semibold uppercase tracking-wider">Autonomous Hub Entrance</span>
-                <div className="h-px w-12 bg-border"></div>
+              <div className="space-y-3 rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                {[
+                  'One-handed rider flow',
+                  'Offline-safe sync',
+                  'Lightweight order context',
+                ].map((point) => (
+                  <div key={point} className="flex items-start gap-3">
+                    <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                      <ShieldCheck size={14} />
+                    </div>
+                    <p className="text-sm leading-6 text-white/76">{point}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-overline">
-                No Deployment ID? <Link href="/rider/auth/signup" className="text-accent hover:text-accent-hover transition-colors ml-2 border-b border-accent/20">Apply for Fleet Clearance</Link>
-            </p>
+          </div>
+
+          <div className="premium-panel flex flex-col justify-center px-6 py-8 md:px-10 md:py-12">
+            <div className="max-w-xl">
+              <p className="text-kicker text-accent">Rider sign in</p>
+              <h2 className="mt-2 text-h2 font-extrabold tracking-tight text-text-primary">
+                Start your shift.
+              </h2>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="rider@petshop.com"
+                inputSize="lg"
+                iconLeft={<Mail />}
+                required
+                value={formData.email}
+                onChange={(event) =>
+                  setFormData({ ...formData, email: event.target.value })
+                }
+              />
+
+              <Input
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                inputSize="lg"
+                iconLeft={<Lock />}
+                required
+                value={formData.password}
+                onChange={(event) =>
+                  setFormData({ ...formData, password: event.target.value })
+                }
+              />
+
+              <Button
+                type="submit"
+                disabled={loading}
+                loading={loading}
+                size="xl"
+                fullWidth
+                iconRight={!loading ? <ArrowRight size={18} /> : undefined}
+              >
+                Sign in to rider app
+              </Button>
+            </form>
+
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
+              <Link
+                href="/rider/auth/signup"
+                className="text-label font-semibold uppercase tracking-[0.14em] text-accent"
+              >
+                New rider? Create account
+              </Link>
+              <Link
+                href="/"
+                className="text-body-xs text-text-tertiary transition-colors hover:text-text-primary"
+              >
+                Back to storefront
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -122,7 +155,7 @@ function RiderLoginForm() {
 
 export default function RiderLoginPage() {
   return (
-    <Suspense fallback={<div>Loading Deployment Portal...</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-text-secondary">Loading rider sign in…</div>}>
       <RiderLoginForm />
     </Suspense>
   );

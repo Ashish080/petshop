@@ -1,157 +1,255 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Search, X, Loader2, PawPrint, ArrowRight, Package } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ArrowRight,
+  Loader2,
+  Package,
+  PawPrint,
+  Scissors,
+  Search,
+  ShieldCheck,
+  Stethoscope,
+  X,
+} from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { motionPresets } from '@/lib/motion';
 
-export default function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+const quickLinks = [
+  { label: 'Puppies', href: '/pets', icon: PawPrint },
+  { label: 'Food', href: '/products?category=food', icon: Package },
+  { label: 'Accessories', href: '/products?category=accessories', icon: ShieldCheck },
+  { label: 'Grooming', href: '/services#grooming', icon: Scissors },
+  { label: 'Vet care', href: '/book-vet', icon: Stethoscope },
+];
+
+type SearchResult = {
+  _id: string;
+  name: string;
+  price?: number;
+  category?: string;
+  images?: string[];
+};
+
+export default function SearchModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+    if (!isOpen) return;
+
+    const frame = window.setTimeout(() => inputRef.current?.focus(), 80);
+    return () => window.clearTimeout(frame);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setQuery('');
+      setResults([]);
     }
   }, [isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const fetchResults = async () => {
-      if (query.length < 2) {
+      if (query.trim().length < 2) {
         setResults([]);
         return;
       }
+
       setLoading(true);
       try {
-        const res = await fetch(`/api/products?search=${encodeURIComponent(query)}&limit=5`);
+        const res = await fetch(
+          `/api/products?search=${encodeURIComponent(query)}&limit=6`
+        );
         const data = await res.json();
         setResults(data.products || []);
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
 
-    const timeout = setTimeout(fetchResults, 300);
-    return () => clearTimeout(timeout);
+    const timeout = window.setTimeout(fetchResults, 280);
+    return () => window.clearTimeout(timeout);
+  }, [isOpen, query]);
+
+  const emptyStateTitle = useMemo(() => {
+    if (query.trim().length < 2) return 'Start with a keyword';
+    return 'No close matches yet';
   }, [query]);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4 sm:pt-32">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-16 sm:pt-24">
           <motion.div
             {...motionPresets.fade}
             onClick={onClose}
-            className="fixed inset-0 bg-overlay backdrop-blur-md cursor-pointer"
+            className="fixed inset-0 bg-overlay backdrop-blur-md"
           />
 
-          {/* Modal Content */}
           <motion.div
             {...motionPresets.fadeUp}
-            className="w-full max-w-2xl bg-bg-elevated rounded-[--radius-xl] shadow-2xl overflow-hidden relative z-10 border border-border selection:bg-brand/10"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="search-modal-title"
+            className="premium-panel relative z-10 w-full max-w-4xl overflow-hidden rounded-[32px]"
           >
-            <div className="relative">
-              <div className="flex items-center px-6 py-6 border-b border-border">
-                <Search
-                  className={`mr-4 transition-colors ${loading ? 'text-brand animate-pulse' : 'text-text-tertiary'}`}
-                  size={24}
-                />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search for pets, food, or accessories..."
-                  className="flex-1 bg-transparent border-none outline-none text-lg font-bold text-text-primary placeholder:text-text-tertiary placeholder:font-medium"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-                <button
-                  onClick={onClose}
-                  className="p-2 hover:bg-bg-tertiary rounded-[--radius-md] transition-colors text-text-tertiary"
-                >
-                  <X size={20} />
-                </button>
+            <div className="border-b border-border/80 px-5 py-5 sm:px-7">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-bg-tertiary text-brand">
+                  <Search size={20} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p id="search-modal-title" className="text-kicker">
+                    Search the marketplace
+                  </p>
+                  <div className="mt-2 flex items-center gap-3">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      placeholder="Try puppy food, retriever, harness, grooming..."
+                      className="w-full bg-transparent text-lg font-semibold text-text-primary outline-none placeholder:text-text-tertiary"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                    <button
+                      onClick={onClose}
+                      className="rounded-full border border-border bg-bg-tertiary p-2.5 text-text-tertiary transition-colors hover:text-text-primary"
+                      aria-label="Close search"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
-                {loading && query.length > 1 && (
-                  <div className="p-12 text-center flex flex-col items-center gap-4">
-                    <Loader2 className="animate-spin text-brand" size={32} />
-                    <p className="text-label uppercase tracking-widest text-text-tertiary">Searching the Catalog...</p>
-                  </div>
-                )}
-
-                {!loading && query.length > 1 && results.length === 0 && (
-                  <div className="p-20 text-center">
-                    <div className="w-16 h-16 bg-bg-secondary rounded-[--radius-lg] flex items-center justify-center mx-auto mb-4 border border-border">
-                      <PawPrint size={28} className="text-text-tertiary" />
+            <div className="grid max-h-[72vh] overflow-hidden lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="border-b border-border/70 p-5 lg:max-h-[72vh] lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-7">
+                {loading ? (
+                  <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 text-center">
+                    <Loader2 className="animate-spin text-brand" size={28} />
+                    <div>
+                      <p className="text-label font-bold uppercase tracking-[0.18em] text-text-primary">
+                        Searching products
+                      </p>
+                      <p className="mt-2 text-body-sm">
+                        Looking through pets, food, accessories, and care services.
+                      </p>
                     </div>
-                    <h3 className="text-h6 text-text-primary mb-1">No Matches Found</h3>
-                    <p className="text-label uppercase tracking-widest text-text-tertiary leading-loose">
-                      We couldn't find any items matching your request.
-                    </p>
                   </div>
-                )}
-
-                {results.length > 0 && (
-                  <div className="p-4 space-y-2">
-                    <div className="px-4 py-2 text-label uppercase tracking-widest text-text-tertiary">
-                      Top Matches Found
+                ) : results.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-kicker">Best matches</p>
+                      <Link
+                        href={`/products?search=${encodeURIComponent(query)}`}
+                        onClick={onClose}
+                        className="text-label font-semibold uppercase tracking-[0.14em] text-brand"
+                      >
+                        View all
+                      </Link>
                     </div>
+
                     {results.map((item) => (
                       <Link
                         key={item._id}
                         href={`/products/${item._id}`}
                         onClick={onClose}
-                        className="flex items-center gap-4 p-4 hover:bg-bg-secondary rounded-[--radius-lg] transition-all group active:scale-[0.98]"
+                        className="group flex items-center gap-4 rounded-[24px] border border-border bg-bg-elevated px-4 py-4 transition-all hover:-translate-y-0.5 hover:border-border-hover hover:shadow-xs"
                       >
-                        <div className="w-14 h-14 bg-bg-tertiary rounded-[--radius-md] overflow-hidden border border-border shrink-0">
-                          <img
-                            src={item.images[0]}
-                            alt={item.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[20px] bg-bg-tertiary">
+                          {item.images?.[0] ? (
+                            <Image
+                              src={item.images[0]}
+                              alt={item.name}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              sizes="64px"
+                            />
+                          ) : null}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-h6 text-text-primary truncate">{item.name}</h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-label font-bold text-brand uppercase tracking-widest">
-                              ₹ {item.price}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-kicker">{item.category || 'Product'}</p>
+                          <h4 className="truncate text-base font-semibold text-text-primary">
+                            {item.name}
+                          </h4>
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-sm font-bold text-brand">
+                              ₹{Number(item.price || 0).toLocaleString('en-IN')}
                             </span>
-                            <span className="text-overline text-text-tertiary uppercase tracking-tight italic">
-                              {item.category} segment
+                            <span className="text-body-xs">
+                              Premium care marketplace
                             </span>
                           </div>
                         </div>
                         <ArrowRight
                           size={18}
-                          className="text-text-tertiary group-hover:text-brand group-hover:translate-x-1 transition-all"
+                          className="text-text-tertiary transition-transform group-hover:translate-x-1 group-hover:text-brand"
                         />
                       </Link>
                     ))}
                   </div>
-                )}
-
-                {query.length <= 1 && (
-                  <div className="p-10">
-                    <div className="bg-bg-secondary rounded-[--radius-xl] p-10 text-center border border-border relative overflow-hidden group">
-                      <div className="mb-6 w-16 h-16 bg-bg-elevated rounded-[--radius-lg] flex items-center justify-center mx-auto shadow-sm text-brand group-hover:scale-110 transition-transform">
-                        <Package size={28} />
-                      </div>
-                      <h3 className="text-h5 text-text-primary mb-2">Ready to Search?</h3>
-                      <p className="text-body-sm text-text-tertiary leading-relaxed max-w-[220px] mx-auto">
-                        Input keywords to explore our premium catalog of companions and care products.
-                      </p>
-
-                      <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-brand opacity-5 rounded-full blur-[40px]"></div>
+                ) : (
+                  <div className="flex min-h-[280px] flex-col items-center justify-center rounded-[28px] border border-dashed border-border bg-bg-tertiary/70 px-6 text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-bg-elevated text-brand shadow-xs">
+                      {query.trim().length >= 2 ? <PawPrint size={28} /> : <Package size={28} />}
                     </div>
+                    <h3 className="mt-5 text-h5 text-text-primary">{emptyStateTitle}</h3>
+                    <p className="mt-2 max-w-sm text-body-sm">
+                      {query.trim().length >= 2
+                        ? 'Try a broader term or explore one of the popular shortcuts on the right.'
+                        : 'Search stays open for guests too, so customers can browse before they sign in.'}
+                    </p>
                   </div>
                 )}
+              </div>
+
+              <div className="space-y-6 p-5 sm:p-7">
+                <div className="rounded-[28px] border border-border bg-bg-tertiary/80 p-5">
+                  <p className="text-kicker">Popular shortcuts</p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    {quickLinks.map(({ label, href, icon: Icon }) => (
+                      <Link
+                        key={label}
+                        href={href}
+                        onClick={onClose}
+                        className="flex items-center justify-between rounded-[22px] border border-border bg-bg-elevated px-4 py-3 transition-colors hover:border-border-hover hover:bg-bg-primary"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-bg-tertiary text-brand">
+                            <Icon size={16} />
+                          </div>
+                          <span className="font-semibold text-text-primary">{label}</span>
+                        </div>
+                        <ArrowRight size={16} className="text-text-tertiary" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[28px] border border-brand/12 bg-brand-muted/70 p-5">
+                  <p className="text-kicker text-brand">What works best here</p>
+                  <ul className="mt-3 space-y-3 text-body-sm">
+                    <li>Search by breed, product type, or care need.</li>
+                    <li>Use category shortcuts for faster mobile browsing.</li>
+                    <li>Keep the experience open to guests and convert later.</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </motion.div>

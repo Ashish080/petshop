@@ -7,6 +7,7 @@ import { CartOwnerSync } from '@/components/CartOwnerSync';
 import { SmoothScroll } from '@/components/ui/SmoothScroll';
 import { AnimatePresence } from 'framer-motion';
 import CartDrawer from '@/components/layout/CartDrawer';
+import { ReactQueryProvider } from '@/components/ReactQueryProvider';
 
 export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
@@ -18,14 +19,15 @@ export function Providers({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <SessionProvider>
-      <CartOwnerSync />
-      <SmoothScroll>
-        <AnimatePresence mode="wait">
-          {children}
-        </AnimatePresence>
-        <CartDrawer />
-      </SmoothScroll>
+    <ReactQueryProvider>
+      <SessionProvider>
+        <CartOwnerSync />
+        <SmoothScroll>
+          <AnimatePresence mode="wait">
+            {children}
+          </AnimatePresence>
+          <CartDrawer />
+        </SmoothScroll>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -51,6 +53,7 @@ export function Providers({ children }: { children: ReactNode }) {
           },
         }}
       />
-    </SessionProvider>
+      </SessionProvider>
+    </ReactQueryProvider>
   );
 }

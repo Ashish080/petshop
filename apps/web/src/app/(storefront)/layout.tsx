@@ -1,7 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
-import MobileStickyCtas from "@/components/ui/MobileStickyCtas";
 import { PageTransition } from "@/components/ui/PageTransition";
 
 export default function StorefrontLayout({
@@ -12,14 +10,12 @@ export default function StorefrontLayout({
   return (
     <>
       <Navbar />
-      <main className="flex-grow pb-16 sm:pb-0"> {/* padding bottom for sticky cta */}
+      <main className="flex-grow pb-32">
         <PageTransition>
           {children}
         </PageTransition>
       </main>
       <Footer />
-      <FloatingWhatsApp />
-      <MobileStickyCtas />
     </>
   );
 }

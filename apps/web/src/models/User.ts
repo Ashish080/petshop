@@ -15,6 +15,16 @@ export interface IUser extends Document {
   updatedAt: Date;
   referralCode: string;
   referredBy?: string;
+  kycStatus?: 'none' | 'pending' | 'verified' | 'rejected';
+  kycDetails?: {
+    idType?: string;
+    idNumber?: string;
+    licenseNumber?: string;
+    vehicleType?: string;
+    vehiclePlate?: string;
+    verifiedAt?: Date;
+    rejectedReason?: string;
+  };
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -38,6 +48,21 @@ const UserSchema = new Schema<IUser>({
   phone: String,
   avatar: String,
   image: String,
+  kycStatus: {
+    type: String,
+    enum: ['none', 'pending', 'verified', 'rejected'],
+    default: 'none',
+    index: true
+  },
+  kycDetails: {
+    idType: String,
+    idNumber: String,
+    licenseNumber: String,
+    vehicleType: String,
+    vehiclePlate: String,
+    verifiedAt: Date,
+    rejectedReason: String
+  },
   lifetimeSpend: { type: Number, default: 0 },
   membershipTier: { 
     type: String, 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
-import Product from '@/models/Product';
 import { auth } from '@/auth';
+import { AdminService } from '@/services/admin.service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,25 +12,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { productId, delta } = await request.json();
+    const body = await request.json();
+    const result = await AdminService.adjustStock(body, session.user.email || 'unknown');
 
-    if (!productId || typeof delta !== 'number') {
-      return NextResponse.json({ success: false, error: 'Invalid input' }, { status: 400 });
-    }
-
-    const product = await Product.findByIdAndUpdate(
-      productId, 
-      { $inc: { stock: delta } }, 
-      { returnDocument: 'after', runValidators: true }
-    );
-
-    if (!product) {
-       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, data: product });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: result });
+  } catch (error: any) {
     console.error('Stock adjustment error:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: error.message || 'Internal Server Error',
+      code: error.code
+    }, { status: error.statusCode || 500 });
   }
 }

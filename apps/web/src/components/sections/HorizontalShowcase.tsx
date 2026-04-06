@@ -1,12 +1,11 @@
 'use client';
 
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useState } from 'react';
 import {
   motion,
   useScroll,
   useTransform,
   useSpring,
-  useMotionValue,
   useMotionValueEvent,
   MotionValue,
 } from 'framer-motion';
@@ -75,21 +74,7 @@ interface ShowcaseItemProps {
   total: number;
 }
 
-// ─── Root export ─────────────────────────────────────────────────────────────
-// Hydration-safe wrapper: renders a skeleton on the server, mounts real
-// content only after the client has hydrated.
-
 export function HorizontalShowcase() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <div className="h-[350vh] bg-black" aria-hidden />;
-  }
-
   return <HorizontalScrollContent />;
 }
 
@@ -212,9 +197,8 @@ function HorizontalScrollContent() {
         <footer className="absolute bottom-6 md:bottom-12 left-6 md:left-16 flex items-center gap-6 z-30">
           <div className="relative h-px w-24 md:w-64 bg-border overflow-hidden rounded-[--radius-full]">
             <motion.div
-              style={{ scaleX: scrollYProgress }}
-              className="absolute inset-0 rounded-full origin-left"
               style={{ backgroundColor: 'var(--color-brand)', scaleX: scrollYProgress }}
+              className="absolute inset-0 rounded-full origin-left"
             />
           </div>
           <span className="text-label-sm font-bold text-text-tertiary uppercase tracking-overline tabular-nums">

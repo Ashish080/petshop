@@ -9,6 +9,7 @@ export interface IWalletTransaction {
 }
 
 export interface IWallet extends Document {
+  userId: mongoose.Types.ObjectId | string;
   userEmail: string;
   balance: number;
   transactions: IWalletTransaction[];
@@ -16,8 +17,9 @@ export interface IWallet extends Document {
 }
 
 const WalletSchema = new Schema<IWallet>({
-  userEmail: { type: String, required: true, unique: true, index: true },
-  balance: { type: Number, default: 0 },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  userEmail: { type: String, required: true, index: true },
+  balance: { type: Number, default: 0, min: 0 },
   transactions: [{
     type: { type: String, enum: ['credit', 'debit'], required: true },
     amount: { type: Number, required: true },
@@ -28,6 +30,10 @@ const WalletSchema = new Schema<IWallet>({
 }, {
   timestamps: true
 });
+
+// Audit index
+WalletSchema.index({ userId: 1, 'transactions.createdAt': -1 });
+WalletSchema.index({ userEmail: 1, 'transactions.createdAt': -1 });
 
 const Wallet: Model<IWallet> = mongoose.models.Wallet || mongoose.model<IWallet>('Wallet', WalletSchema);
 export default Wallet;

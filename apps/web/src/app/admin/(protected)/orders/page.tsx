@@ -1,14 +1,33 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Order } from '@/types';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-import { Package, Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import type { Order } from '@/types';
+
+const STATUS_OPTIONS = [
+  'pending',
+  'placed',
+  'confirmed',
+  'processing',
+  'accepted',
+  'picked',
+  'out-for-delivery',
+  'shipped',
+  'delivered',
+  'cancelled',
+] as const;
+
+type RiderOption = {
+  _id: string;
+  name: string;
+  email: string;
+};
 
 function OrdersContent() {
   const { data: session, status } = useSession();
@@ -18,347 +37,407 @@ function OrdersContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [riders, setRiders] = useState<any[]>([]);
+  const [riders, setRiders] = useState<RiderOption[]>([]);
   const [assigningLoading, setAssigningLoading] = useState(false);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (statusFilter) params.set('status', statusFilter);
-      const res = await fetch(`/api/admin/orders?${params}`);
-      const data = await res.json();
-      if (data.success) {
-        setOrders(data.data);
-      }
+      const response = await fetch(`/api/admin/orders?${params}`);
+      const data = await response.json();
+      if (data.success) setOrders(data.data);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
-  const fetchRiders = async () => {
+  const fetchRiders = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/riders');
-      const data = await res.json();
+      const response = await fetch('/api/admin/riders');
+      const data = await response.json();
       if (data.success) setRiders(data.data);
-    } catch (e) { console.error(e); }
-  };
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated' || (status === 'authenticated' && session?.user?.role !== 'admin')) {
       router.push('/auth/login');
-    } else if (status === 'authenticated' && session?.user?.role === 'admin') {
+      return;
+    }
+
+    if (status === 'authenticated' && session?.user?.role === 'admin') {
       setLoading(true);
       fetchOrders();
       fetchRiders();
     }
-  }, [status, session, router, statusFilter]);
+  }, [fetchOrders, fetchRiders, router, session, status]);
 
-  const orderTotal = (o: Order) => o.total ?? o.totalPrice ?? 0;
+  const orderTotal = (order: Order) => order.total ?? order.totalPrice ?? 0;
 
-  const customerLine = (o: Order) => {
-    const u = o.user;
-    if (typeof u === 'object' && u !== null && 'email' in u) {
-      return { primary: u.name || u.email || 'Customer', secondary: u.email ?? '' };
+  const customerLine = (order: Order) => {
+    const user = order.user;
+    if (typeof user === 'object' && user !== null && 'email' in user) {
+      return { primary: user.name || user.email || 'Customer', secondary: user.email ?? '' };
     }
-    return { primary: 'Customer', secondary: typeof u === 'string' ? u : '' };
+    return { primary: 'Customer', secondary: typeof user === 'string' ? user : '' };
   };
 
   const assignRider = async (orderId: string, riderId: string) => {
     setAssigningLoading(true);
     try {
-      const res = await fetch('/api/admin/orders', {
+      const response = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, riderId })
+        body: JSON.stringify({ orderId, riderId }),
       });
-      if (res.ok) {
+
+      if (response.ok) {
         fetchOrders();
         setSelectedOrder(null);
       }
-    } catch (e) {
-      console.error(e);
-    } finally { setAssigningLoading(false); }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAssigningLoading(false);
+    }
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch('/api/admin/orders', {
+      const response = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, orderStatus: newStatus })
+        body: JSON.stringify({ orderId, orderStatus: newStatus }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
       if (data.success && data.data) {
-        setOrders((prev) =>
-          prev.map((o) => (o._id === orderId ? { ...o, ...data.data, orderStatus: newStatus as Order['orderStatus'] } : o))
+        setOrders((previous) =>
+          previous.map((order) =>
+            order._id === orderId ? { ...order, ...data.data, orderStatus: newStatus as Order['orderStatus'] } : order
+          )
         );
-        setSelectedOrder((sel) =>
-          sel && sel._id === orderId ? { ...sel, ...data.data, orderStatus: newStatus as Order['orderStatus'] } : sel
+        setSelectedOrder((selected) =>
+          selected && selected._id === orderId
+            ? { ...selected, ...data.data, orderStatus: newStatus as Order['orderStatus'] }
+            : selected
         );
-        fetchOrders();
       }
     } catch (error) {
       console.error('Update error:', error);
     }
   };
 
-  const filteredOrders = orders.filter((order) => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return true;
-    const { primary, secondary } = customerLine(order);
-    return (
-      order._id.toLowerCase().includes(q) ||
-      (order.orderNumber?.toLowerCase().includes(q) ?? false) ||
-      primary.toLowerCase().includes(q) ||
-      secondary.toLowerCase().includes(q)
-    );
-  });
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const query = searchQuery.trim().toLowerCase();
+      if (!query) return true;
+      const { primary, secondary } = customerLine(order);
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info' | 'primary'> = {
+      return (
+        order._id.toLowerCase().includes(query) ||
+        (order.orderNumber?.toLowerCase().includes(query) ?? false) ||
+        primary.toLowerCase().includes(query) ||
+        secondary.toLowerCase().includes(query)
+      );
+    });
+  }, [orders, searchQuery]);
+
+  const stats = useMemo(() => {
+    const pendingCount = filteredOrders.filter((order) =>
+      ['pending', 'placed', 'confirmed', 'processing'].includes(order.orderStatus)
+    ).length;
+    const deliveredCount = filteredOrders.filter((order) => order.orderStatus === 'delivered').length;
+    const revenue = filteredOrders.reduce((sum, order) => sum + orderTotal(order), 0);
+    return { pendingCount, deliveredCount, revenue };
+  }, [filteredOrders]);
+
+  const getStatusBadge = (orderStatus: string) => {
+    const variants: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent' | 'brand'> = {
       pending: 'warning',
+      placed: 'info',
       confirmed: 'info',
-      processing: 'primary',
-      shipped: 'primary',
+      processing: 'accent',
+      accepted: 'brand',
+      picked: 'brand',
+      'out-for-delivery': 'brand',
+      shipped: 'brand',
       delivered: 'success',
-      cancelled: 'danger'
+      cancelled: 'danger',
     };
-    return <Badge variant={variants[status] || 'default'}>{status}</Badge>;
+    return <Badge variant={variants[orderStatus] || 'default'}>{orderStatus.replaceAll('-', ' ')}</Badge>;
   };
 
   return (
-    <>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Orders</h1>
-          <p className="text-gray-600">Manage customer orders</p>
+    <div className="relative overflow-hidden pb-10">
+      <div className="pointer-events-none absolute inset-0 hero-aurora opacity-45" />
+
+      <div className="relative z-10">
+        <div className="mb-6">
+          <h1 className="text-h1 font-black tracking-tight text-text-primary">Orders Control</h1>
+          <p className="mt-1 text-body text-text-secondary">Track, assign, and close deliveries.</p>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
-              <Input
-                placeholder="Search by order ID or customer..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400"
-            >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+        <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-[--radius-xl] border border-border bg-bg-elevated/80 p-4 backdrop-blur">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-text-tertiary">Visible</p>
+            <p className="mt-1 text-h3 font-black text-text-primary">{filteredOrders.length}</p>
+          </div>
+          <div className="rounded-[--radius-xl] border border-border bg-bg-elevated/80 p-4 backdrop-blur">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-text-tertiary">Pending</p>
+            <p className="mt-1 text-h3 font-black text-warning">{stats.pendingCount}</p>
+          </div>
+          <div className="rounded-[--radius-xl] border border-border bg-bg-elevated/80 p-4 backdrop-blur">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-text-tertiary">Delivered</p>
+            <p className="mt-1 text-h3 font-black text-success">{stats.deliveredCount}</p>
+          </div>
+          <div className="rounded-[--radius-xl] border border-border bg-bg-elevated/80 p-4 backdrop-blur">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-text-tertiary">Value</p>
+            <p className="mt-1 text-h3 font-black text-text-primary">₹{stats.revenue.toLocaleString('en-IN')}</p>
           </div>
         </div>
 
-        {/* Orders Table */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Order ID</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Customer</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Date</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Items</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Total</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Status</th>
-                <th className="text-right py-4 px-6 text-sm font-medium text-gray-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && orders.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-16 text-center text-gray-500">
-                    Loading orders…
-                  </td>
-                </tr>
-              ) : null}
-              {!loading && filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-16 text-center text-gray-500">
-                    No orders match your filters.
-                  </td>
-                </tr>
-              ) : null}
-              {filteredOrders.map((order) => {
-                const cust = customerLine(order);
-                return (
-                <tr key={order._id} className="border-b border-gray-50">
-                  <td className="py-4 px-6 font-mono text-sm text-gray-900">
-                    {order.orderNumber ?? `#${order._id.slice(-8).toUpperCase()}`}
-                  </td>
-                  <td className="py-4 px-6">
-                    <p className="font-medium text-gray-900">{cust.primary}</p>
-                    <p className="text-sm text-gray-500">{order.shippingAddress?.city ?? cust.secondary}</p>
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
-                    {new Date(order.createdAt).toLocaleDateString('en-IN')}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{order.items.length} items</td>
-                  <td className="py-4 px-6 font-semibold text-gray-900">
-                    ₹{orderTotal(order).toLocaleString('en-IN')}
-                  </td>
-                  <td className="py-4 px-6">{getStatusBadge(order.orderStatus)}</td>
-                  <td className="py-4 px-6 text-right">
-                    <Button
-                      onClick={() => setSelectedOrder(order)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      View
-                    </Button>
-                  </td>
-                </tr>
-              );
-              })}
-            </tbody>
-          </table>
+        <div className="premium-panel mb-6 rounded-[--radius-2xl] border border-border/70 p-5">
+          <div className="flex flex-col gap-3 md:flex-row">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-tertiary" />
+              <Input
+                placeholder="Search order or customer"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="relative md:w-64">
+              <SlidersHorizontal className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+                className="h-11 w-full rounded-[--radius-md] border border-border bg-bg-tertiary pl-9 pr-4 text-sm text-text-primary outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20"
+              >
+                <option value="">All statuses</option>
+                {STATUS_OPTIONS.map((statusOption) => (
+                  <option key={statusOption} value={statusOption}>
+                    {statusOption.replaceAll('-', ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
-        {/* Order Detail Modal */}
+        <div className="overflow-hidden rounded-[--radius-2xl] border border-border bg-bg-elevated/90 shadow-soft backdrop-blur">
+          <div className="overflow-x-auto">
+            <table className="min-w-[920px] w-full">
+              <thead className="border-b border-border bg-bg-tertiary/70">
+                <tr>
+                  <th className="px-5 py-4 text-left text-label text-text-tertiary">Order</th>
+                  <th className="px-5 py-4 text-left text-label text-text-tertiary">Customer</th>
+                  <th className="px-5 py-4 text-left text-label text-text-tertiary">Date</th>
+                  <th className="px-5 py-4 text-left text-label text-text-tertiary">Items</th>
+                  <th className="px-5 py-4 text-left text-label text-text-tertiary">Total</th>
+                  <th className="px-5 py-4 text-left text-label text-text-tertiary">Status</th>
+                  <th className="px-5 py-4 text-right text-label text-text-tertiary">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && orders.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-16 text-center text-text-tertiary">
+                      Loading orders...
+                    </td>
+                  </tr>
+                ) : null}
+                {!loading && filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-16 text-center text-text-tertiary">
+                      No matching orders.
+                    </td>
+                  </tr>
+                ) : null}
+
+                {filteredOrders.map((order) => {
+                  const customer = customerLine(order);
+                  return (
+                    <tr key={order._id} className="border-b border-border/50 transition-colors hover:bg-bg-tertiary/65">
+                      <td className="px-5 py-4 font-mono text-sm text-text-primary">
+                        {order.orderNumber ?? `#${order._id.slice(-8).toUpperCase()}`}
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="font-semibold text-text-primary">{customer.primary}</p>
+                        <p className="text-body-xs text-text-tertiary">{order.shippingAddress?.city ?? customer.secondary}</p>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-text-secondary">
+                        {new Date(order.createdAt).toLocaleDateString('en-IN')}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-text-secondary">{order.items.length} items</td>
+                      <td className="px-5 py-4 font-semibold text-text-primary">
+                        ₹{orderTotal(order).toLocaleString('en-IN')}
+                      </td>
+                      <td className="px-5 py-4">{getStatusBadge(order.orderStatus)}</td>
+                      <td className="px-5 py-4 text-right">
+                        <Button size="sm" variant="outline" onClick={() => setSelectedOrder(order)}>
+                          Open
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
         {selectedOrder && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          >
+            <motion.div
+              initial={{ y: 20, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 14, opacity: 0, scale: 0.98 }}
+              className="premium-panel max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[--radius-2xl] p-6"
+            >
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-h3 font-black text-text-primary">Order Detail</h2>
                 <button
+                  type="button"
                   onClick={() => setSelectedOrder(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="rounded-[--radius-md] p-2 text-text-tertiary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-5">
+                <div className="grid grid-cols-2 gap-4 rounded-[--radius-lg] border border-border bg-bg-tertiary/70 p-4">
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Order ID</p>
-                    <p className="font-mono font-semibold">#{selectedOrder._id.slice(-8).toUpperCase()}</p>
+                    <p className="text-label text-text-tertiary">Order</p>
+                    <p className="font-mono text-label-lg font-black text-text-primary">
+                      #{selectedOrder._id.slice(-8).toUpperCase()}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Date</p>
-                    <p className="font-semibold">{new Date(selectedOrder.createdAt).toLocaleString('en-IN')}</p>
+                    <p className="text-label text-text-tertiary">Placed</p>
+                    <p className="text-label-lg font-semibold text-text-primary">
+                      {new Date(selectedOrder.createdAt).toLocaleString('en-IN')}
+                    </p>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-sm text-gray-500 mb-2">Customer & shipping</p>
-                  <p className="font-semibold text-gray-900">
+                <div className="rounded-[--radius-lg] border border-border bg-bg-tertiary/70 p-4">
+                  <p className="text-label text-text-tertiary">Customer & shipping</p>
+                  <p className="mt-1 font-semibold text-text-primary">
                     {typeof selectedOrder.user === 'object' && selectedOrder.user?.name
                       ? selectedOrder.user.name
                       : customerLine(selectedOrder).primary}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-body-xs text-text-tertiary">
                     {typeof selectedOrder.user === 'object' ? selectedOrder.user?.email : ''}
                   </p>
-                  <p className="text-gray-600 mt-2">{selectedOrder.shippingAddress.street}</p>
-                  <p className="text-gray-600">
+                  <p className="mt-2 text-body-sm text-text-secondary">{selectedOrder.shippingAddress.street}</p>
+                  <p className="text-body-sm text-text-secondary">
                     {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}{' '}
                     {selectedOrder.shippingAddress.zipCode ?? selectedOrder.shippingAddress.pincode}
                   </p>
                   {selectedOrder.shippingAddress.country && (
-                    <p className="text-gray-600">{selectedOrder.shippingAddress.country}</p>
+                    <p className="text-body-sm text-text-secondary">{selectedOrder.shippingAddress.country}</p>
                   )}
                 </div>
 
-                <div>
-                  <p className="text-sm text-gray-500 mb-3">Items</p>
+                <div className="rounded-[--radius-lg] border border-border bg-bg-tertiary/70 p-4">
+                  <p className="mb-3 text-label text-text-tertiary">Items</p>
                   <div className="space-y-2">
-                    {selectedOrder.items.map((item, i) => {
-                      const v = item.variant?.variantName ?? item.variantName;
+                    {selectedOrder.items.map((item, index) => {
+                      const variant = item.variant?.variantName ?? item.variantName;
                       return (
-                      <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100">
-                        <div>
-                          <p className="font-medium text-gray-900">{item.name}</p>
-                          <p className="text-sm text-gray-500">Qty: {item.quantity}{v ? ` (${v})` : ''}</p>
+                        <div key={`${item.name}-${index}`} className="flex items-center justify-between border-b border-border/60 pb-2">
+                          <div>
+                            <p className="font-medium text-text-primary">{item.name}</p>
+                            <p className="text-body-xs text-text-tertiary">Qty {item.quantity}{variant ? ` • ${variant}` : ''}</p>
+                          </div>
+                          <p className="font-semibold text-text-primary">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
                         </div>
-                        <p className="font-semibold">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
-                      </div>
-                    );
+                      );
                     })}
                   </div>
                 </div>
 
-                <div className="bg-orange-50 rounded-xl p-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-gray-900">Total</span>
-                    <span className="text-2xl font-bold text-orange-500">₹{orderTotal(selectedOrder).toLocaleString('en-IN')}</span>
-                  </div>
+                <div className="rounded-[--radius-lg] border border-brand/20 bg-brand/8 p-4">
+                  <p className="text-label text-text-tertiary">Total</p>
+                  <p className="text-h2 font-black text-text-primary">₹{orderTotal(selectedOrder).toLocaleString('en-IN')}</p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fleet Assignment</label>
-                  <div className="flex gap-2">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-label text-text-tertiary">Rider</label>
                     <select
-                      className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400"
-                      onChange={(e) => {
-                        if (e.target.value) assignRider(selectedOrder._id, e.target.value);
+                      className="h-11 w-full rounded-[--radius-md] border border-border bg-bg-tertiary px-3 text-sm text-text-primary outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      onChange={(event) => {
+                        if (event.target.value) assignRider(selectedOrder._id, event.target.value);
                       }}
-                      defaultValue={selectedOrder.riderId || ""}
+                      defaultValue={selectedOrder.riderId || ''}
+                      disabled={assigningLoading}
                     >
-                      <option value="">-- Unassigned --</option>
-                      {riders.map(r => (
-                        <option key={r._id} value={r._id}>{r.name} ({r.email})</option>
+                      <option value="">Unassigned</option>
+                      {riders.map((rider) => (
+                        <option key={rider._id} value={rider._id}>
+                          {rider.name} ({rider.email})
+                        </option>
                       ))}
                     </select>
                   </div>
-                  <p className="mt-1 text-[10px] text-gray-400 uppercase tracking-widest font-black">Designate verified agent for mission</p>
+
+                  <div>
+                    <label className="mb-2 block text-label text-text-tertiary">Status</label>
+                    <select
+                      value={selectedOrder.orderStatus}
+                      onChange={(event) => updateOrderStatus(selectedOrder._id, event.target.value)}
+                      className="h-11 w-full rounded-[--radius-md] border border-border bg-bg-tertiary px-3 text-sm text-text-primary outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    >
+                      {STATUS_OPTIONS.map((statusOption) => (
+                        <option key={statusOption} value={statusOption}>
+                          {statusOption.replaceAll('-', ' ')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Update Status</label>
-                  <select
-                    value={selectedOrder.orderStatus}
-                    onChange={(e) => {
-                      updateOrderStatus(selectedOrder._id, e.target.value);
-                    }}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="placed">Placed</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="picked">Picked</option>
-                    <option value="out-for-delivery">Out for Delivery</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-
-                <Button onClick={() => setSelectedOrder(null)} variant="primary" className="w-full">
+                <Button onClick={() => setSelectedOrder(null)} variant="brand" className="w-full">
                   Close
                 </Button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
-      </>
+      </AnimatePresence>
+    </div>
   );
 }
 
 export default function AdminOrdersPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto mb-3 h-12 w-12 animate-spin rounded-full border-4 border-brand border-t-transparent" />
+            <p className="text-text-secondary">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <OrdersContent />
     </Suspense>
   );

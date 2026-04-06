@@ -1,115 +1,72 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, Award, Heart, Stethoscope, Sparkles, CheckCircle2 } from 'lucide-react';
-import { staggerVariants, staggerItemVariants, scrollRevealVariants } from '@/lib/motion';
+import { Shield, Sparkles, Truck, Clock } from 'lucide-react';
+
+const REASONS = [
+  {
+    icon: Shield,
+    title: "Verified LINEAGE",
+    description: "Every companion comes with certified health records and proven pedigree."
+  },
+  {
+    icon: Truck,
+    title: "ELITE LOGISTICS",
+    description: "Climate-controlled delivery fleet ensures stress-free arrival at your doorstep."
+  },
+  {
+    icon: Sparkles,
+    title: "PREMIUM CARE",
+    description: "Lifecycle support from birth to adulthood with expert veterinary guidance."
+  },
+  {
+    icon: Clock,
+    title: "ACTIVE SUPPORT",
+    description: "Connect with our care specialists 24/7 for immediate behavioral advice."
+  }
+];
 
 export default function WhyChooseUs() {
-    return (
-        <section className="py-24 md:py-32 bg-bg-primary text-text-primary overflow-hidden relative">
-            {/* Cinematic Background */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-success/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
+  return (
+    <section className="py-32 bg-[#050505]">
+      <div className="container-app">
+        <div className="flex flex-col lg:flex-row gap-20 items-start">
+            
+            <div className="lg:w-1/3">
+                <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="flex items-center gap-3 mb-6"
+                >
+                    <span className="w-12 h-[1px] bg-brand" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-brand">Philosophy</span>
+                </motion.div>
+                <h2 className="text-5xl font-black italic uppercase tracking-tighter text-white leading-none mb-8">
+                    WHY <br />
+                    <span className="text-white/20">KANHA</span>
+                </h2>
+                <p className="text-white/40 italic font-medium leading-relaxed">
+                    We don't just sell pets. We curate lifelong bonds built on trust, transparency, and elite care protocols.
+                </p>
             </div>
 
-            <div className="container-app relative z-10">
-                <div className="grid lg:grid-cols-2 gap-20 items-center">
-                    {/* Left: Power Heading */}
-                    <motion.div 
-                        variants={scrollRevealVariants}
-                        initial="offscreen"
-                        whileInView="onscreen"
-                        viewport={{ once: true }}
-                        className="max-w-2xl"
-                    >
-                        <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-bg-secondary border border-border text-brand text-label-sm uppercase tracking-overline mb-10 backdrop-blur-md">
-                           <ShieldCheck size={16} /> 100% Authenticity Verified
+            <div className="lg:w-2/3 grid sm:grid-cols-2 gap-px bg-white/5 border border-white/5 rounded-[40px] overflow-hidden">
+                {REASONS.map((reason, i) => (
+                    <div key={i} className="bg-[#050505] p-12 group hover:bg-white/[0.02] transition-all">
+                        <div className="mb-8 text-brand/40 group-hover:text-brand transition-colors transform group-hover:scale-110 duration-500">
+                            <reason.icon size={32} strokeWidth={1} />
                         </div>
-                        
-                        <h2 className="text-h1 md:text-display font-extrabold text-text-primary leading-[0.9] tracking-tighter uppercase mb-10">
-                            OUR HEALTH <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-accent">GUARANTEE.</span>
-                        </h2>
-                        
-                        <p className="text-body-lg text-text-secondary max-w-lg leading-relaxed mb-12 border-l-4 border-brand pl-6">
-                            We don't just sell pets — we build lifelong bonds. Every companion at Kanha is ethically sourced, rigorously health-checked, and certified for a lifetime of joy.
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80 mb-4">{reason.title}</h4>
+                        <p className="text-sm text-white/40 leading-relaxed font-medium italic">
+                            {reason.description}
                         </p>
-
-                        <div className="grid grid-cols-2 gap-8">
-                            <div className="flex flex-col gap-3">
-                                <div className="text-h1 text-stat text-brand tracking-tight leading-none">500+</div>
-                                <div className="text-overline text-text-tertiary">Happy Homes</div>
-                            </div>
-                            <div className="flex flex-col gap-3">
-                                <div className="text-h1 text-stat text-success tracking-tight leading-none">100%</div>
-                                <div className="text-overline text-text-tertiary">Health Warranty</div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Right: Feature Matrix */}
-                    <motion.div 
-                        variants={staggerVariants}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        className="grid gap-4"
-                    >
-                        {[
-                            { 
-                                icon: Award, 
-                                title: "Breed Certificate", 
-                                desc: "KCI / IKC certified papers ensuring 100% pure bloodline and lineage.",
-                                color: "text-warning",
-                                bg: "bg-warning/10"
-                            },
-                            { 
-                                icon: Stethoscope, 
-                                title: "Free Vet Consultation", 
-                                desc: "Exclusive first health checkup by our expert veterinary panel.",
-                                color: "text-info",
-                                bg: "bg-info/10"
-                            },
-                            { 
-                                icon: Heart, 
-                                title: "Microchipped Security", 
-                                desc: "International standard identification for your pet's global safety.",
-                                color: "text-brand",
-                                bg: "bg-brand/10"
-                            },
-                            { 
-                                icon: Sparkles, 
-                                title: "30-Day Nutrition Support", 
-                                desc: "Custom-crafted survival and health kits for a thriving companion.",
-                                color: "text-success",
-                                bg: "bg-success/10"
-                            }
-                        ].map((feature, i) => (
-                            <motion.div 
-                                key={i}
-                                variants={staggerItemVariants}
-                                className="group relative"
-                            >
-                                <div className="bg-bg-tertiary/40 border border-border backdrop-blur-xl p-6 md:p-8 rounded-[--radius-xl] hover:bg-bg-tertiary transition-all duration-[--duration-slow] hover:border-border-hover flex gap-6 items-center cursor-pointer">
-                                    <div className={`w-16 h-16 shrink-0 rounded-[--radius-lg] ${feature.bg} flex items-center justify-center transition-all duration-[--duration-slow] group-hover:scale-110 group-hover:rotate-6`}>
-                                        <feature.icon className={`w-8 h-8 ${feature.color}`} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-h4 text-text-primary mb-1 flex items-center gap-2">
-                                            {feature.title}
-                                            <CheckCircle2 size={14} className="text-success opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </h3>
-                                        <p className="text-body-sm text-text-secondary leading-relaxed">
-                                            {feature.desc}
-                                        </p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                </div>
+                    </div>
+                ))}
             </div>
-        </section>
-    );
+
+        </div>
+      </div>
+    </section>
+  );
 }

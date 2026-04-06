@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
-import Order from '@/models/Order';
 import { auth } from '@/auth';
+import { RiderService } from '@/services/rider.service';
 
-// GET /api/rider/orders - Get orders for the current rider or available orders
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -16,18 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
-    const query: any = {};
-    
-    if (status === 'available') {
-      query.orderStatus = { $in: ['placed', 'confirmed', 'pending'] };
-      query.riderId = session.user.id; // Corrected: Assigned to THIS rider but not yet active
-    } else {
-      query.riderId = session.user.id;
-      if (status) query.orderStatus = status;
-      else query.orderStatus = { $nin: ['pending', 'placed', 'confirmed', 'cancelled'] }; // Currently active or done
-    }
-
-    const orders = await Order.find(query).sort({ updatedAt: -1 }).lean();
+    const orders = await RiderService.getOrders(session.user.id, status);
     return NextResponse.json({ success: true, data: orders });
   } catch (error) {
     console.error('Rider Orders Error:', error);
@@ -35,7 +23,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PATCH /api/rider/orders - Bulk update (e.g., acceptance)
 export async function PATCH(request: NextRequest) {
   try {
     await connectDB();
@@ -48,24 +35,16 @@ export async function PATCH(request: NextRequest) {
     const { orderId, action } = await request.json();
 
     if (action === 'accept') {
-      const order = await Order.findOneAndUpdate(
-        { _id: orderId, orderStatus: { $in: ['placed', 'confirmed', 'pending'] }, riderId: session.user.id },
-        { 
-          orderStatus: 'accepted'
-        },
-        { returnDocument: 'after' }
-      );
-
-      if (!order) {
-        return NextResponse.json({ success: false, error: 'Order not available' }, { status: 400 });
-      }
-
+      const order = await RiderService.updateOrderStatus(session.user.id, orderId, 'accepted');
       return NextResponse.json({ success: true, data: order });
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Rider Patch Error:', error);
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: error.message || 'Internal Server Error' 
+    }, { status: error.statusCode || 500 });
   }
 }

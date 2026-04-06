@@ -1,39 +1,40 @@
-import Link from 'next/link';
-import { Gift, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import Link from "next/link";
+import { ChevronRight, Gift } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export default function OffersBanner() {
-    return (
-        <section className="section-padding bg-bg-primary">
-            <div className="container-app">
-                <div className="relative overflow-hidden p-10 md:p-16 lg:p-20 flex flex-col md:flex-row items-center justify-between rounded-[--radius-xl] bg-text-primary shadow-lg group">
-                    {/* Gradient Orbs */}
-                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-brand opacity-20 blur-[120px] animate-pulse" />
-                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] rounded-full bg-accent opacity-10 blur-[120px]" />
+  return (
+    <section className="py-12 md:py-16">
+      <div className="container-app">
+        <div className="relative overflow-hidden rounded-[--radius-2xl] border border-border bg-text-primary p-8 shadow-soft md:p-12 lg:p-16">
+          <div className="absolute -right-16 -top-20 h-80 w-80 rounded-full bg-brand/20 blur-[120px]" />
+          <div className="absolute -bottom-20 -left-14 h-80 w-80 rounded-full bg-accent/14 blur-[120px]" />
 
-                    <div className="relative z-10 md:max-w-2xl text-center md:text-left mb-10 md:mb-0">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[--radius-full] bg-brand/10 border border-brand/20 text-brand text-label-sm uppercase tracking-wider mb-8">
-                           <Gift size={16} /> Limited Time Member Offer
-                        </div>
-                        <h2 className="text-h1 md:text-display text-text-inverse mb-6 tracking-tighter leading-[0.9]">
-                            UNLOCK <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-orange-300">20% VEDIC</span> <br />
-                            GROOMING.
-                        </h2>
-                        <p className="text-body-lg text-white/40 max-w-md leading-relaxed">
-                            Treat your companion to Lucknow's most premium spa experience. Valid for first-time bookings.
-                        </p>
-                    </div>
-
-                    <div className="relative z-10 w-full md:w-auto">
-                        <Link href="/services#grooming">
-                            <Button size="lg" variant="primary" iconRight={<ChevronRight size={22} />} className="!px-10 !py-6 !text-lg">
-                                Claim Offer Now
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
+          <div className="relative z-10 flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3.5 py-2 text-label-sm uppercase tracking-[0.12em] text-brand">
+                <Gift size={14} />
+                Member offer
+              </div>
+              <h2 className="mt-5 text-display text-text-inverse">Save 20% on grooming</h2>
+              <p className="mt-3 text-body-lg text-white/65">
+                First booking benefit for members. Premium hygiene, gentle care, faster scheduling.
+              </p>
             </div>
-        </section>
-    );
+
+            <Link href="/services#grooming">
+              <Button
+                size="lg"
+                variant="primary"
+                iconRight={<ChevronRight size={20} />}
+                className="!rounded-full !px-8"
+              >
+                Claim offer
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

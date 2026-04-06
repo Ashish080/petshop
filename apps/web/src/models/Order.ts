@@ -95,12 +95,25 @@ const OrderSchema = new Schema<IOrder>({
   timestamps: true
 });
 
+// ── Compound Indexes ────────────────────────────────────────────────────────
+// user order history — most common query pattern
+OrderSchema.index({ 'user.email': 1, createdAt: -1 });
+// admin order management — filter by status + sort by newest
+OrderSchema.index({ orderStatus: 1, createdAt: -1 });
+// rider assignment — find orders assigned to a rider quickly
+OrderSchema.index({ riderId: 1, orderStatus: 1 });
+// available orders for rider acceptance
+OrderSchema.index({ orderStatus: 1, riderId: 1 });
+// payment reconciliation
+OrderSchema.index({ paymentStatus: 1, createdAt: -1 });
+
 OrderSchema.pre('validate', function () {
   const doc = this as IOrder;
   if (!doc.orderNumber) {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    doc.orderNumber = `ORD-${timestamp}-${random}`;
+    // Timestamp (base36) + 4 random chars = ~1.6 trillion unique combinations per second
+    const ts = Date.now().toString(36).toUpperCase();
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    doc.orderNumber = `ORD-${ts}-${rand}`;
   }
 });
 

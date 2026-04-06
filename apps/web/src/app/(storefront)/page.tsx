@@ -23,6 +23,10 @@ export default function Home() {
         <PetSearchFilter />
       </ScrollStorySection>
 
+      <ScrollStorySection parallaxOffset={70} direction="down" className="!min-h-fit">
+        <CategoryGrid />
+      </ScrollStorySection>
+
       <ScrollStorySection parallaxOffset={150} direction="down">
         <FeaturedPets />
       </ScrollStorySection>
@@ -42,7 +46,6 @@ export default function Home() {
         <BestSellingProducts />
       </ScrollStorySection>
 
-
       <ScrollStorySection parallaxOffset={80} direction="down">
         <Services />
       </ScrollStorySection>
@@ -61,4 +64,3 @@ export default function Home() {
     </div>
   );
 }
-

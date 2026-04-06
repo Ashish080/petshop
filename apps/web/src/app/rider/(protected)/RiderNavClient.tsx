@@ -1,11 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Package, User, LogOut, Truck, Wifi, WifiOff } from 'lucide-react';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { Home, LogOut, User, Wifi, WifiOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface RiderNavClientProps {
   user: {
@@ -16,83 +16,86 @@ interface RiderNavClientProps {
   };
 }
 
+const navItems = [
+  { href: '/rider', icon: Home, label: 'Home', exact: true },
+  { href: '/rider/profile', icon: User, label: 'Profile', exact: false },
+];
+
 export default function RiderNavClient({ user }: RiderNavClientProps) {
   const pathname = usePathname();
   const [isOnline, setIsOnline] = useState(true);
-  const [toggling, setToggling] = useState(false);
 
-  const toggleOnline = async () => {
-    setToggling(true);
-    // TODO: Persist to API when isOnline field is added to User model
-    setIsOnline(prev => !prev);
-    toast.success(isOnline ? 'You are now Offline' : 'You are now Online');
-    setToggling(false);
-  };
+  useEffect(() => {
+    const syncStatus = () => setIsOnline(window.navigator.onLine);
 
-  const navItems = [
-    { href: '/rider', icon: Package, label: 'Orders', exact: true },
-    { href: '/rider/profile', icon: User, label: 'Profile', exact: false },
-  ];
+    syncStatus();
+    window.addEventListener('online', syncStatus);
+    window.addEventListener('offline', syncStatus);
+
+    return () => {
+      window.removeEventListener('online', syncStatus);
+      window.removeEventListener('offline', syncStatus);
+    };
+  }, []);
 
   return (
     <>
-      {/* Top Header */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div className="max-w-lg mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/rider" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <Truck size={18} className="text-white" />
-            </div>
-            <div className="leading-tight">
-              <p className="text-sm font-black text-slate-900 tracking-tight">Rider Hub</p>
-              <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest">Logistics Portal</p>
-            </div>
-          </Link>
-
-          {/* Online Toggle */}
-          <button
-            onClick={toggleOnline}
-            disabled={toggling}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
-              isOnline
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
-            }`}
-          >
-            {isOnline ? <Wifi size={12} strokeWidth={3} /> : <WifiOff size={12} strokeWidth={3} />}
-            {isOnline ? 'Online' : 'Offline'}
-          </button>
+      <div className="pointer-events-none fixed bottom-20 left-0 right-0 z-40 px-4">
+        <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-border bg-bg-elevated/90 px-3 py-2 shadow-xs backdrop-blur-xl">
+          {isOnline ? (
+            <Wifi size={14} className="text-success" />
+          ) : (
+            <WifiOff size={14} className="text-danger" />
+          )}
+          <span className="text-[11px] font-semibold tracking-[0.12em] text-text-secondary uppercase">
+            {isOnline ? 'Live sync' : 'Offline mode'}
+          </span>
         </div>
-      </header>
+      </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 z-50 pb-safe">
-        <div className="max-w-lg mx-auto px-6 h-16 flex items-center justify-around">
-          {navItems.map(({ href, icon: Icon, label, exact }) => {
-            const isActive = exact ? pathname === href : pathname.startsWith(href);
-            return (
-              <Link key={href} href={href} className="flex flex-col items-center gap-1 group">
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${
-                  isActive ? 'bg-indigo-600 shadow-lg shadow-indigo-500/30' : 'bg-slate-50 group-hover:bg-slate-100'
-                }`}>
-                  <Icon size={20} className={isActive ? 'text-white' : 'text-slate-400'} />
-                </div>
-                <span className={`text-[9px] font-black uppercase tracking-widest ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-
-          <button
-            onClick={() => signOut({ callbackUrl: '/rider/auth/login' })}
-            className="flex flex-col items-center gap-1 group"
-          >
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-rose-50 group-hover:bg-rose-100 transition-all">
-              <LogOut size={20} className="text-rose-500" />
+      <nav className="fixed bottom-4 left-0 right-0 z-50 px-4">
+        <div className="premium-panel mx-auto flex max-w-lg items-center justify-between rounded-[28px] px-3 py-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-text-primary text-text-inverse shadow-xs">
+              {user.name?.slice(0, 1)?.toUpperCase() || 'R'}
             </div>
-            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Logout</span>
-          </button>
+            <div className="min-w-0">
+              <p className="text-kicker">Rider app</p>
+              <p className="truncate text-sm font-semibold text-text-primary">
+                {user.name || 'Delivery partner'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {navItems.map(({ href, icon: Icon, label, exact }) => {
+              const active = exact ? pathname === href : pathname.startsWith(href);
+
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-2 rounded-full px-3 py-2.5 text-sm font-semibold transition-all',
+                    active
+                      ? 'bg-text-primary text-text-inverse shadow-xs'
+                      : 'text-text-secondary hover:bg-bg-tertiary'
+                  )}
+                >
+                  <Icon size={16} />
+                  <span className="hidden sm:inline">{label}</span>
+                </Link>
+              );
+            })}
+
+            <button
+              onClick={() => signOut({ callbackUrl: '/rider/auth/login' })}
+              className="rounded-full border border-border bg-bg-tertiary p-2.5 text-text-tertiary transition-colors hover:text-danger"
+              aria-label="Log out"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
       </nav>
     </>

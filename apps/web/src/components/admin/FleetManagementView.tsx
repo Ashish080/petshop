@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { 
     Users, MapPin, Activity, Clock, 
     CheckCircle, ShieldAlert, Phone,
-    MoreVertical, Power, UserCheck
+    MoreVertical, Power, UserCheck,
+    Navigation, Target, Zap, Crosshair
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/Badge';
 import toast from 'react-hot-toast';
+import { TacticalFleetMap } from './TacticalFleetMap';
 
 export function FleetManagementView() {
     const [riders, setRiders] = useState<any[]>([]);
@@ -28,7 +30,7 @@ export function FleetManagementView() {
 
     useEffect(() => {
         fetchFleet();
-        const interval = setInterval(fetchFleet, 30000); // 30s auto-refresh
+        const interval = setInterval(fetchFleet, 30000); 
         return () => clearInterval(interval);
     }, []);
 
@@ -43,115 +45,123 @@ export function FleetManagementView() {
             const data = await res.json();
             if (data.success) {
                 setRiders(prev => prev.map(r => r._id === id ? { ...r, status: newStatus } : r));
-                toast.success(`Rider marked as ${newStatus}`);
+                toast.success(`Protocol ${newStatus.toUpperCase()} established`);
             }
         } catch (err) {
-            toast.error('Failed to update status');
+            toast.error('Protocol update failed');
         }
     };
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center py-24 text-text-tertiary">
-                <Activity size={40} className="animate-spin mb-4" />
-                <p className="text-label-sm font-black uppercase tracking-widest animate-pulse">Syncing Fleet Telemetry...</p>
+            <div className="flex flex-col items-center justify-center py-40">
+                <div className="relative mb-8">
+                    <Activity size={48} className="text-brand animate-spin" />
+                    <div className="absolute inset-0 bg-brand/20 blur-xl animate-pulse" />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 animate-pulse italic">Synchronizing Tactical Nodes...</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Header / Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="bg-bg-elevated p-6 rounded-[--radius-2xl] border border-border shadow-sm">
-                    <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Total Fleet</p>
-                    <p className="text-h2 font-black text-text-primary">{riders.length}</p>
+        <div className="space-y-12 animate-fade-in">
+            
+            {/* Split View Map + Fleet */}
+            <div className="flex flex-col xl:flex-row gap-8">
+                
+                {/* Tactical Visualization */}
+                <div className="xl:flex-1 space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-brand/10 border border-brand/20">
+                                <Crosshair size={16} className="text-brand" />
+                            </div>
+                            <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Lucknow Tactical Grid</h3>
+                        </div>
+                        <div className="flex items-center gap-4 text-[10px] uppercase font-black tracking-widest text-white/20 italic">
+                            <span>Sector 1-9 Online</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                        </div>
+                    </div>
+                    <TacticalFleetMap />
                 </div>
-                <div className="bg-bg-elevated p-6 rounded-[--radius-2xl] border border-border shadow-sm">
-                    <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">Active Now</p>
-                    <p className="text-h2 font-black text-success">{riders.filter(r => r.status === 'active').length}</p>
-                </div>
-                <div className="bg-bg-elevated p-6 rounded-[--radius-2xl] border border-border shadow-sm">
-                    <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-1">In Transit</p>
-                    <p className="text-h2 font-black text-brand">{riders.reduce((acc, r) => acc + (r.activeOrdersCount || 0), 0)}</p>
-                </div>
-            </div>
 
-            {/* Rider Grid (Modern Cards) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {riders.map((rider) => (
-                    <motion.div 
-                        layout
-                        key={rider._id}
-                        className="bg-bg-elevated border border-border rounded-[--radius-3xl] p-6 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative"
-                    >
-                        {/* Background Accent */}
-                        <div className={`absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full blur-3xl opacity-[0.03] pointer-events-none group-hover:opacity-[0.08] transition-opacity ${rider.status === 'active' ? 'bg-success' : 'bg-text-tertiary'}`} />
-
-                        <div className="flex items-start justify-between mb-6 relative">
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
-                                    <div className="w-14 h-14 rounded-2xl bg-bg-secondary border border-border flex items-center justify-center font-black text-h4 text-text-secondary group-hover:scale-105 transition-transform">
+                {/* Fleet Registry Dashboard */}
+                <div className="xl:w-[420px] space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-info/10 border border-info/20">
+                                <Users size={16} className="text-info" />
+                            </div>
+                            <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Active Fleet</h3>
+                        </div>
+                    </div>
+                    
+                    <div className="h-[600px] overflow-y-auto space-y-4 pr-3 custom-scrollbar">
+                        {riders.map((rider) => (
+                            <motion.div 
+                                key={rider._id}
+                                className="p-6 glass rounded-[32px] border border-white/5 hover:border-brand/30 transition-all group relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full blur-2xl opacity-[0.03] group-hover:opacity-[0.08] transition-opacity" style={{ backgroundColor: rider.status === 'active' ? '#00C48C' : '#7C5CFC' }} />
+                                
+                                <div className="flex items-center gap-4 mb-6 relative z-10">
+                                    <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center font-black text-2xl text-white italic transition-transform group-hover:scale-110">
                                         {rider.name.charAt(0)}
                                     </div>
-                                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-bg-elevated ${rider.status === 'active' ? 'bg-success animate-pulse' : 'bg-text-tertiary'}`} />
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-black text-white italic uppercase tracking-tight">{rider.name}</h4>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${rider.status === 'active' ? 'bg-success animate-pulse shadow-[0_0_8px_rgba(0,196,140,0.5)]' : 'bg-white/20'}`} />
+                                            <span className={`text-[9px] font-black uppercase tracking-widest ${rider.status === 'active' ? 'text-success' : 'text-white/20'}`}>
+                                                {rider.status === 'active' ? 'Operational' : 'Node Offline'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => toggleStatus(rider._id, rider.status)} className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${rider.status === 'active' ? 'bg-danger/10 border-danger/20 text-danger hover:bg-danger hover:text-white' : 'bg-success/10 border-success/20 text-success hover:bg-success hover:text-white'}`}>
+                                        <Power size={16} />
+                                    </button>
                                 </div>
-                                <div>
-                                    <h3 className="text-label-md font-bold text-text-primary uppercase tracking-tight">{rider.name}</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Badge variant={rider.status === 'active' ? 'success' : 'secondary'} size="sm" className="px-1.5 font-black uppercase text-[8px] tracking-widest">
-                                            {rider.status || 'Offline'}
-                                        </Badge>
-                                        <span className="text-[10px] text-text-tertiary font-medium">LKO-FLEET-{rider._id.slice(-4).toUpperCase()}</span>
+
+                                <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
+                                    <div className="p-3 bg-white/[0.02] border border-white/5 rounded-2xl">
+                                        <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Missions</p>
+                                        <p className="text-xl font-black text-white italic tracking-tighter">{rider.activeOrdersCount || 0}</p>
+                                    </div>
+                                    <div className="p-3 bg-white/[0.02] border border-white/5 rounded-2xl">
+                                        <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Pulse</p>
+                                        <p className="text-xl font-black text-brand italic tracking-tighter">98.4%</p>
                                     </div>
                                 </div>
-                            </div>
-                            <button className="p-2 text-text-tertiary hover:text-text-primary transition-colors">
-                                <MoreVertical size={18} />
-                            </button>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                            <div className="bg-bg-secondary/50 p-3 rounded-xl border border-border/40">
-                                <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-1 flex items-center gap-1">
-                                    <ShoppingBag size={10} /> Active Missions
-                                </p>
-                                <p className="text-label-md font-black text-text-primary">{rider.activeOrdersCount || 0}</p>
-                            </div>
-                            <div className="bg-bg-secondary/50 p-3 rounded-xl border border-border/40">
-                                <p className="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-1 flex items-center gap-1">
-                                    <Clock size={10} /> Reliability
-                                </p>
-                                <p className="text-label-md font-black text-info">98.4%</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 pt-4 border-t border-border">
-                            <button className="flex-1 py-2 bg-bg-secondary hover:bg-bg-primary border border-border rounded-xl text-[10px] font-black uppercase tracking-widest text-text-secondary hover:text-text-primary transition-all flex items-center justify-center gap-2">
-                                <Phone size={12} /> Contact
-                            </button>
-                            <button 
-                                onClick={() => toggleStatus(rider._id, rider.status)}
-                                className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${rider.status === 'active' ? 'bg-danger/10 text-danger hover:bg-danger hover:text-white' : 'bg-success/10 text-success hover:bg-success hover:text-white'}`}
-                            >
-                                <Power size={12} /> {rider.status === 'active' ? 'Disable' : 'Activate'}
-                            </button>
-                        </div>
-                    </motion.div>
-                ))}
+                                <button className="w-full h-12 glass border border-white/10 hover:border-white/30 rounded-xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-all group/btn relative z-10 overflow-hidden">
+                                    <div className="absolute inset-0 bg-brand/5 -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-500" />
+                                    <Phone size={14} className="group-hover/btn:scale-110 transition-transform text-white/40 group-hover/btn:text-brand" />
+                                    <span className="relative z-10">Contact Protocol</span>
+                                </button>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
-            {riders.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-24 text-center opacity-60 bg-bg-elevated rounded-[--radius-3xl] border border-dashed border-border mt-12">
-                     <Users size={48} className="text-text-disabled mb-4" />
-                     <p className="text-h4 font-black text-text-tertiary uppercase italic">No Riders Registered</p>
-                     <p className="text-body-sm text-text-disabled mt-2">Create accounts with 'rider' role to see them here.</p>
-                </div>
-            )}
+            {/* Fleet Status Hub Indicators */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-8">
+                 {[
+                    { label: "Active Fleet", value: riders.filter(r => r.status === 'active').length, icon: Navigation, color: "#00C48C" },
+                    { label: "Transit Mission", value: riders.reduce((acc, r) => acc + (r.activeOrdersCount || 0), 0), icon: Zap, color: "#FF6B00" },
+                    { label: "Grid Health", value: "99.8%", icon: Activity, color: "#7C5CFC" },
+                    { label: "Avg Delivery", value: "32m", icon: Clock, color: "#FFB020" }
+                 ].map((stat, i) => (
+                    <div key={i} className="p-8 glass rounded-[32px] border border-white/5 relative overflow-hidden group">
+                        <stat.icon className="absolute -bottom-6 -right-6 w-32 h-32 opacity-[0.03] group-hover:scale-110 group-hover:-rotate-12 transition-all" style={{ color: stat.color }} />
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] mb-4">{stat.label}</p>
+                        <h4 className="text-4xl font-black text-white tracking-tighter italic" style={{ color: stat.color }}>{stat.value}</h4>
+                    </div>
+                 ))}
+            </div>
+
         </div>
     );
-}
-
-function ShoppingBag(props: any) {
-    return <Activity {...props} />
 }

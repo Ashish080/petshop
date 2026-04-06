@@ -12,6 +12,59 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { signOut, useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { useOrderStream } from '@/hooks/useOrderStream';
+
+function LiveOrderTracker({ order }: { order: any }) {
+    const [status, setStatus] = useState(order.orderStatus);
+    
+    useOrderStream({
+        orderId: order._id,
+        onUpdate: (data) => {
+            if (data.orderStatus) setStatus(data.orderStatus);
+        }
+    });
+
+    const getStatusMessage = (s: string) => {
+        switch(s) {
+            case 'pending': return 'Preparing your pet\'s treats...';
+            case 'confirmed': return 'Mission confirmed. Dispatching soon.';
+            case 'accepted': return 'Rider assigned to your mission.';
+            case 'picked': return 'Package secured. Heading your way.';
+            case 'out-for-delivery': return 'Scout is right around the corner!';
+            default: return 'Tracking active mission...';
+        }
+    }
+
+    return (
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-brand text-white p-8 rounded-[--radius-3xl] shadow-xl shadow-brand/20 relative overflow-hidden mb-12 group"
+        >
+            <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform duration-700">
+                <Truck size={120} />
+            </div>
+            <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                        <Activity size={16} />
+                    </div>
+                    <span className="text-overline tracking-[0.2em] opacity-80">Live Mission Tracking</span>
+                </div>
+                <h3 className="text-h3 font-black tracking-tight mb-2 italic">#{order.orderNumber}</h3>
+                <p className="text-body-lg font-bold opacity-90 mb-8">{getStatusMessage(status)}</p>
+                
+                <Link href="/orders">
+                    <button className="bg-white text-brand px-8 py-3 rounded-[--radius-xl] font-black text-label-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                        View Live Map <ChevronRight size={16} />
+                    </button>
+                </Link>
+            </div>
+            {/* Ambient Logistics Glow */}
+            <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+        </motion.div>
+    );
+}
 
 export default function UserDashboardClient() {
   const { data: session, update } = useSession();
@@ -19,6 +72,9 @@ export default function UserDashboardClient() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('My Pets');
   const [selectedPet, setSelectedPet] = useState('Bella');
+
+  const activeOrders = orders.filter(o => !['delivered', 'cancelled'].includes(o.orderStatus));
+  const primaryActive = activeOrders[0];
 
   // Profile Settings States
   const [profileData, setProfileData] = useState({
@@ -33,7 +89,7 @@ export default function UserDashboardClient() {
     showNew: false
   });
   const [updating, setUpdating] = useState(false);
-  const fileInputRef = (typeof window !== 'undefined') ? require('react').useRef<HTMLInputElement>(null) : { current: null };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -236,6 +292,8 @@ export default function UserDashboardClient() {
                                     <Plus size={20} />
                                 </button>
                             </div>
+
+                            {primaryActive && <LiveOrderTracker order={primaryActive} />}
 
                             <section className="grid grid-cols-1 xl:grid-cols-12 gap-12">
                                 {/* PROFILE CARD */}

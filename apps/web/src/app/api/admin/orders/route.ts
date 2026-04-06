@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
-import Order from '@/models/Order';
-import User from '@/models/User';
 import { auth } from '@/auth';
+import { AdminService } from '@/services/admin.service';
+import { ServiceError } from '@/services/base.service';
 
 // PATCH /api/admin/orders - Secure Update and Assignment Logic
 export async function PATCH(request: NextRequest) {
@@ -17,42 +17,19 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { orderId, orderStatus, paymentStatus, riderId } = await request.json();
-
-    if (!orderId) {
-      return NextResponse.json({ success: false, error: 'Order ID is required' }, { status: 400 });
-    }
-
-    const updateData: any = {};
-    if (orderStatus) updateData.orderStatus = orderStatus;
-    if (paymentStatus) updateData.paymentStatus = paymentStatus;
-
-    // SECURITY FIX: Prevent any user ID as riderId - must verify rider existence and role
-    if (riderId) {
-      const riderUser = await User.findById(riderId);
-      if (!riderUser || riderUser.role !== 'rider') {
-        return NextResponse.json({ success: false, error: 'Invalid Rider ID provided' }, { status: 400 });
-      }
-      updateData.riderId = riderId;
-    }
-
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      { $set: updateData },
-      { returnDocument: 'after', runValidators: true }
-    );
-
-    if (!order) {
-      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
-    }
+    const body = await request.json();
+    const order = await AdminService.updateOrder(body);
 
     return NextResponse.json({
       success: true,
       data: order,
       message: 'Order updated successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[ADMIN_ORDER_PATCH_ERROR]', error);
+    if (error instanceof ServiceError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.statusCode });
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to update order' },
       { status: 500 }
@@ -60,7 +37,7 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// GET /api/admin/orders - Optimized Querying
+// GET /api/admin/orders - Optimized Querying with Pagination
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -71,16 +48,24 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const query: any = status ? { orderStatus: status } : {};
+    const status = searchParams.get('status') || undefined;
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '50', 10);
 
-    const orders = await Order.find(query).sort({ createdAt: -1 }).lean();
+    const data = await AdminService.getOrders({ status, page, limit });
 
     return NextResponse.json({
       success: true,
-      data: orders.map(o => ({ ...o, id: o._id.toString() }))
+      data: data.orders,
+      pagination: {
+        total: data.total,
+        page: data.page,
+        limit: data.limit,
+        pages: data.pages
+      }
     });
   } catch (error) {
+    console.error('[ADMIN_ORDER_GET_ERROR]', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch orders' }, { status: 500 });
   }
 }

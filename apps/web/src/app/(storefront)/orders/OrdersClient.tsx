@@ -573,20 +573,42 @@ const HistoryItem = memo(function HistoryItem({ order, onSelect }: { order: any;
 // MAIN DASHBOARD EXPORT
 // ═══════════════════════════════════════════════════════════════════════════════
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+
 export default function UserOrdersDashboard({ initialOrders, userName }: { initialOrders: any[]; userName: string; }) {
-  const [orders, setOrders] = useState(initialOrders);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const { permission, requestPermission } = useNotifications();
-  const [referralData, setReferralData] = useState<any>(null);
+  
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetch('/api/user/referrals')
-      .then(r => r.json())
-      .then(d => d.success && setReferralData(d.data));
-  }, []);
+  // Primary fresh data via React Query
+  const { data: orders = [] } = useQuery({
+    queryKey: ['orders', 'user'],
+    queryFn: async () => {
+      const res = await fetch('/api/orders');
+      const json = await res.json();
+      return json.success ? json.data : [];
+    },
+    initialData: initialOrders,
+  });
 
-  const activeOrders = useMemo(() => orders.filter(o => !['delivered', 'cancelled'].includes(o.orderStatus)), [orders]);
-  const pastOrders = useMemo(() => orders.filter(o => ['delivered', 'cancelled'].includes(o.orderStatus)), [orders]);
+  const { data: referralData } = useQuery({
+    queryKey: ['user', 'referrals'],
+    queryFn: async () => {
+       const res = await fetch('/api/user/referrals');
+       const json = await res.json();
+       return json.success ? json.data : null;
+    }
+  });
+
+  const handleStatusChange = useCallback((id: string, status: string) => {
+    queryClient.setQueryData(['orders', 'user'], (old: any[]) => 
+      (old || []).map(o => o._id === id ? { ...o, orderStatus: status } : o)
+    );
+  }, [queryClient]);
+
+  const activeOrders = useMemo(() => orders.filter((o: any) => !['delivered', 'cancelled'].includes(o.orderStatus)), [orders]);
+  const pastOrders = useMemo(() => orders.filter((o: any) => ['delivered', 'cancelled'].includes(o.orderStatus)), [orders]);
   const primaryActive = activeOrders[0] ?? null;
 
   return (
@@ -685,7 +707,7 @@ export default function UserOrdersDashboard({ initialOrders, userName }: { initi
 
       {primaryActive ? (
          <div className="space-y-6">
-            <ActiveOrderCard order={primaryActive} onStatusChange={(id, status) => setOrders(prev => prev.map(o => o._id === id ? { ...o, orderStatus: status } : o))} />
+            <ActiveOrderCard order={primaryActive} onStatusChange={handleStatusChange} />
          </div>
       ) : (
         <div className="flex flex-col items-center justify-center p-16 bg-bg-elevated rounded-[--radius-3xl] border border-dashed border-border text-center shadow-sm">
@@ -700,7 +722,7 @@ export default function UserOrdersDashboard({ initialOrders, userName }: { initi
         <section className="space-y-6">
           <h2 className="text-h3 font-black text-text-primary tracking-tight">Previous Hauls</h2>
           <div className="space-y-4">
-             {pastOrders.slice(0, 5).map(o => <HistoryItem key={o._id} order={o} onSelect={setSelectedOrder} />)}
+             {pastOrders.slice(0, 5).map((o: any) => <HistoryItem key={o._id} order={o} onSelect={setSelectedOrder} />)}
           </div>
         </section>
       )}

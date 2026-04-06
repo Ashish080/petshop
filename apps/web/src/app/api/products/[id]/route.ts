@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     
     const { id } = await params;
     
-    const product = await Product.findById(id).lean();
+    const product = await Product.findById(id).select('-buyPrice').lean();
     
     if (!product) {
       return NextResponse.json(

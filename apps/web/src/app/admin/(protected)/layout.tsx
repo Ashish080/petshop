@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/layout/AdminSidebar';
+import { AdminHeader } from '@/components/admin/layout/AdminHeader';
 
 export default async function AdminRootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -9,30 +10,25 @@ export default async function AdminRootLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans uppercase">
-      {/* Vyapar-Style Fixed Sidebar */}
-      <AdminSidebar />
-      
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Topbar */}
-        <header className="h-16 border-b border-gray-200 bg-white px-8 flex items-center justify-between shrink-0 shadow-sm z-10">
-          <div className="font-semibold text-sm text-gray-500">
-            Internal Operations
-          </div>
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold text-xs uppercase border border-brand-primary/20">
-               AD
-             </div>
-          </div>
-        </header>
+    <div className="flex h-screen bg-[#0A0A0B] text-[#FAFAFA] overflow-hidden antialiased items-center justify-center p-0 md:p-3">
+      {/* Premium Dashboard Shell */}
+      <div className="flex w-full h-full max-w-[2000px] bg-[#0F0F10] md:rounded-[24px] border border-white/5 overflow-hidden shadow-2xl relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,107,0,0.05),transparent_50%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(124,92,252,0.05),transparent_50%)] pointer-events-none" />
         
-        {/* Scrollable Workspace Viewport */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-6 md:p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
+        {/* Futuristic Sidebar */}
+        <AdminSidebar />
+        
+        {/* Main Command Center */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+          <AdminHeader user={{ name: session.user?.name || 'Admin', initials: 'AD' }} />
+          
+          <main className="flex-1 overflow-y-auto px-6 py-8 custom-scrollbar relative z-10">
+            <div className="max-w-[1400px] mx-auto animate-fade-in">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );

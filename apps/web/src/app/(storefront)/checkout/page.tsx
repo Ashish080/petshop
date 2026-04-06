@@ -10,12 +10,12 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { 
-  CheckCircle2, MapPin, CreditCard, ChevronRight, 
+  CheckCircle2, MapPin, CreditCard,
   Check, Star, Ticket, Tag, X as XIcon, Wallet 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { motionPresets, duration, easing } from '@/lib/motion';
+import { motionPresets, easing } from '@/lib/motion';
 
 type Step = 'address' | 'payment' | 'confirm';
 
@@ -24,29 +24,58 @@ interface ShippingForm {
   state: string; pincode: string; phone: string;
 }
 
+type MembershipData = {
+  perks?: {
+    discount?: number;
+    label?: string;
+  };
+};
+
+type WalletData = {
+  balance: number;
+};
+
+type CouponData = {
+  code: string;
+  discountPercent?: number;
+  discountAmount?: number;
+};
+
+type StockReportItem = {
+  available: boolean;
+  name: string;
+};
+
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  if (status === 'unauthenticated') {
-    router.push('/auth/login?callbackUrl=/checkout');
-    return null;
-  }
 
   const { items, total, clearCart } = useCartStore();
   const [step, setStep] = useState<Step>('address');
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState('');
-  const [membership, setMembership] = useState<any>(null);
-  const [wallet, setWallet] = useState<any>(null);
+  const [membership, setMembership] = useState<MembershipData | null>(null);
+  const [wallet, setWallet] = useState<WalletData | null>(null);
   const [paymentMode, setPaymentMode] = useState<'cod' | 'wallet'>('cod');
   const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [form, setForm] = useState<ShippingForm>({
     name: session?.user?.name ?? '',
     street: '', city: '', state: 'Uttar Pradesh', pincode: '', phone: '',
   });
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login?callbackUrl=/checkout');
+    }
+  }, [router, status]);
+
+  useEffect(() => {
+    if (session?.user?.name && !form.name) {
+      setForm((previous) => ({ ...previous, name: session.user.name ?? '' }));
+    }
+  }, [form.name, session?.user?.name]);
 
   useEffect(() => {
     const fetchMembership = async () => {
@@ -77,6 +106,13 @@ export default function CheckoutPage() {
 
   const discountAmount = membershipDiscount + couponDiscount;
   const orderTotal = Math.max(0, total + deliveryFee - discountAmount);
+  const walletBalance = wallet?.balance ?? 0;
+  const checkoutSteps: { id: Step; title: string; detail: string }[] = [
+    { id: 'address', title: 'Address', detail: 'Shipping' },
+    { id: 'payment', title: 'Payment', detail: 'Method' },
+    { id: 'confirm', title: 'Done', detail: 'Receipt' },
+  ];
+  const activeStepIndex = checkoutSteps.findIndex((item) => item.id === step);
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
@@ -95,7 +131,7 @@ export default function CheckoutPage() {
         toast.error(data.error || 'Invalid coupon');
         setCouponCode('');
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to validate coupon');
     } finally {
       setValidatingCoupon(false);
@@ -119,6 +155,25 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setLoading(true);
     try {
+      // 1. Bulk Stock Guard
+      const checkRes = await fetch('/api/products/bulk-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+           items: items.map(i => ({ productId: i.product, quantity: i.quantity })) 
+        })
+      });
+      const checkData = await checkRes.json();
+      
+      if (!checkData.success || !checkData.data?.allAvailable) {
+         const unavailable: StockReportItem[] = (checkData.data?.report ?? []).filter(
+           (row: StockReportItem) => !row.available
+         );
+         const itemNames = unavailable.map((item: StockReportItem) => item.name).join(', ');
+         throw new Error(`Insufficient stock for: ${itemNames || 'Some items'}. Please adjust your cart.`);
+      }
+
+      // 2. Place Order
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,14 +195,19 @@ export default function CheckoutPage() {
       setOrderId(orderData.data._id || orderData.data.id);
       clearCart();
       setStep('confirm');
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Order failed';
+      toast.error(message, { duration: 5000 });
     } finally {
       setLoading(false);
     }
   };
 
   const isAddressValid = Boolean(form.name && form.street && form.city && form.pincode && form.phone);
+
+  if (status === 'loading' || status === 'unauthenticated') {
+    return null;
+  }
 
   if (step === 'confirm') {
       return (
@@ -193,11 +253,57 @@ export default function CheckoutPage() {
       );
   }
 
+  if (items.length === 0) {
+    return (
+      <div className="container-app flex min-h-[68vh] items-center justify-center py-16">
+        <motion.div {...motionPresets.scaleIn} className="premium-panel max-w-lg rounded-[--radius-2xl] p-10 text-center">
+          <h2 className="text-h2 font-black text-text-primary">Cart is empty</h2>
+          <p className="mt-2 text-body text-text-secondary">Add products to start checkout.</p>
+          <div className="mt-7">
+            <Button size="lg" variant="brand" onClick={() => router.push('/products')}>
+              Browse Products
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 lg:py-16">
-      <div className="mb-10 text-center">
-          <h1 className="text-h1 font-black text-text-primary tracking-tighter mb-2">Secure Checkout</h1>
-          <p className="text-text-secondary font-medium">Almost there! Complete your details below.</p>
+    <div className="relative overflow-hidden py-12 lg:py-16">
+      <div className="pointer-events-none absolute inset-0 hero-aurora opacity-60" />
+      <div className="pointer-events-none absolute -top-24 right-[-7rem] h-[22rem] w-[22rem] rounded-full bg-brand/14 blur-[100px]" />
+      <div className="pointer-events-none absolute bottom-[-10rem] left-[-6rem] h-[20rem] w-[20rem] rounded-full bg-accent/10 blur-[100px]" />
+
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
+      <div className="mb-9 text-center">
+          <h1 className="text-h1 font-black tracking-tight text-text-primary">Checkout</h1>
+          <p className="mt-2 text-text-secondary">Address, payment, done.</p>
+      </div>
+
+      <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {checkoutSteps.map((item, index) => {
+          const isCurrent = activeStepIndex === index;
+          const isComplete = activeStepIndex > index;
+          return (
+            <motion.div
+              key={item.id}
+              layout
+              className={`rounded-[--radius-lg] border px-4 py-3 text-left ${
+                isCurrent
+                  ? 'border-brand/40 bg-bg-elevated shadow-sm'
+                  : isComplete
+                    ? 'border-success/30 bg-success/10'
+                    : 'border-border bg-bg-tertiary/80'
+              }`}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-text-tertiary">{item.detail}</p>
+              <p className={`text-label-lg font-black ${isCurrent || isComplete ? 'text-text-primary' : 'text-text-secondary'}`}>
+                {item.title}
+              </p>
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -206,7 +312,14 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7 space-y-4">
             
             {/* Step 1: Address */}
-            <div className={`rounded-[--radius-xl] overflow-hidden transition-all duration-300 border ${step === 'address' ? 'border-brand shadow-md bg-bg-elevated' : 'border-border bg-bg-tertiary opacity-70'}`}>
+            <motion.section
+                layout
+                className={`overflow-hidden rounded-[--radius-xl] border transition-all duration-300 ${
+                  step === 'address'
+                    ? 'premium-panel border-brand/40 shadow-soft'
+                    : 'border-border/80 bg-bg-elevated/65'
+                }`}
+            >
                 <div className={`p-6 flex items-center justify-between ${step === 'address' ? 'border-b border-border/50' : ''}`}>
                     <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step === 'address' ? 'bg-brand text-white' : 'bg-bg-secondary text-text-secondary'} ${step === 'payment' && 'bg-success text-white'}`}>
@@ -214,7 +327,7 @@ export default function CheckoutPage() {
                         </div>
                         <h3 className={`text-h4 font-bold ${step === 'address' ? 'text-text-primary' : 'text-text-secondary'} flex items-center gap-2`}>
                             <MapPin size={20} className={step === 'address' ? 'text-brand' : 'text-text-tertiary'} />
-                            Shipping Details
+                            Address
                         </h3>
                     </div>
                     {step === 'payment' && (
@@ -253,17 +366,24 @@ export default function CheckoutPage() {
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+            </motion.section>
 
             {/* Step 2: Payment */}
-            <div className={`rounded-[--radius-xl] overflow-hidden transition-all duration-300 border ${step === 'payment' ? 'border-brand shadow-md bg-bg-elevated' : 'border-border bg-bg-tertiary opacity-70'}`}>
+            <motion.section
+                layout
+                className={`overflow-hidden rounded-[--radius-xl] border transition-all duration-300 ${
+                  step === 'payment'
+                    ? 'premium-panel border-brand/40 shadow-soft'
+                    : 'border-border/80 bg-bg-elevated/65'
+                }`}
+            >
                 <div className="p-6 flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step === 'payment' ? 'bg-brand text-white' : 'bg-bg-secondary text-text-secondary'}`}>
                         2
                     </div>
                     <h3 className={`text-h4 font-bold ${step === 'payment' ? 'text-text-primary' : 'text-text-secondary'} flex items-center gap-2`}>
                         <CreditCard size={20} className={step === 'payment' ? 'text-brand' : 'text-text-tertiary'} />
-                        Payment Method
+                        Payment
                     </h3>
                 </div>
 
@@ -278,22 +398,23 @@ export default function CheckoutPage() {
                           className="overflow-hidden"
                         >
                             <div className="p-6 pt-2 space-y-4">
-                               <label onClick={() => setPaymentMode('cod')} className={`flex items-center justify-between p-4 rounded-[--radius-lg] border-2 cursor-pointer transition-all ${paymentMode === 'cod' ? 'border-brand bg-brand/5 shadow-sm' : 'border-border bg-bg-secondary'}`}>
+                               <motion.label whileTap={{ scale: 0.99 }} onClick={() => setPaymentMode('cod')} className={`flex items-center justify-between p-4 rounded-[--radius-lg] border-2 cursor-pointer transition-all ${paymentMode === 'cod' ? 'border-brand bg-brand/5 shadow-sm' : 'border-border bg-bg-secondary'}`}>
                                   <div className="flex items-center gap-4">
                                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMode === 'cod' ? 'border-brand' : 'border-border'}`}>
                                           {paymentMode === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-brand" />}
                                       </div>
                                       <div>
                                           <p className="font-bold text-text-primary">Cash on Delivery</p>
-                                          <p className="text-body-sm text-text-secondary mt-0.5">Pay conveniently when your order arrives</p>
+                                          <p className="mt-0.5 text-body-sm text-text-secondary">Pay on arrival</p>
                                       </div>
                                   </div>
                                   <Badge variant="success">Free</Badge>
-                               </label>
+                               </motion.label>
                                
-                               <label 
-                                 onClick={() => wallet?.balance >= orderTotal && setPaymentMode('wallet')} 
-                                 className={`flex items-center justify-between p-4 rounded-[--radius-lg] border-2 transition-all ${wallet?.balance < orderTotal ? 'opacity-50 grayscale cursor-not-allowed border-border bg-bg-tertiary' : 'cursor-pointer'} ${paymentMode === 'wallet' ? 'border-brand bg-brand/5 shadow-sm' : 'border-border bg-bg-secondary'}`}
+                               <motion.label
+                                 whileTap={{ scale: walletBalance < orderTotal ? 1 : 0.99 }}
+                                 onClick={() => walletBalance >= orderTotal && setPaymentMode('wallet')} 
+                                 className={`flex items-center justify-between p-4 rounded-[--radius-lg] border-2 transition-all ${walletBalance < orderTotal ? 'opacity-50 grayscale cursor-not-allowed border-border bg-bg-tertiary' : 'cursor-pointer'} ${paymentMode === 'wallet' ? 'border-brand bg-brand/5 shadow-sm' : 'border-border bg-bg-secondary'}`}
                                >
                                   <div className="flex items-center gap-4">
                                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMode === 'wallet' ? 'border-brand' : 'border-border'}`}>
@@ -303,15 +424,15 @@ export default function CheckoutPage() {
                                           <p className="font-bold text-text-primary flex items-center gap-2">
                                               <Wallet size={16} className="text-brand" /> Pay with Pet Cash
                                           </p>
-                                          <p className="text-body-sm text-text-secondary mt-0.5">Balance: ₹{wallet?.balance?.toLocaleString() || '0'}</p>
+                                          <p className="mt-0.5 text-body-sm text-text-secondary">Balance: ₹{walletBalance.toLocaleString('en-IN')}</p>
                                       </div>
                                   </div>
-                                  {wallet?.balance < orderTotal ? (
+                                  {walletBalance < orderTotal ? (
                                       <Badge variant="danger">Low Balance</Badge>
                                   ) : (
                                       <Badge variant="brand">Instant</Badge>
                                   )}
-                               </label>
+                               </motion.label>
 
                                <div className="pt-6">
                                    <Button size="lg" fullWidth variant="brand" onClick={handlePlaceOrder} loading={loading}>
@@ -322,20 +443,26 @@ export default function CheckoutPage() {
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+            </motion.section>
         </div>
 
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-5 relative">
-            <div className="sticky top-24 bg-bg-secondary rounded-[--radius-2xl] p-8 border border-border shadow-md">
+            <div className="premium-panel sticky top-24 rounded-[--radius-2xl] border border-border/80 p-8">
                 <h3 className="text-h4 font-bold text-text-primary mb-6 flex items-center justify-between">
-                    Order Summary
-                    <Badge variant="default" size="sm">{items.length} Items</Badge>
+                    Summary
+                    <Badge variant="default" size="sm">{items.length} items</Badge>
                 </h3>
                 
                 <div className="max-h-[300px] overflow-y-auto space-y-4 mb-6 pr-2 scrollbar-hide">
-                    {items.map((item) => (
-                        <div key={item.product + (item.variantName ?? '')} className="flex gap-4">
+                    {items.map((item, index) => (
+                        <motion.div
+                            key={item.product + (item.variantName ?? '')}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.03 }}
+                            className="flex gap-4"
+                        >
                             <div className="relative w-16 h-16 rounded-[--radius-md] bg-bg-elevated border border-border overflow-hidden shrink-0">
                                 {item.image ? (
                                     <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
@@ -353,7 +480,7 @@ export default function CheckoutPage() {
                             <div className="text-label-lg font-bold text-text-primary self-center">
                                 ₹{(item.price * item.quantity).toLocaleString('en-IN')}
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
 
@@ -429,6 +556,7 @@ export default function CheckoutPage() {
             </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

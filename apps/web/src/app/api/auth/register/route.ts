@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import connectDB from '@/lib/mongoose';
 import User from '@/models/User';
 import redis from '@/lib/redis';
+import { z } from 'zod';
 
 /**
  * FIXED: Security Loophole - Registering as Rider/Admin
@@ -37,21 +38,26 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
     
-    const { name, email, password, phone, referralCode } = await request.json();
+    // === Zod Validation: Robust Input Checking ===
+    const RegisterSchema = z.object({
+      name: z.string().min(2, 'Name must be at least 2 characters').trim(),
+      email: z.string().email('Invalid email address').toLowerCase().trim(),
+      password: z.string().min(6, 'Password must be at least 6 characters'),
+      phone: z.string().optional().transform((v: string | undefined) => v?.trim()),
+      referralCode: z.string().optional().transform((v: string | undefined) => v?.trim().toUpperCase())
+    });
 
-    if (!name || !email || !password) {
+    const body = await request.json();
+    const parsed = RegisterSchema.safeParse(body);
+    
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: 'Name, email and password are required' },
+        { success: false, error: parsed.error.issues[0].message },
         { status: 400 }
       );
     }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { success: false, error: 'Password must be at least 6 characters' },
-        { status: 400 }
-      );
-    }
+    
+    const { name, email, password, phone, referralCode } = parsed.data;
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     

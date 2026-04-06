@@ -1,71 +1,73 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowRight, Calendar } from 'lucide-react';
-import { blogData } from '@/data/blog';
-import { Button } from '@/components/ui/Button';
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Calendar } from "lucide-react";
+import { blogData } from "@/data/blog";
+import { Button } from "@/components/ui/Button";
 
 export default function BlogPreview() {
-    return (
-        <section className="section-padding bg-bg-primary transition-colors duration-[--duration-normal]">
-            <div className="container-app">
-                <div className="flex justify-between items-end mb-10">
-                    <div>
-                        <h2 className="text-h1 mb-3">
-                            Pet Care Tips & News
-                        </h2>
-                        <p className="text-body-lg max-w-2xl">
-                            Read our latest articles for expert advice on keeping your pets healthy and happy.
-                        </p>
-                    </div>
-                    <Link
-                        href="/blog"
-                        className="hidden md:flex items-center gap-2 text-label-lg text-brand hover:text-brand-hover transition-colors"
-                    >
-                        View All Posts <ArrowRight size={18} />
-                    </Link>
-                </div>
+  return (
+    <section className="section-padding">
+      <div className="container-app">
+        <div className="mb-10 flex items-end justify-between gap-6 md:mb-12">
+          <div className="max-w-2xl">
+            <p className="text-kicker">Knowledge hub</p>
+            <h2 className="mt-2 text-h1 text-text-primary">Pet care guides and updates</h2>
+            <p className="mt-3 text-body-lg text-text-secondary">
+              Quick reads for nutrition, grooming, and everyday care decisions.
+            </p>
+          </div>
+          <Link
+            href="/blog"
+            className="hidden items-center gap-2 rounded-full border border-border bg-bg-elevated px-4 py-2.5 text-label-lg font-semibold text-text-primary transition-all hover:border-brand/30 hover:text-brand md:inline-flex"
+          >
+            View all posts
+            <ArrowRight size={16} />
+          </Link>
+        </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                    {blogData.map((post) => (
-                        <Link key={post.id} href={`/blog/${post.id}`} className="group block">
-                            <div className="bg-bg-tertiary h-full flex flex-col md:flex-row overflow-hidden border border-border transition-all duration-[--duration-slow] ease-[--ease-out-expo] hover:-translate-y-1 hover:shadow-sm hover:border-border-hover rounded-[--radius-lg]">
-                                <div className="relative h-56 md:h-auto md:w-2/5 overflow-hidden shrink-0">
-                                    <Image
-                                        src={post.image}
-                                        alt={post.title}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                        sizes="(max-width: 768px) 100vw, 33vw"
-                                    />
-                                </div>
-                                <div className="p-6 flex flex-col">
-                                    <div className="flex items-center gap-2 mb-3 text-body-sm text-accent">
-                                        <Calendar size={14} />
-                                        <span>{post.date}</span>
-                                    </div>
-                                    <h3 className="text-h4 mb-3 group-hover:text-brand transition-colors line-clamp-2 leading-snug">
-                                        {post.title}
-                                    </h3>
-                                    <p className="text-body-sm mb-4 line-clamp-3 flex-grow leading-relaxed">
-                                        {post.excerpt}
-                                    </p>
-                                    <span className="text-label-lg text-brand flex items-center gap-1 mt-auto">
-                                        Read More <ArrowRight size={14} />
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
+        <div className="grid gap-6 md:grid-cols-2">
+          {blogData.map((post) => (
+            <Link key={post.id} href={`/blog/${post.id}`} className="group block">
+              <article className="overflow-hidden rounded-[--radius-xl] border border-border bg-bg-elevated/90 shadow-xs transition-all duration-[--duration-normal] hover:-translate-y-1 hover:border-brand/30 hover:shadow-soft">
+                <div className="relative h-56 overflow-hidden">
+                  <Image
+                    src={post.image}
+                    alt={post.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                 </div>
+                <div className="p-6">
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-bg-tertiary/85 px-3 py-1 text-body-xs text-text-secondary">
+                    <Calendar size={12} />
+                    <span>{post.date}</span>
+                  </div>
+                  <h3 className="text-h4 leading-snug text-text-primary transition-colors group-hover:text-brand">
+                    {post.title}
+                  </h3>
+                  <p className="mt-3 line-clamp-3 text-body-sm leading-relaxed text-text-secondary">
+                    {post.excerpt}
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-label-lg font-semibold text-text-primary transition-colors group-hover:text-brand">
+                    Read article
+                    <ArrowRight size={14} />
+                  </span>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
 
-                <div className="mt-10 md:hidden flex justify-center">
-                    <Link href="/blog">
-                        <Button variant="outline" icon={<ArrowRight size={16} />}>
-                            View All Posts
-                        </Button>
-                    </Link>
-                </div>
-            </div>
-        </section>
-    );
+        <div className="mt-10 flex justify-center md:hidden">
+          <Link href="/blog">
+            <Button variant="outline" iconRight={<ArrowRight size={16} />}>
+              View all posts
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
 }

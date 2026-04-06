@@ -38,8 +38,7 @@ const ProductSchema = new Schema<IProduct>({
     type: String, 
     required: true, 
     enum: [
-      'Pets', 'Food', 'Accessories', 'Medicine', 'Grooming', 'Other',
-      'food', 'toys', 'health', 'bedding', 'accessories'
+      'Pets', 'Food', 'Accessories', 'Medicine', 'Grooming', 'Toys', 'Bedding', 'Health', 'Other'
     ],
     index: true
   },
@@ -54,11 +53,13 @@ const ProductSchema = new Schema<IProduct>({
   }],
   rating: { type: Number, default: 0, min: 0, max: 5 },
   reviewCount: { type: Number, default: 0 },
-  isActive: { type: Boolean, default: true },
+  isActive: { type: Boolean, default: true, index: true },
   tags: [{ type: String }],
-  demandCount: { type: Number, default: 0 }
+  demandCount: { type: Number, default: 0, index: -1 }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Virtual for isLowStock
@@ -66,7 +67,12 @@ ProductSchema.virtual('isLowStock').get(function() {
   return this.stock > 0 && this.stock <= this.lowStockThreshold;
 });
 
-// Index for text search
+// ── Compound Indexes ────────────────────────────────────────────────────────
+// Browsing by category
+ProductSchema.index({ category: 1, isActive: 1, createdAt: -1 });
+// Search results sort by demand/popular
+ProductSchema.index({ isActive: 1, demandCount: -1, rating: -1 });
+// Text search
 ProductSchema.index({ name: 'text', description: 'text' });
 
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);

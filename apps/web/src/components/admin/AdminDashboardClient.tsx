@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { 
     TrendingUp, Users, Package, ShoppingBag, 
     Bell, Search, ChevronRight, Activity, 
@@ -8,7 +9,9 @@ import {
     ShieldAlert, AlertCircle, Check, X,
     Mail, MessageSquare, ExternalLink,
     LayoutDashboard, Wallet, BarChart3,
-    Truck, Settings, LogOut, Menu
+    Truck, Settings, LogOut, Menu, Zap,
+    ArrowUpRight, ArrowDownRight, MoreHorizontal,
+    Layers, Crosshair, Command
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/Badge';
@@ -19,227 +22,202 @@ import toast from 'react-hot-toast';
 import { FleetManagementView } from './FleetManagementView';
 import { WalletManagementView } from './WalletManagementView';
 import { AnalyticsDashboardView } from './AnalyticsDashboardView';
+import { AdminProductsClient } from './AdminProductsClient';
 
 type AdminTab = 'overview' | 'orders' | 'inventory' | 'fleet' | 'wallet' | 'analytics';
 
 export function AdminDashboardClient() {
     const [activeTab, setActiveTab] = useState<AdminTab>('overview');
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [orders, setOrders] = useState<any[]>([]);
-    const [tickets, setTickets] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    const fetchTickets = async () => {
-        try {
+    const { data: tickets = [] } = useQuery({
+        queryKey: ['admin', 'tickets'],
+        queryFn: async () => {
             const res = await fetch('/api/admin/tickets');
             const data = await res.json();
-            if (data.success) setTickets(data.data);
-        } catch (err) {}
-    };
+            return data.success ? data.data : [];
+        }
+    });
 
-    const fetchOrders = async () => {
-        try {
-            // Simplified order fetch for overview
-            const res = await fetch('/api/admin/orders?limit=8');
-            const data = await res.json();
-            if (data.success) setOrders(data.data);
-        } catch (err) {} finally {
-            setLoading(false);
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'fleet': return <FleetManagementView />;
+            case 'wallet': return <WalletManagementView />;
+            case 'analytics': return <AnalyticsDashboardView />;
+            case 'inventory': return <AdminProductsClient initialProducts={[]} />; // Initial state, will fetch inside
+            case 'overview':
+            default:
+                return (
+                    <div className="space-y-12 animate-fade-in">
+                        {/* High-Precision KPI Layer */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <MetricCard title="Gross Revenue" value="₹1.24M" trend="+12.5%" icon={TrendingUp} color="#FF6B00" />
+                            <MetricCard title="Fleet Enlisted" value="18" trend="LIVE" icon={Truck} color="#00C48C" />
+                            <MetricCard title="System Guard" value="04" trend="SECURE" icon={ShieldAlert} color="#F04438" />
+                            <MetricCard title="Pet Parents" value="2.4k" trend="+18%" icon={Users} color="#7C5CFC" />
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                             {/* Operational Command Feed */}
+                             <div className="lg:col-span-2 space-y-6">
+                                <div className="flex items-center justify-between px-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-brand/10 border border-brand/20">
+                                            <Crosshair size={18} className="text-brand" />
+                                        </div>
+                                        <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Mission Logs</h3>
+                                    </div>
+                                    <button className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-brand transition-colors">Tactical Archive</button>
+                                </div>
+
+                                <div className="glass rounded-[32px] border border-white/5 overflow-hidden shadow-2xl">
+                                    <table className="w-full text-left">
+                                        <thead>
+                                            <tr className="bg-white/[0.02] border-b border-white/5">
+                                                <th className="px-8 py-5 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic">Mission ID</th>
+                                                <th className="px-8 py-5 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic">Protocol</th>
+                                                <th className="px-8 py-5 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic">Payload</th>
+                                                <th className="px-8 py-5 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic text-right">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {[1, 2, 3, 4, 5].map((i) => (
+                                                <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors group">
+                                                    <td className="px-8 py-6">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center">
+                                                                <Command size={16} className="text-white/20 group-hover:text-brand transition-colors" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-black text-white italic uppercase tracking-tight">ORD-72{i}9</p>
+                                                                <p className="text-[9px] font-bold text-white/20 uppercase mt-0.5">Lucknow Sector {i+2}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-6">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse" />
+                                                            <span className="text-[10px] font-black text-brand uppercase italic tracking-widest leading-none">In Transit</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-6">
+                                                        <p className="text-sm font-black text-white italic tracking-tighter">₹14,299</p>
+                                                    </td>
+                                                    <td className="px-8 py-6 text-right">
+                                                        <button className="w-10 h-10 rounded-xl glass border border-white/5 text-white/20 hover:text-white transition-all opacity-0 group-hover:opacity-100 items-center justify-center inline-flex">
+                                                            <ArrowUpRight size={16} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                             </div>
+
+                             {/* Priority Strategic Alerts */}
+                             <div className="space-y-6">
+                                <div className="flex items-center gap-3 px-2">
+                                    <div className="p-2 rounded-lg bg-danger/10 border border-danger/20">
+                                        <ShieldAlert size={18} className="text-danger" />
+                                    </div>
+                                    <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">Priorities</h3>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {tickets.length > 0 ? (tickets.map((t: any) => (
+                                        <div key={t._id} className="p-6 glass rounded-3xl relative overflow-hidden group hover:border-danger/30 transition-all border border-white/5">
+                                            <div className="absolute top-0 left-0 w-1 h-full bg-danger opacity-40" />
+                                            <div className="flex justify-between items-start mb-4">
+                                                <Badge className="bg-danger/10 text-danger border-danger/20 text-[9px] uppercase font-black italic">{t.issueType}</Badge>
+                                                <span className="text-[9px] font-black text-white/20 uppercase">2m ago</span>
+                                            </div>
+                                            <p className="text-sm font-black text-white italic uppercase tracking-tight truncate">{t.userEmail}</p>
+                                            <p className="text-[10px] text-white/40 mt-1 line-clamp-2 leading-relaxed">System protocol breach detected at node 7. Secure immediate verification.</p>
+                                        </div>
+                                    ))) : (
+                                        <div className="p-12 border-2 border-white/5 border-dashed rounded-[40px] flex flex-col items-center justify-center text-center">
+                                            <div className="w-16 h-16 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center mb-6">
+                                                <Activity size={24} className="text-white/10" />
+                                            </div>
+                                            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-1">Grid Operational</p>
+                                            <p className="text-[9px] font-bold text-white/10 uppercase italic">No active breaches</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Pulse Meter Mock */}
+                                <div className="p-8 glass rounded-[32px] border border-brand/20 relative overflow-hidden group shadow-2xl shadow-brand/10">
+                                    <Zap className="absolute -right-8 -bottom-8 w-40 h-40 text-brand/5 rotate-12 group-hover:scale-110 transition-transform" />
+                                    <h4 className="text-[10px] font-black text-brand uppercase tracking-[0.3em] mb-6">Tactical Pulse</h4>
+                                    <div className="flex items-end justify-between relative z-10">
+                                        <div>
+                                            <p className="text-4xl font-black text-white italic tracking-tighter leading-none">98.4%</p>
+                                            <p className="text-[9px] font-bold text-white/30 uppercase mt-3 tracking-widest uppercase">Grid Optimization</p>
+                                        </div>
+                                        <div className="w-14 h-14 rounded-2xl border-4 border-brand/10 border-t-brand animate-spin" />
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                );
         }
     };
 
-    useEffect(() => {
-        fetchTickets();
-        fetchOrders();
-    }, []);
-
-    const sidebarItems = [
-        { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
-        { id: 'orders', icon: ShoppingBag, label: 'Mission Log' },
-        { id: 'fleet', icon: Truck, label: 'Fleet Control' },
-        { id: 'wallet', icon: Wallet, label: 'Wallet Support' },
-        { id: 'analytics', icon: BarChart3, label: 'Mission Control' },
-        { id: 'inventory', icon: Package, label: 'Catalog' },
-    ];
-
-    return (
-        <div className="min-h-screen bg-bg-primary flex overflow-hidden">
-            
-            {/* Sidebar */}
-            <motion.aside 
-                initial={false}
-                animate={{ width: sidebarOpen ? 280 : 80 }}
-                className="bg-bg-elevated border-r border-border flex flex-col h-screen fixed lg:static z-50 shadow-xl lg:shadow-none"
-            >
-                <div className="p-6 flex items-center justify-between mb-8 border-b border-border/50">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-brand rounded-[--radius-lg] flex items-center justify-center font-bold text-white text-h4 shadow-lg shadow-brand/20">P</div>
-                        {sidebarOpen && <h1 className="text-h5 font-bold text-text-primary tracking-tighter uppercase italic">PET HQ</h1>}
-                    </div>
-                </div>
-
-                <nav className="flex-1 px-4 space-y-2">
-                    {sidebarItems.map((item) => {
-                        const Icon = item.icon;
-                        const active = activeTab === item.id;
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveTab(item.id as AdminTab)}
-                                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all relative group ${active ? 'bg-brand text-white shadow-lg shadow-brand/10' : 'text-text-tertiary hover:bg-bg-secondary hover:text-text-primary'}`}
-                            >
-                                <Icon size={20} className={active ? 'fill-white' : 'group-hover:scale-110 transition-transform'} />
-                                {sidebarOpen && <span className="text-label-md font-bold uppercase tracking-tight">{item.label}</span>}
-                                {active && (
-                                    <motion.div 
-                                        layoutId="sidebar-active"
-                                        className="absolute left-0 w-1.5 h-6 bg-white rounded-full ml-1"
-                                    />
-                                )}
-                            </button>
-                        );
-                    })}
-                </nav>
-
-                <div className="p-6 border-t border-border mt-auto">
-                    <button className="w-full flex items-center gap-4 px-4 py-3 text-text-tertiary hover:text-danger hover:bg-danger/5 transition-all rounded-2xl group">
-                        <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
-                        {sidebarOpen && <span className="text-label font-bold uppercase tracking-wider">Sign Out</span>}
-                    </button>
-                </div>
-            </motion.aside>
-
-            {/* Main Content Pane */}
-            <main className="flex-1 h-screen overflow-y-auto relative custom-scrollbar">
-                
-                {/* Viewport Header */}
-                <header className="sticky top-0 z-40 bg-bg-primary/80 backdrop-blur-3xl border-b border-border/50 px-8 py-5">
-                    <div className="flex items-center justify-between max-w-[1400px] mx-auto">
-                        <div className="flex items-center gap-4">
-                            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2.5 bg-bg-elevated border border-border rounded-xl text-text-tertiary hover:text-brand transition-colors">
-                                <Menu size={20} />
-                            </button>
-                            <div>
-                                <p className="text-overline opacity-60">Admin Dashboard / {activeTab}</p>
-                                <h2 className="text-label-lg font-bold text-text-primary uppercase tracking-tight italic">
-                                    {sidebarItems.find(i => i.id === activeTab)?.label}
-                                </h2>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-6">
-                            <div className="relative group hidden sm:block">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-brand transition-colors" size={16} />
-                                <input placeholder="Global search..." className="pl-10 pr-4 py-2.5 bg-bg-elevated border border-border rounded-xl text-label-sm w-64 outline-none focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button className="w-11 h-11 bg-bg-elevated border border-border rounded-full flex items-center justify-center text-text-tertiary relative hover:text-brand transition-all shadow-sm">
-                                    <Bell size={18} />
-                                    <span className="absolute top-3 right-3 w-2 h-2 bg-danger rounded-full" />
-                                </button>
-                                <div className="w-11 h-11 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center font-bold text-brand text-label-lg shadow-sm">A</div>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                {/* Dynamic Content */}
-                <div className="p-8 max-w-[1400px] mx-auto min-h-[calc(100vh-80px)]">
-                    <AnimatePresence mode="wait">
-                        <motion.div 
-                            key={activeTab}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            {activeTab === 'overview' && <AdminOverview orders={orders} tickets={tickets} />}
-                            {activeTab === 'fleet' && <FleetManagementView />}
-                            {activeTab === 'wallet' && <WalletManagementView />}
-                            {activeTab === 'analytics' && <AnalyticsDashboardView />}
-                            {['orders', 'inventory'].includes(activeTab) && (
-                                <div className="flex flex-col items-center justify-center py-32 text-center opacity-60 bg-bg-elevated rounded-[--radius-3xl] border border-dashed border-border">
-                                     <ShoppingBag size={64} className="text-text-disabled mb-6 animate-bounce" />
-                                     <h3 className="text-h3 font-bold text-text-tertiary uppercase italic tracking-tighter">Segment in Maintenance</h3>
-                                     <p className="text-body-md text-text-disabled mt-2">The full list view for {activeTab} is being optimized for high-velocity scrolling.</p>
-                                </div>
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-            </main>
-        </div>
-    );
-}
-
-// Extraction of original Overview content to a sub-component for clarity
-function AdminOverview({ orders, tickets }: any) {
     return (
         <div className="space-y-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <MetricCard title="Today's Revenue" value="₹42.5k" trend="+14.5%" icon={TrendingUp} colorClass="text-success" bgClass="bg-success/10" />
-                <MetricCard title="Active Missions" value="12" trend="Live Ops" icon={Truck} colorClass="text-brand" bgClass="bg-brand/10" />
-                <MetricCard title="Unassigned" value={orders.filter((o: any) => o.status === 'unassigned').length.toString()} trend="Pending Task" icon={Clock} colorClass="text-danger" bgClass="bg-danger/10" />
-                <KPI value="8/15" label="Fleet Efficiency" icon={Users} />
+            {/* Global Tab Interface */}
+            <div className="flex items-center gap-2 p-1.5 glass rounded-3xl border border-white/5 w-fit">
+                {['overview', 'fleet', 'inventory', 'wallet', 'analytics'].map((tab) => (
+                    <button 
+                        key={tab}
+                        onClick={() => setActiveTab(tab as AdminTab)}
+                        className={`px-6 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-brand text-white shadow-xl shadow-brand/20' : 'text-white/30 hover:text-white/60 hover:bg-white/[0.03]'}`}
+                    >
+                        {tab}
+                    </button>
+                ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                 <div className="lg:col-span-2">
-                    <div className="bg-bg-elevated border border-border rounded-[--radius-3xl] overflow-hidden shadow-sm">
-                        <div className="p-6 border-b border-border flex justify-between items-center">
-                            <h3 className="text-h4 font-bold italic text-text-primary uppercase tracking-tighter">Live Activity</h3>
-                            <button className="text-label-sm font-semibold text-brand uppercase tracking-wider hover:underline px-4 py-2 bg-brand/5 rounded-[--radius-md]">View Archives</button>
-                        </div>
-                        <div className="p-6 text-text-tertiary text-center py-20 italic font-medium">Order registry syncing with mission control...</div>
-                    </div>
-                 </div>
-                 <div className="lg:col-span-1">
-                    <div className="bg-bg-elevated border border-border rounded-[--radius-3xl] p-8 shadow-sm h-full">
-                         <h3 className="text-h5 font-bold italic text-brand uppercase tracking-tighter mb-6 flex items-center gap-2">
-                            <AlertCircle size={20} /> High Priority Tickets
-                         </h3>
-                         <div className="space-y-4">
-                             {tickets.map((t: any) => (
-                                 <div key={t._id} className="p-4 bg-bg-secondary rounded-2xl border border-border border-l-4 border-l-danger hover:border-danger/30 transition-all">
-                                     <p className="text-label-sm font-semibold text-danger uppercase tracking-wider mb-1">{t.issueType}</p>
-                                     <p className="text-label-sm font-bold text-text-primary">{t.userEmail}</p>
-                                 </div>
-                             ))}
-                             {tickets.length === 0 && <p className="text-label-sm text-text-disabled italic text-center py-10 uppercase tracking-widest">No issues reported</p>}
-                         </div>
-                    </div>
-                 </div>
-            </div>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
+                    {renderContent()}
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 }
 
-function MetricCard({ title, value, trend, icon: Icon, colorClass, bgClass }: any) {
+function MetricCard({ title, value, trend, icon: Icon, color }: any) {
     return (
-        <div className="bg-bg-elevated border border-border p-6 rounded-[--radius-3xl] shadow-sm flex flex-col justify-between group hover:border-brand/40 transition-all">
-            <div className="flex justify-between items-start mb-6">
-                <span className="text-overline">{title}</span>
-                <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${bgClass} ${colorClass}`}>
-                    <Icon size={18} />
+        <motion.div 
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="p-8 glass rounded-[32px] border border-white/5 relative overflow-hidden group hover:border-white/20 transition-all shadow-2xl"
+        >
+            <div className="absolute -right-4 -bottom-4 w-32 h-32 blur-[40px] opacity-[0.03] group-hover:opacity-[0.08] transition-all" style={{ backgroundColor: color }} />
+            
+            <div className="flex justify-between items-start mb-10 relative z-10">
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 group-hover:scale-110 group-hover:rotate-6 transition-all" style={{ color }}>
+                    <Icon size={22} />
+                </div>
+                <div className="text-right">
+                    <div className="flex items-center gap-1 text-[10px] font-black uppercase italic text-brand">
+                        <ArrowUpRight size={14} />
+                        {trend}
+                    </div>
                 </div>
             </div>
-            <div>
-                <h3 className="text-h2 text-stat text-text-primary tracking-tight mb-1">{value}</h3>
-                <span className="text-label-sm font-semibold uppercase text-success tracking-wider">{trend} vs prev</span>
-            </div>
-        </div>
-    );
-}
 
-function KPI({ value, label, icon: Icon }: any) {
-    return (
-        <div className="bg-bg-elevated border border-border p-6 rounded-[--radius-3xl] shadow-sm flex flex-col justify-between hover:border-info/40 transition-all">
-            <div className="flex justify-between items-start mb-6 text-info">
-                <span className="text-overline">{label}</span>
-                <Icon size={18} />
+            <div className="relative z-10">
+                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-2">{title}</p>
+                <h3 className="text-4xl font-black text-white italic tracking-tighter leading-none">{value}</h3>
             </div>
-            <h3 className="text-h2 text-stat text-text-primary tracking-tight mb-1 opacity-80">{value}</h3>
-            <span className="text-label-sm font-bold text-info uppercase tracking-tight">System Optimized</span>
-        </div>
+        </motion.div>
     );
 }

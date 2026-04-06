@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongoose';
 import User from '@/models/User';
 import Wallet from '@/models/Wallet';
 import { auth } from '@/auth';
+import { AdminService } from '@/services/admin.service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,16 +15,19 @@ export async function GET(request: NextRequest) {
     }
 
     // 1. Fetch all users and their wallets
-    const users = await User.find({ role: 'user' }).select('name email avatar').lean();
-    const wallets = await Wallet.find({}).lean();
+    const users = await User.find({ role: 'user' }).select('name email avatar image').lean();
+    const wallets = await Wallet.find({}).select('userEmail balance').lean();
 
     // 2. Pair them up
-    const data = users.map(user => {
-       const wallet = wallets.find(w => w.userEmail === user.email);
+    interface LeanUser { name: string; email: string; avatar?: string; image?: string; _id: any; }
+    interface LeanWallet { userEmail: string; balance: number; _id: any; }
+
+    const data = (users as LeanUser[]).map(user => {
+       const wallet = (wallets as LeanWallet[]).find(w => w.userEmail === user.email);
        return {
           ...user,
           balance: wallet?.balance || 0,
-          walletId: wallet?._id
+          walletId: wallet?._id?.toString()
        };
     });
 
@@ -42,26 +46,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { email, amount, type, reason } = await request.json();
-
-    const wallet = await Wallet.findOneAndUpdate(
-       { userEmail: email },
-       { 
-          $inc: { balance: amount },
-          $push: { 
-             transactions: { 
-                type: amount > 0 ? 'credit' : 'debit', 
-                amount: Math.abs(amount), 
-                description: `Admin Support Adjustment: ${reason || 'Customer satisfaction reward'}`,
-                createdAt: new Date()
-             } 
-          }
-       },
-       { upsert: true, returnDocument: 'after' }
-    );
+    const body = await request.json();
+    const wallet = await AdminService.adjustWallet(body, session.user.email || 'unknown');
 
     return NextResponse.json({ success: true, data: wallet });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[ADMIN_WALLET_POST_ERROR]', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error.message || 'Internal Server Error',
+      code: error.code
+    }, { status: error.statusCode || 500 });
   }
 }
