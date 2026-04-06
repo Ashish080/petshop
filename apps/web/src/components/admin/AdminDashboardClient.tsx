@@ -23,8 +23,9 @@ import { FleetManagementView } from './FleetManagementView';
 import { WalletManagementView } from './WalletManagementView';
 import { AnalyticsDashboardView } from './AnalyticsDashboardView';
 import { AdminProductsClient } from './AdminProductsClient';
+import { SystemPulseView } from './SystemPulseView';
 
-type AdminTab = 'overview' | 'orders' | 'inventory' | 'fleet' | 'wallet' | 'analytics';
+type AdminTab = 'overview' | 'orders' | 'inventory' | 'fleet' | 'wallet' | 'analytics' | 'pulse';
 
 export function AdminDashboardClient() {
     const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -43,6 +44,7 @@ export function AdminDashboardClient() {
             case 'fleet': return <FleetManagementView />;
             case 'wallet': return <WalletManagementView />;
             case 'analytics': return <AnalyticsDashboardView />;
+            case 'pulse': return <SystemPulseView />;
             case 'inventory': return <AdminProductsClient initialProducts={[]} />; // Initial state, will fetch inside
             case 'overview':
             default:
@@ -168,7 +170,7 @@ export function AdminDashboardClient() {
         <div className="space-y-12">
             {/* Global Tab Interface */}
             <div className="flex items-center gap-2 p-1.5 glass rounded-3xl border border-white/5 w-fit">
-                {['overview', 'fleet', 'inventory', 'wallet', 'analytics'].map((tab) => (
+                {['overview', 'fleet', 'inventory', 'pulse', 'wallet', 'analytics'].map((tab) => (
                     <button 
                         key={tab}
                         onClick={() => setActiveTab(tab as AdminTab)}

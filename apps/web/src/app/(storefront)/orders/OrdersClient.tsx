@@ -9,7 +9,8 @@ import {
   RotateCcw, User, Wifi, WifiOff, X,
   Receipt, Sparkles, Navigation, ShieldCheck,
   AlertCircle, HelpCircle, MessageSquare, Send, Bell,
-  Copy, Share2, Wallet as WalletIcon, Gift
+  Copy, Share2, Wallet as WalletIcon, Gift,
+  Cpu, Crosshair, Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useOrderStream, type ConnectionState } from '@/hooks/useOrderStream';
@@ -26,12 +27,12 @@ import { useRouter } from 'next/navigation';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const STATUS_STEPS = [
-  { key: 'pending',          label: 'Preparing',    icon: Receipt,     color: 'var(--color-bg-secondary)' },
-  { key: 'confirmed',        label: 'Confirmed',    icon: CheckCircle, color: 'var(--color-info)' },
-  { key: 'accepted',         label: 'Assigned',     icon: User,        color: 'var(--color-brand)' },
-  { key: 'picked',           label: 'Picked Up',    icon: Package,     color: 'var(--color-brand)' },
-  { key: 'out-for-delivery', label: 'On the Way',   icon: Truck,       color: 'var(--color-warning)' },
-  { key: 'delivered',        label: 'Delivered',    icon: CheckCircle, color: 'var(--color-success)' },
+  { key: 'pending',          label: 'Preparing',    icon: Cpu,         color: 'var(--color-obsidian-light)' },
+  { key: 'confirmed',        label: 'Confirmed',    icon: ShieldCheck, color: 'var(--color-info)' },
+  { key: 'accepted',         label: 'Assigned',     icon: Crosshair,   color: 'var(--color-brand)' },
+  { key: 'picked',           label: 'Intercepted',  icon: Package,     color: 'var(--color-brand)' },
+  { key: 'out-for-delivery', label: 'Transit',      icon: Truck,       color: 'var(--color-warning)' },
+  { key: 'delivered',        label: 'Secured',      icon: CheckCircle, color: 'var(--color-success)' },
 ] as const;
 
 const STATUS_IDX: Record<string, number> = {};
@@ -48,87 +49,84 @@ const ETA_MINUTES: Record<string, number> = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function ConnBadge({ state }: { state: ConnectionState }) {
-  if (state === 'connected') return <span className="inline-flex items-center gap-1 text-success text-[10px] font-bold tracking-widest uppercase bg-success/10 px-2 py-1 rounded-full"><Wifi size={10} /> Live GPS</span>;
-  if (state === 'reconnecting') return <span className="inline-flex items-center gap-1 text-warning text-[10px] font-bold uppercase tracking-widest animate-pulse bg-warning/10 px-2 py-1 rounded-full"><WifiOff size={10} /> Recalibrating</span>;
-  if (state === 'connecting') return <span className="inline-flex items-center gap-1 text-text-tertiary text-[10px] font-bold uppercase tracking-widest animate-pulse bg-bg-secondary px-2 py-1 rounded-full"><Wifi size={10} /> Connecting</span>;
+  if (state === 'connected') return <span className="inline-flex items-center gap-2 text-success text-[10px] font-black tracking-[0.2em] uppercase bg-success/10 border border-success/20 px-3 py-1.5 rounded-xl italic animate-fade-in"><Activity size={12} className="animate-pulse" /> Live Telemetry</span>;
+  if (state === 'reconnecting') return <span className="inline-flex items-center gap-2 text-warning text-[10px] font-black uppercase tracking-[0.2em] bg-warning/10 border border-warning/20 px-3 py-1.5 rounded-xl italic transition-all"><WifiOff size={12} /> Syncing Node</span>;
+  if (state === 'connecting') return <span className="inline-flex items-center gap-2 text-white/40 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl italic">Initializing Pulse</span>;
   return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// A. TRACKING UI MAP COMPONENT - "The Running Dog Timeline"
+// A. TRACKING UI MAP COMPONENT - "Mission Radar"
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function JourneyMap({ statusIdx }: { statusIdx: number }) {
   const progressPercent = Math.max(5, Math.min(100, (statusIdx / (STATUS_STEPS.length - 1)) * 100));
 
   return (
-    <div className="relative w-full h-[220px] bg-gradient-to-b from-[#e0f2fe] to-[#f0f9ff] dark:from-[#0f172a] dark:to-bg-elevated overflow-hidden rounded-t-[--radius-2xl] flex flex-col items-center justify-end pb-12 border-b border-border">
+    <div className="relative w-full h-[240px] bg-obsidian overflow-hidden rounded-t-[40px] flex flex-col items-center justify-end pb-16 border-b border-white/5">
       
-      {/* Playful Sky Background (Clouds) */}
-      <div className="absolute inset-0 top-0 w-full h-full pointer-events-none opacity-50 dark:opacity-10">
-         <motion.div animate={{ x: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 20, ease: "linear" }} className="absolute text-5xl top-4 left-[10%]">☁️</motion.div>
-         <motion.div animate={{ x: [0, -30, 0] }} transition={{ repeat: Infinity, duration: 25, ease: "linear" }} className="absolute text-3xl top-8 right-[20%]">☁️</motion.div>
-      </div>
+      {/* Tactical Radar Grid Overlay */}
+      <div className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+      
+      {/* Base Elevation Shadow */}
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-brand/10 to-transparent pointer-events-none opacity-40" />
 
-      {/* The Core Path */}
-      <div className="absolute bottom-16 w-[85%] h-3 bg-white/50 dark:bg-bg-primary/50 backdrop-blur-md rounded-full shadow-inner border border-white/60 dark:border-border overflow-hidden">
-        {/* Dynamic fill line */}
+      {/* The Mission Path */}
+      <div className="absolute bottom-20 w-[85%] h-[2px] bg-white/5 rounded-full overflow-hidden">
+        {/* Dynamic Telemetry Line */}
         <motion.div 
-          className="h-full bg-gradient-to-r from-brand to-[#FFA057] rounded-full relative"
+          className="h-full bg-brand relative"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}
           transition={{ type: "spring", stiffness: 45, damping: 15 }}
         >
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:20px_20px] animate-[slide_2s_linear_infinite]" />
+            <div className="absolute top-[-4px] right-[-4px] w-2 h-2 bg-brand rounded-full shadow-[0_0_15px_rgba(255,107,0,1)]" />
         </motion.div>
       </div>
 
-      {/* Base Milestones (Store -> Home) */}
-      <div className="absolute bottom-12 w-[85%] flex justify-between z-10 items-end px-2 pointer-events-none">
+      {/* Strategic Milestones */}
+      <div className="absolute bottom-14 w-[85%] flex justify-between z-10 items-end px-2 pointer-events-none">
          <div className="flex flex-col items-center">
-            <span className="text-3xl drop-shadow-md mb-1 -ml-2">🏪</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#64748b] bg-white/80 dark:bg-bg-primary/80 px-2 py-0.5 rounded-full shadow-sm">Store</span>
-         </div>
-         <div className="flex flex-col items-center opacity-70">
-            <span className="w-3 h-3 bg-white border-2 border-brand rounded-full mb-3" />
+            <div className="w-10 h-10 rounded-2xl glass border border-white/10 flex items-center justify-center mb-3">
+                <Navigation size={18} className="text-white/40" />
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 italic">Asset Origin</span>
          </div>
          <div className="flex flex-col items-center">
-            <span className="text-3xl drop-shadow-md mb-1 -mr-2">🏠</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#64748b] bg-white/80 dark:bg-bg-primary/80 px-2 py-0.5 rounded-full shadow-sm">Home</span>
+            <div className={`w-10 h-10 rounded-2xl glass border border-white/10 flex items-center justify-center mb-3 transition-colors ${statusIdx === 5 ? 'border-success/40 bg-success/10' : ''}`}>
+                <MapPin size={18} className={statusIdx === 5 ? 'text-success' : 'text-white/40'} />
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 italic">Deployment Node</span>
          </div>
       </div>
 
-      {/* The Running Animal/Delivery Marker */}
+      {/* The Strategic Asset / Rider Marker */}
       <motion.div 
-         className="absolute bottom-16 z-30 ml-4"
+         className="absolute bottom-20 z-30 ml-4"
          initial={{ left: '0%' }}
          animate={{ left: `${progressPercent}%` }}
          transition={{ type: "spring", stiffness: 50, damping: 20 }}
          style={{ translateX: '-50%' }}
       >
           <motion.div 
-            animate={{ y: [0, -12, 0], rotate: [0, 5, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 0.6 }}
-            className="relative -top-1"
+            animate={{ y: [0, -4, 0] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            className="relative"
           >
              {statusIdx < 2 ? (
-                <span className="text-4xl drop-shadow-lg">📦</span>
+                <div className="p-3 bg-brand/20 border border-brand/40 rounded-xl backdrop-blur-md">
+                    <Package size={24} className="text-brand" />
+                </div>
              ) : statusIdx === 5 ? (
-                <span className="text-4xl drop-shadow-lg">🎉</span>
+                <div className="p-3 bg-success/20 border border-success/40 rounded-xl backdrop-blur-md animate-bounce">
+                    <CheckCircle size={24} className="text-success" />
+                </div>
              ) : (
                 <div className="relative group">
-                    <span className="text-5xl drop-shadow-lg tracking-tight">🛵🐕</span>
-                    {/* Speed motion lines behind scooter */}
-                    <motion.div 
-                       animate={{ opacity: [0, 1, 0], x: [0, -15] }} 
-                       transition={{ repeat: Infinity, duration: 0.4 }} 
-                       className="absolute top-4 -left-6 w-5 h-1 bg-white rounded-full opacity-60" 
-                    />
-                    <motion.div 
-                       animate={{ opacity: [0, 1, 0], x: [0, -25] }} 
-                       transition={{ repeat: Infinity, duration: 0.5, delay: 0.2 }} 
-                       className="absolute top-7 -left-10 w-8 h-1.5 bg-white rounded-full opacity-40" 
-                    />
+                    <div className="p-4 bg-brand rounded-2xl shadow-[0_15px_30px_rgba(255,107,0,0.4)] flex items-center justify-center">
+                        <Truck size={24} className="text-white" />
+                    </div>
                 </div>
              )}
           </motion.div>
@@ -138,7 +136,7 @@ function JourneyMap({ statusIdx }: { statusIdx: number }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// B. ACTIVE ORDER CARD (The Pulse Tracker)
+// B. MISSION TRACKER CARD
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function ActiveOrderCard({ order, onStatusChange }: { order: any; onStatusChange: (id: string, s: string) => void; }) {

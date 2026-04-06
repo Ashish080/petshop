@@ -46,9 +46,9 @@ const statusMeta: Record<
   string,
   { label: string; badge: 'warning' | 'info' | 'success' | 'brand' }
 > = {
-  accepted: { label: 'Accepted', badge: 'info' },
-  picked: { label: 'Picked', badge: 'warning' },
-  'out-for-delivery': { label: 'On route', badge: 'brand' },
+  accepted: { label: 'INTERCEPTED', badge: 'info' },
+  picked: { label: 'PAYLOAD SECURED', badge: 'warning' },
+  'out-for-delivery': { label: 'TRANSIT PROTOCOL', badge: 'brand' },
 };
 
 function getNextStatus(status: string) {
@@ -145,43 +145,50 @@ export default function RiderDashboardClient({
   };
 
   return (
-    <div className="max-w-md space-y-5 pb-28">
+    <div className="max-w-md mx-auto space-y-6 pb-32 pt-4">
+      
+      {/* 1. MISSION COMMAND HEADER */}
       <motion.section
         {...motionPresets.fadeDown}
-        className="premium-panel overflow-hidden rounded-[32px] p-5"
+        className="glass rounded-[40px] p-8 border border-white/5 relative overflow-hidden shadow-2xl"
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-brand/5 blur-[80px] rounded-full -mr-20 -mt-20 pointer-events-none" />
+        
+        <div className="flex items-start justify-between gap-4 relative z-10">
           <div>
-            <p className="text-kicker">Today</p>
-            <h1 className="mt-2 text-h3 font-black tracking-tight text-text-primary">
-              One-handed rider flow.
+            <div className="flex items-center gap-2 mb-2">
+               <div className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse shadow-[0_0_8px_rgba(255,107,0,0.5)]" />
+               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">Sector: LKO-7</p>
+            </div>
+            <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase leading-none">
+              Mission Protocol <span className="text-brand">Active</span>
             </h1>
           </div>
-          <Badge variant={isOnline ? 'success' : 'danger'} dot>
-            {isOnline ? 'Online' : 'Offline'}
+          <Badge variant={isOnline ? 'success' : 'danger'} dot className="bg-white/5 border-white/10 text-[9px] font-black tracking-widest italic">
+            {isOnline ? 'ONLINE' : 'OFFLINE'}
           </Badge>
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          <MetricChip label="Active" value={String(currentOrders.length)} icon={<Package size={16} />} />
-          <MetricChip label="Nearby" value={String(nearbyOrders.length)} icon={<Sparkles size={16} />} />
-          <MetricChip label="Today" value={formatCurrency(todayEarnings || 0)} icon={<Wallet size={16} />} />
+        <div className="mt-10 grid grid-cols-3 gap-4 relative z-10">
+          <MetricChip label="Missions" value={String(currentOrders.length)} icon={<Package size={16} />} />
+          <MetricChip label="Signals" value={String(nearbyOrders.length)} icon={<Sparkles size={16} />} />
+          <MetricChip label="Yield" value={formatCurrency(todayEarnings || 0)} icon={<Wallet size={16} />} />
         </div>
 
         {(pendingCount > 0 || isSyncing) && (
-          <div className="mt-4 flex items-center justify-between rounded-[22px] border border-border bg-bg-tertiary px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-muted text-brand">
-                <RefreshCcw size={16} className={isSyncing ? 'animate-spin' : ''} />
+          <div className="mt-8 flex items-center justify-between rounded-[28px] border border-white/5 bg-white/[0.02] px-6 py-4 backdrop-blur-3xl animate-fade-in">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 border border-brand/20 text-brand">
+                <RefreshCcw size={18} className={isSyncing ? 'animate-spin' : ''} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary">
-                  {isSyncing ? 'Syncing rider updates' : 'Actions queued safely'}
+                <p className="font-black text-white italic uppercase tracking-tighter text-sm">
+                  {isSyncing ? 'Syncing Protocol' : 'Actions Queued'}
                 </p>
-                <p className="text-body-xs">
+                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-0.5">
                   {pendingCount > 0
-                    ? `${pendingCount} pending sync`
-                    : 'Refreshing status'}
+                    ? `${pendingCount} units pending ingress`
+                    : 'Tactical Sync Active'}
                 </p>
               </div>
             </div>
@@ -189,23 +196,24 @@ export default function RiderDashboardClient({
         )}
       </motion.section>
 
-      <div className="flex rounded-full border border-border bg-bg-tertiary/80 p-1">
+      {/* 2. OPERATIONAL TABS */}
+      <div className="flex p-1.5 glass rounded-full border border-white/5 mx-2">
         {([
-          { id: 'current', label: 'Current' },
-          { id: 'nearby', label: 'Nearby' },
-          { id: 'leaderboard', label: 'Leaderboard' },
+          { id: 'current', label: 'DEPLOYED' },
+          { id: 'nearby', label: 'SIGNALS' },
+          { id: 'leaderboard', label: 'RANKINGS' },
         ] as const).map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative flex-1 rounded-full px-3 py-3 text-sm font-semibold transition-colors ${
-              activeTab === tab.id ? 'text-text-inverse' : 'text-text-secondary'
+            className={`relative flex-1 rounded-full px-4 py-3.5 text-[10px] font-black uppercase tracking-widest italic transition-all ${
+              activeTab === tab.id ? 'text-white' : 'text-white/30 hover:text-white/60'
             }`}
           >
             {activeTab === tab.id && (
               <motion.div
                 layoutId="rider-tabs"
-                className="absolute inset-0 rounded-full bg-text-primary shadow-xs"
+                className="absolute inset-0 rounded-full bg-brand shadow-xl shadow-brand/20"
                 transition={{ type: 'spring', stiffness: 320, damping: 28 }}
               />
             )}
@@ -223,48 +231,49 @@ export default function RiderDashboardClient({
           <motion.div key="current" {...motionPresets.fade} className="space-y-4">
             {primaryOrder ? (
               <>
-                <div className="premium-panel rounded-[32px] overflow-hidden">
-                  <div className="border-b border-border/80 px-5 py-4">
-                    <div className="flex items-start justify-between gap-3">
+                <div className="glass rounded-[40px] overflow-hidden border border-white/5 relative">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 blur-[60px] pointer-events-none" />
+                  
+                  <div className="border-b border-white/5 px-8 py-8">
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-kicker">Current stop</p>
-                        <h2 className="mt-2 text-xl font-bold tracking-tight text-text-primary">
-                          {primaryOrder.shippingAddress?.street || 'Address pending'}
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic mb-3">Payload Destination</p>
+                        <h2 className="text-xl font-black italic tracking-tighter text-white uppercase leading-tight">
+                          {primaryOrder.shippingAddress?.street || 'SCANNING ADDRESS...'}
                         </h2>
-                        <p className="mt-1 text-body-sm">
-                          {primaryOrder.shippingAddress?.city || 'City unavailable'}
+                        <p className="mt-2 text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                          {primaryOrder.shippingAddress?.city || 'SECTOR UNKNOWN'}
                         </p>
                       </div>
                       <div className="text-right">
-                        <Badge variant={statusMeta[primaryOrder.orderStatus]?.badge || 'default'}>
+                        <Badge variant={statusMeta[primaryOrder.orderStatus]?.badge || 'default'} className="mb-4">
                           {statusMeta[primaryOrder.orderStatus]?.label || primaryOrder.orderStatus}
                         </Badge>
-                        <p className="mt-3 text-2xl font-black tracking-tight text-text-primary">
+                        <p className="text-2xl font-black italic tracking-tighter text-brand">
                           {formatCurrency(primaryOrder.total || 0)}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4 px-5 py-5">
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <OrderFact label="Order" value={primaryOrder.orderNumber || primaryOrder._id.slice(-6)} />
-                      <OrderFact label="Queue" value={`${queuedOrders.length} after this`} />
-                      <OrderFact label="Updated" value={new Date(primaryOrder.updatedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} />
+                  <div className="space-y-6 px-8 py-8">
+                    <div className="grid grid-cols-2 gap-4">
+                      <OrderFact label="Protocol ID" value={primaryOrder.orderNumber || primaryOrder._id.slice(-6).toUpperCase()} />
+                      <OrderFact label="Queue Status" value={`${queuedOrders.length} IN BUFFER`} />
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       <Link
                         href={`/rider/orders/${primaryOrder._id}`}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-[20px] border border-border bg-bg-tertiary px-4 py-3.5 text-sm font-semibold text-text-primary transition-colors hover:bg-bg-primary"
+                        className="flex-1 h-14 rounded-2xl glass border border-white/10 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest italic text-white hover:bg-white/5 transition-all"
                       >
-                        Route details
-                        <ExternalLink size={16} />
+                        Sector Map
+                        <ExternalLink size={16} className="text-white/20" />
                       </Link>
                       <Button
-                        size="lg"
+                        size="xl"
                         variant="primary"
-                        className="flex-1"
+                        className="flex-1 bg-brand text-white shadow-xl shadow-brand/20"
                         loading={loadingAction === primaryOrder._id}
                         onClick={() =>
                           updateOrderStatus(
@@ -281,23 +290,23 @@ export default function RiderDashboardClient({
                 </div>
 
                 {queuedOrders.length > 0 && (
-                  <div className="space-y-3">
-                    <p className="text-kicker px-1">Up next in queue</p>
+                  <div className="space-y-4">
+                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 px-2 italic">Backlog Protocol</p>
                     {queuedOrders.map((order) => (
                       <div
                         key={order._id}
-                        className="flex items-center justify-between rounded-[26px] border border-border bg-bg-elevated px-4 py-4 shadow-xs"
+                        className="flex items-center justify-between rounded-[28px] border border-white/5 bg-white/[0.02] px-6 py-5 group hover:border-white/10 transition-all"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-text-primary">
-                            {order.shippingAddress?.street || 'Address pending'}
+                          <p className="truncate text-xs font-black italic text-white uppercase tracking-tight">
+                            {order.shippingAddress?.street || 'SCANNING...'}
                           </p>
-                          <div className="mt-1 flex items-center gap-2 text-body-xs">
+                          <div className="mt-1 flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
                             <MapPin size={12} />
-                            <span>{order.shippingAddress?.city || 'City unavailable'}</span>
+                            <span>{order.shippingAddress?.city || 'SECTOR PK'}</span>
                           </div>
                         </div>
-                        <Badge variant={statusMeta[order.orderStatus]?.badge || 'default'}>
+                        <Badge variant={statusMeta[order.orderStatus]?.badge || 'default'} className="opacity-60 group-hover:opacity-100 transition-opacity">
                           {statusMeta[order.orderStatus]?.label || order.orderStatus}
                         </Badge>
                       </div>
@@ -308,8 +317,8 @@ export default function RiderDashboardClient({
             ) : (
               <EmptyState
                 icon={<CheckCircle size={28} />}
-                title="No active deliveries"
-                description="You are clear for now."
+                title="Sector Clear"
+                description="Zero active missions detected in your proximity."
               />
             )}
           </motion.div>
@@ -319,39 +328,41 @@ export default function RiderDashboardClient({
               nearbyOrders.map((order) => (
                 <div
                   key={order._id}
-                  className="premium-panel rounded-[28px] px-4 py-4"
+                  className="glass rounded-[32px] px-6 py-6 border border-white/5 relative overflow-hidden group"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-brand/5 blur-3xl pointer-events-none group-hover:bg-brand/10 transition-colors" />
+                  
+                  <div className="flex items-start justify-between gap-4 relative z-10">
                     <div>
-                      <Badge variant="accent">Nearby pickup</Badge>
-                      <h3 className="mt-3 text-lg font-bold tracking-tight text-text-primary">
-                        {order.shippingAddress?.city || 'New order'}
+                      <Badge variant="accent" className="mb-4">SIGNAL DETECTED</Badge>
+                      <h3 className="text-lg font-black italic tracking-tighter text-white uppercase leading-tight">
+                        {order.shippingAddress?.city || 'NEW MISSION'}
                       </h3>
-                      <div className="mt-2 flex items-center gap-2 text-body-xs">
+                      <div className="mt-2 flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
                         <Clock3 size={12} />
-                        <span>{order.orderNumber || order._id.slice(-6)}</span>
+                        <span>ID: {order.orderNumber || order._id.slice(-6).toUpperCase()}</span>
                       </div>
                     </div>
-                    <p className="text-xl font-black tracking-tight text-text-primary">
+                    <p className="text-2xl font-black italic tracking-tighter text-brand">
                       {formatCurrency(order.total || 0)}
                     </p>
                   </div>
 
-                  <div className="mt-4 flex gap-3">
+                  <div className="mt-8 flex gap-4 relative z-10">
                     <Link
                       href={`/rider/orders/${order._id}`}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-[18px] border border-border bg-bg-tertiary px-4 py-3 text-sm font-semibold text-text-primary"
+                      className="flex-1 h-12 rounded-xl glass border border-white/5 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest italic text-white/40 hover:text-white transition-all"
                     >
                       Preview
                       <ArrowRight size={15} />
                     </Link>
                     <Button
                       variant="primary"
-                      className="flex-1"
+                      className="flex-1 h-12 bg-brand text-white text-[10px]"
                       loading={loadingAction === order._id}
                       onClick={() => updateOrderStatus(order._id, 'accepted', 'nearby')}
                     >
-                      Claim order
+                      Intercept
                     </Button>
                   </div>
                 </div>
@@ -359,8 +370,8 @@ export default function RiderDashboardClient({
             ) : (
               <EmptyState
                 icon={<Sparkles size={28} />}
-                title="No nearby orders"
-                description="We are watching your area."
+                title="Low Signal"
+                description="Scanning for new mission availability..."
               />
             )}
           </motion.div>
@@ -370,22 +381,14 @@ export default function RiderDashboardClient({
   );
 }
 
-function MetricChip({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}) {
+function MetricChip({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-[22px] border border-border bg-bg-tertiary/80 px-3 py-3">
-      <div className="flex items-center gap-2 text-brand">
+    <div className="rounded-3xl border border-white/5 bg-white/[0.02] px-4 py-5 hover:bg-white/[0.04] transition-all">
+      <div className="flex items-center gap-2 text-brand mb-4">
         {icon}
-        <span className="text-kicker">{label}</span>
+        <span className="text-[9px] font-black uppercase tracking-widest italic">{label}</span>
       </div>
-      <p className="mt-2 truncate text-base font-bold tracking-tight text-text-primary">
+      <p className="text-xl font-black italic tracking-tighter text-white uppercase truncate">
         {value}
       </p>
     </div>
@@ -394,29 +397,21 @@ function MetricChip({
 
 function OrderFact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[20px] border border-border bg-bg-tertiary/80 px-3 py-3">
-      <p className="text-kicker">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-text-primary">{value}</p>
+    <div className="rounded-2xl border border-white/5 bg-white/[0.02] px-4 py-4">
+      <p className="text-[9px] font-black uppercase tracking-widest text-white/20 italic mb-2">{label}</p>
+      <p className="text-xs font-black italic text-white uppercase">{value}</p>
     </div>
   );
 }
 
-function EmptyState({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
+function EmptyState({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-[30px] border border-dashed border-border bg-bg-tertiary/80 px-8 py-12 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-bg-elevated text-brand shadow-xs">
+    <div className="flex flex-col items-center justify-center rounded-[40px] border border-dashed border-white/10 bg-white/[0.01] px-8 py-16 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center text-brand mb-6">
         {icon}
       </div>
-      <h3 className="mt-5 text-h5 text-text-primary">{title}</h3>
-      <p className="mt-2 max-w-xs text-body-sm">{description}</p>
+      <h3 className="text-xl font-black italic tracking-tighter text-white uppercase">{title}</h3>
+      <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-2">{description}</p>
     </div>
   );
 }
