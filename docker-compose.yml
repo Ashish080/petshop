@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # 🛒 USER PORTAL (Port 3000)
+  petshop-user:
+    build: .
+    container_name: kanha-shop-user
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - PORT=3000
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=petshop-super-secret-jwt-key-change-in-production-2024
+    volumes:
+      - .:/app
+      - /app/node_modules
+    tty: true
+    command: npx next dev -p 3000
+
+  # 🛵 RIDER PORTAL (Port 3001)
+  petshop-rider:
+    build: .
+    container_name: kanha-shop-rider
+    ports:
+      - "3001:3001"
+    env_file: .env
+    environment:
+      - PORT=3001
+      - NEXTAUTH_URL=http://localhost:3001
+      - NEXTAUTH_SECRET=petshop-super-secret-jwt-key-change-in-production-2024
+    volumes:
+      - .:/app
+      - /app/node_modules
+    tty: true
+    command: npx next dev -p 3001
+
+  # 👨‍💼 ADMIN PORTAL (Port 3002)
+  petshop-admin:
+    build: .
+    container_name: kanha-shop-admin
+    ports:
+      - "3002:3002"
+    env_file: .env
+    environment:
+      - PORT=3002
+      - NEXTAUTH_URL=http://localhost:3002
+      - NEXTAUTH_SECRET=petshop-super-secret-jwt-key-change-in-production-2024
+    volumes:
+      - .:/app
+      - /app/node_modules
+    tty: true
+    command: npx next dev -p 3002
