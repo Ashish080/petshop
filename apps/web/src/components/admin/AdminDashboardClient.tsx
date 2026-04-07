@@ -25,7 +25,9 @@ import { AnalyticsDashboardView } from './AnalyticsDashboardView';
 import { AdminProductsClient } from './AdminProductsClient';
 import { SystemPulseView } from './SystemPulseView';
 
-type AdminTab = 'overview' | 'orders' | 'inventory' | 'fleet' | 'wallet' | 'analytics' | 'pulse';
+import { PredictiveDemandView } from './PredictiveDemandView';
+
+type AdminTab = 'overview' | 'orders' | 'inventory' | 'fleet' | 'wallet' | 'analytics' | 'pulse' | 'vision';
 
 export function AdminDashboardClient() {
     const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -39,13 +41,33 @@ export function AdminDashboardClient() {
         }
     });
 
+    const { data: adminOrders = [], isLoading: ordersLoading } = useQuery({
+        queryKey: ['admin', 'orders', 'recent'],
+        queryFn: async () => {
+            const res = await fetch('/api/admin/orders?limit=8');
+            const data = await res.json();
+            return data.success ? data.data : [];
+        },
+        refetchInterval: 15000 // Tactical re-sync
+    });
+
+    const getStatusProtocol = (status: string) => {
+        switch(status?.toLowerCase()) {
+            case 'delivered': return { label: 'SUCCESS', color: 'text-success', iconColor: 'bg-success' };
+            case 'cancelled': return { label: 'TERMINATED', color: 'text-danger', iconColor: 'bg-danger' };
+            case 'shipped': return { label: 'IN TRANSIT', color: 'text-brand', iconColor: 'bg-brand' };
+            default: return { label: 'PENDING', color: 'text-info', iconColor: 'bg-info' };
+        }
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case 'fleet': return <FleetManagementView />;
             case 'wallet': return <WalletManagementView />;
             case 'analytics': return <AnalyticsDashboardView />;
             case 'pulse': return <SystemPulseView />;
-            case 'inventory': return <AdminProductsClient initialProducts={[]} />; // Initial state, will fetch inside
+            case 'inventory': return <AdminProductsClient initialProducts={[]} />;
+            case 'vision': return <PredictiveDemandView />;
             case 'overview':
             default:
                 return (
@@ -71,7 +93,7 @@ export function AdminDashboardClient() {
                                     <button className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-brand transition-colors">Tactical Archive</button>
                                 </div>
 
-                                <div className="glass rounded-[32px] border border-white/5 overflow-hidden shadow-2xl">
+                                <div className="glass rounded-[32px] border border-white/5 overflow-hidden shadow-2xl backdrop-blur-3xl">
                                     <table className="w-full text-left">
                                         <thead>
                                             <tr className="bg-white/[0.02] border-b border-white/5">
@@ -82,35 +104,46 @@ export function AdminDashboardClient() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {[1, 2, 3, 4, 5].map((i) => (
-                                                <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors group">
-                                                    <td className="px-8 py-6">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center">
-                                                                <Command size={16} className="text-white/20 group-hover:text-brand transition-colors" />
+                                            {adminOrders.length > 0 ? adminOrders.map((order: any) => {
+                                                const protocol = getStatusProtocol(order.status);
+                                                return (
+                                                    <tr key={order._id} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors group">
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center group-hover:border-brand/40 transition-all">
+                                                                    <Command size={16} className="text-white/20 group-hover:text-brand transition-colors" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-black text-white italic uppercase tracking-tight leading-none">{order._id.slice(-6).toUpperCase()}</p>
+                                                                    <p className="text-[9px] font-bold text-white/20 uppercase mt-2 italic">{order.shippingAddress?.city || 'Lucknow Sector'}</p>
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <p className="text-sm font-black text-white italic uppercase tracking-tight">ORD-72{i}9</p>
-                                                                <p className="text-[9px] font-bold text-white/20 uppercase mt-0.5">Lucknow Sector {i+2}</p>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-2.5">
+                                                                <div className={`w-1.5 h-1.5 rounded-full animate-pulse shadow-[0_0_8px_rgba(255,107,0,0.5)] ${protocol.iconColor}`} />
+                                                                <span className={`text-[10px] font-black uppercase italic tracking-widest leading-none ${protocol.color}`}>
+                                                                    {protocol.label}
+                                                                </span>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-8 py-6">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-1.5 h-1.5 bg-brand rounded-full animate-pulse" />
-                                                            <span className="text-[10px] font-black text-brand uppercase italic tracking-widest leading-none">In Transit</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-8 py-6">
-                                                        <p className="text-sm font-black text-white italic tracking-tighter">₹14,299</p>
-                                                    </td>
-                                                    <td className="px-8 py-6 text-right">
-                                                        <button className="w-10 h-10 rounded-xl glass border border-white/5 text-white/20 hover:text-white transition-all opacity-0 group-hover:opacity-100 items-center justify-center inline-flex">
-                                                            <ArrowUpRight size={16} />
-                                                        </button>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <p className="text-sm font-black text-white italic tracking-tighter leading-none">₹{order.totalAmount?.toLocaleString('en-IN')}</p>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right">
+                                                            <button className="w-10 h-10 rounded-xl glass border border-white/5 text-white/20 hover:text-brand transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center ml-auto">
+                                                                <ExternalLink size={16} />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            }) : (
+                                                <tr>
+                                                    <td colSpan={4} className="py-20 text-center">
+                                                        <p className="text-[10px] font-black text-white/10 uppercase tracking-widest">No active missions detected</p>
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
@@ -170,7 +203,7 @@ export function AdminDashboardClient() {
         <div className="space-y-12">
             {/* Global Tab Interface */}
             <div className="flex items-center gap-2 p-1.5 glass rounded-3xl border border-white/5 w-fit">
-                {['overview', 'fleet', 'inventory', 'pulse', 'wallet', 'analytics'].map((tab) => (
+                {['overview', 'vision', 'fleet', 'inventory', 'pulse', 'wallet', 'analytics'].map((tab) => (
                     <button 
                         key={tab}
                         onClick={() => setActiveTab(tab as AdminTab)}

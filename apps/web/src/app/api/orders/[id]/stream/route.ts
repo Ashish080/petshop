@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import connectDB from '@/lib/mongoose';
 import Order from '@/models/Order';
 import redis from '@/lib/redis';
+import { ORDER_STATE_MACHINE, OrderStatus } from '@/config/order-states';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ export async function GET(
 
   await connectDB();
 
-  const order = await Order.findById(id).select('user riderId orderStatus').lean();
+  const order = await Order.findById(id).select('user riderId orderStatus timeline').lean();
   if (!order) {
     return new Response('Order not found', { status: 404 });
   }
@@ -46,9 +47,13 @@ export async function GET(
         }
       };
 
+      const initialLog = order.timeline?.[order.timeline.length - 1]?.message 
+        || ORDER_STATE_MACHINE[order.orderStatus as OrderStatus]?.missionLog;
+
       send({
         type: 'init',
         orderStatus: order.orderStatus,
+        missionLog: initialLog,
         riderId: order.riderId?.toString(),
         updatedAt: new Date().toISOString(),
       });
@@ -70,9 +75,21 @@ export async function GET(
         if (isClosed) return;
         try {
           const event = JSON.parse(message);
+          
+          if (event.type === 'location_update') {
+            send({
+              type: 'update',
+              location: event.location,
+              updatedAt: event.updatedAt,
+            });
+            return;
+          }
+
+          // Handle standard status updates
           send({
             type: 'update',
             orderStatus: event.orderStatus,
+            missionLog: event.missionLog,
             riderId: event.riderId,
             updatedAt: event.updatedAt,
           });

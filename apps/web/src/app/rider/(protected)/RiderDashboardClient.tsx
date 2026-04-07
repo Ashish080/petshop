@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -97,11 +97,67 @@ export default function RiderDashboardClient({
     0
   );
 
-  const updateOrderStatus = async (
-    orderId: string,
-    status: string,
-    source: 'assigned' | 'nearby'
-  ) => {
+    const lastSyncRef = useRef<number>(0);
+
+    useEffect(() => {
+        if (!isOnline || !primaryOrder) return;
+
+        let lastPos: GeolocationPosition | null = null;
+
+        const watchId = navigator.geolocation.watchPosition(
+          (position) => {
+            lastPos = position;
+          },
+          (err) => {
+            if (err.code === err.PERMISSION_DENIED) {
+              toast.error('Mission Protocol: Location Access Required', { icon: '🚨' });
+            }
+          },
+          { enableHighAccuracy: true }
+        );
+
+        // Tactical Heartbeat Optimization: Throttle in background
+        let intervalTime = 10000;
+        
+        const handleHeartbeat = async () => {
+          if (!lastPos) return;
+          try {
+            await fetch('/api/rider/location', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                lat: lastPos.coords.latitude, 
+                lng: lastPos.coords.longitude 
+              })
+            });
+          } catch (err) {
+            console.error('[GEOLOCATION_HEARTBEAT_FAILED]', err);
+          }
+        };
+
+        let heartbeatInterval = setInterval(handleHeartbeat, intervalTime);
+
+        const onVisibilityChange = () => {
+           clearInterval(heartbeatInterval);
+           intervalTime = document.hidden ? 45000 : 10000;
+           heartbeatInterval = setInterval(handleHeartbeat, intervalTime);
+           console.log(`[TACTICAL_SYNC] Heartbeat interval adapted: ${intervalTime}ms`);
+        };
+
+        document.addEventListener('visibilitychange', onVisibilityChange);
+
+        return () => {
+          navigator.geolocation.clearWatch(watchId);
+          clearInterval(heartbeatInterval);
+          document.removeEventListener('visibilitychange', onVisibilityChange);
+        };
+    }, [isOnline, primaryOrder]);
+
+    const updateOrderStatus = async (
+        orderId: string,
+        status: string,
+        source: 'assigned' | 'nearby'
+    ) => {
     setLoadingAction(orderId);
 
     const success = await syncRequest(`/api/rider/orders/${orderId}`, 'PATCH', {

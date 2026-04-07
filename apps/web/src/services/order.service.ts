@@ -4,6 +4,7 @@ import Order from '../models/Order';
 import Product from '../models/Product';
 import User from '../models/User';
 import redis from '../lib/redis';
+import { ORDER_STATE_MACHINE } from '../config/order-states';
 import { sendEmail, generateOrderEmailTemplate } from '../lib/email';
 import { cached, invalidate } from '../lib/cache';
 import { z } from 'zod';
@@ -154,6 +155,11 @@ export class OrderService {
         paymentMethod: paymentMethod || 'cod',
         paymentStatus: paymentMethod === 'wallet' ? 'paid' : 'pending',
         orderStatus: 'pending',
+        timeline: [{
+          status: 'pending',
+          message: ORDER_STATE_MACHINE.pending.missionLog,
+          timestamp: new Date()
+        }],
         notes: notes?.trim()
       }], { session: isTransactionActive ? session : undefined });
 

@@ -1,8 +1,10 @@
 import redis from './redis';
+import { ORDER_STATE_MACHINE, OrderStatus } from '../config/order-states';
 
 export interface OrderStatusEvent {
   orderId: string;
   orderStatus: string;
+  missionLog?: string;
   riderId?: string;
   updatedAt: string;
 }
@@ -12,6 +14,14 @@ export interface OrderStatusEvent {
  */
 export async function emitOrderStatusChange(event: OrderStatusEvent): Promise<void> {
   const channel = `order:${event.orderId}`;
+  
+  if (!event.missionLog) {
+    const config = ORDER_STATE_MACHINE[event.orderStatus as OrderStatus];
+    if (config) {
+      event.missionLog = config.missionLog;
+    }
+  }
+
   await redis.publish(channel, JSON.stringify(event));
 
   // Also publish to admin live feed

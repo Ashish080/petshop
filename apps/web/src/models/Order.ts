@@ -36,6 +36,11 @@ export interface IOrder extends Document {
     zipCode: string;
     country: string;
   };
+  timeline: Array<{
+    status: string;
+    message: string;
+    timestamp: Date;
+  }>;
   createdAt: Date;
   updatedAt: Date;
   notes?: string;
@@ -90,6 +95,11 @@ const OrderSchema = new Schema<IOrder>({
     zipCode: { type: String, required: true },
     country: { type: String, required: true }
   },
+  timeline: [{
+    status: String,
+    message: String,
+    timestamp: { type: Date, default: Date.now }
+  }],
   notes: { type: String }
 }, {
   timestamps: true

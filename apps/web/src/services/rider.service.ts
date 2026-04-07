@@ -3,7 +3,7 @@ import Order from '../models/Order';
 import User from '../models/User';
 import { z } from 'zod';
 import { ServiceError } from './base.service';
-import { isValidTransition, OrderStatus } from '../config/order-states';
+import { isValidTransition, OrderStatus, ORDER_STATE_MACHINE } from '../config/order-states';
 import { emitOrderStatusChange } from '../lib/orderEvents';
 
 const KYCDetailsSchema = z.object({
@@ -15,25 +15,39 @@ const KYCDetailsSchema = z.object({
 });
 
 export class RiderService {
-  /** Rider heartbeat — call every 30s from rider app */
+  /** Rider heartbeat — call every 10-30s from rider app */
   static async heartbeat(riderId: string, location: { lat: number; lng: number }) {
     const key = `rider:presence:${riderId}`;
     
-    // Set presence with 60s expiry
+    // 1. Set presence with 60s expiry
     await redis.setex(key, 60, JSON.stringify({
       riderId,
       location,
       lastSeen: new Date().toISOString(),
     }));
     
-    // Publish location for live tracking
+    // 2. Publish global location for general tracking
     await redis.publish(`rider:location:${riderId}`, JSON.stringify({
       riderId,
       ...location,
       timestamp: Date.now(),
     }));
 
-    // Publish to admin live feed as well
+    // 3. Find active orders and publish to individual order channels for customer radar
+    const activeOrders = await Order.find({
+      riderId,
+      orderStatus: { $in: ['accepted', 'picked', 'out-for-delivery'] }
+    }).select('_id').lean();
+
+    for (const order of activeOrders) {
+      await redis.publish(`order:${order._id.toString()}`, JSON.stringify({
+        type: 'location_update',
+        location,
+        updatedAt: new Date().toISOString(),
+      }));
+    }
+
+    // 4. Publish to admin live feed as well
     await redis.publish('admin:live-feed', JSON.stringify({
       type: 'rider_location_update',
       data: { riderId, location, timestamp: Date.now() },
@@ -97,9 +111,22 @@ export class RiderService {
       throw new ServiceError(transition.reason || 'Invalid status transition', 'INVALID_TRANSITION', 400);
     }
 
+    const config = ORDER_STATE_MACHINE[targetStatus];
+    const updateOperation: any = { $set: { orderStatus: targetStatus } };
+
+    if (config) {
+      updateOperation.$push = {
+        timeline: {
+          status: targetStatus,
+          message: config.missionLog,
+          timestamp: new Date()
+        }
+      };
+    }
+
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
-      { $set: { orderStatus: targetStatus } },
+      updateOperation,
       { returnDocument: 'after', lean: true }
     );
 

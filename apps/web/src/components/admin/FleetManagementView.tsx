@@ -84,7 +84,7 @@ export function FleetManagementView() {
                             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                         </div>
                     </div>
-                    <TacticalFleetMap />
+                    <TacticalFleetMap fleet={riders} />
                 </div>
 
                 {/* Fleet Registry Dashboard */}

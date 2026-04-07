@@ -2,7 +2,7 @@ import { ServiceError } from './base.service';
 import Order from '../models/Order';
 import User from '../models/User';
 import { emitOrderStatusChange } from '../lib/orderEvents';
-import { isValidTransition, OrderStatus } from '../config/order-states';
+import { isValidTransition, OrderStatus, ORDER_STATE_MACHINE } from '../config/order-states';
 import Product from '../models/Product';
 import Wallet from '../models/Wallet';
 import AuditLog from '../models/AuditLog';
@@ -106,9 +106,24 @@ export class AdminService {
       return currentOrder.toObject();
     }
 
+    const updateOperation: any = { $set: updateData };
+
+    if (updateData.orderStatus) {
+      const config = ORDER_STATE_MACHINE[updateData.orderStatus as OrderStatus];
+      if (config) {
+        updateOperation.$push = {
+          timeline: {
+            status: updateData.orderStatus,
+            message: config.missionLog,
+            timestamp: new Date()
+          }
+        };
+      }
+    }
+
     const order = await Order.findByIdAndUpdate(
       orderId,
-      { $set: updateData },
+      updateOperation,
       { returnDocument: 'after', runValidators: true, lean: true }
     );
 

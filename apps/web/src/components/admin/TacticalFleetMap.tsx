@@ -1,106 +1,173 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { MapPin, Navigation, Zap, Compass, Activity, Target } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Navigation, Zap, Compass, Activity, Target, ShieldAlert, Cpu } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 
-const SECTORS = [
-    { id: 'S1', name: 'Gomti Nagar', x: '70%', y: '40%', missions: 5 },
-    { id: 'S2', name: 'Hazratganj', x: '45%', y: '35%', missions: 8 },
-    { id: 'S3', name: 'Indira Nagar', x: '65%', y: '25%', missions: 3 },
-    { id: 'S4', name: 'Alambagh', x: '30%', y: '65%', missions: 6 },
-    { id: 'S5', name: 'Ashiyana', x: '40%', y: '80%', missions: 4 },
-];
+interface TacticalFleetMapProps {
+    fleet?: any[];
+}
 
-export function TacticalFleetMap() {
-    const [scrolled, setScrolled] = useState(0);
-
+export function TacticalFleetMap({ fleet = [] }: TacticalFleetMapProps) {
+    const activeRiders = useMemo(() => fleet.filter(r => r.status === 'active' || r.status === 'online'), [fleet]);
+    
     return (
-        <div className="relative w-full h-[600px] bg-[#050510] rounded-[40px] border border-white/5 overflow-hidden group shadow-2xl">
-            {/* Grid Overlay */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
-            
-            {/* Radar Sweep Effect */}
+        <div className="relative w-full h-[600px] bg-[#050510] rounded-[48px] border border-white/5 overflow-hidden group shadow-2xl backdrop-blur-3xl">
+            {/* 1. AGGRESSIVE 3D PERSPECTIVE BASE */}
+            <div className="absolute inset-0 preserve-3d" style={{ perspective: '1200px' }}>
+                <div 
+                    className="absolute inset-0 border border-white/5 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"
+                    style={{ 
+                        transform: 'rotateX(60deg) scale(1.8) translateY(-150px)', 
+                        transformOrigin: 'center bottom',
+                        maskImage: 'radial-gradient(circle at center, black 40%, transparent 90%)'
+                    }}
+                />
+            </div>
+
+            {/* 2. PREDICTIVE HEATMAP LAYER */}
+            <div className="absolute inset-0 pointer-events-none opacity-30 mix-blend-screen overflow-hidden">
+                <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-[#F04438] blur-[120px] rounded-full animate-pulse" />
+                <div className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] bg-brand blur-[140px] rounded-full animate-pulse" style={{ animationDelay: '1.5s' }} />
+                <div className="absolute top-1/2 left-2/3 w-64 h-64 bg-brand/40 blur-[100px] rounded-full animate-pulse px-10" style={{ animationDelay: '3s' }} />
+            </div>
+
+            {/* 3. RADAR SCANNER SWEEP */}
             <motion.div 
                 animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-brand/10 via-transparent to-transparent rounded-full pointer-events-none origin-center"
-                style={{ borderRight: '1px solid rgba(255,107,0,0.1)' }}
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 pointer-events-none z-10 origin-center scale-[1.5]"
+                style={{ 
+                    background: 'conic-gradient(from 0deg, rgba(255,107,0,0.1) 0deg, transparent 45deg)',
+                }}
             />
 
-            {/* Simulated Lucknow Hub Map (Abstract SVG) */}
-            <div className="absolute inset-20 opacity-20 pointer-events-none">
-                <svg viewBox="0 0 100 100" className="w-full h-full text-white/5">
-                    <path d="M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="currentColor" strokeWidth="0.5" />
-                    <path d="M50,10 L50,90 M10,50 L90,50" fill="none" stroke="currentColor" strokeWidth="0.5" />
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" />
-                    {/* Abstract Road Network */}
-                    <path d="M20,20 Q50,40 80,20 M10,60 L90,40 M40,10 Q60,50 40,90" fill="none" stroke="white" strokeWidth="0.2" />
-                </svg>
+            {/* 4. CROSSHAIR & SECTOR OVERLAY */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-[0.05] pointer-events-none z-20">
+                <div className="w-px h-full bg-white" />
+                <div className="h-px w-full bg-white absolute" />
+                <div className="w-[300px] h-[300px] border border-white rounded-full absolute" />
+                <div className="w-[600px] h-[600px] border border-white rounded-full absolute" />
             </div>
 
-            {/* Interactive Sector Nodes */}
-            {SECTORS.map((sector) => (
-                <motion.div 
-                    key={sector.id}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    style={{ left: sector.x, top: sector.y }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 group/node"
-                >
-                    <div className="relative">
-                        <div className="w-4 h-4 bg-brand rounded-full shadow-[0_0_20px_rgba(255,107,0,0.5)] border-2 border-white/20 group-hover/node:scale-125 transition-transform" />
-                        <div className="absolute -inset-2 bg-brand/20 rounded-full animate-ping" />
+            {/* 5. LIVE RIDER NODES */}
+            <div className="absolute inset-0 z-30">
+                <AnimatePresence>
+                    {activeRiders.map((rider, i) => {
+                        const x = ((rider.location?.lng || 80.94) - 80.90) * 10000 % 100;
+                        const y = ((rider.location?.lat || 26.84) - 26.80) * 10000 % 100;
+
+                        return (
+                            <motion.div 
+                                key={rider._id || rider.id}
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1, left: `${x}%`, top: `${y}%` }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
+                            >
+                                {/* Glow Halo */}
+                                <div className="absolute inset-0 w-12 h-12 -ml-5 -mt-5 bg-brand/20 blur-2xl rounded-full group-hover:bg-brand/40 transition-all scale-0 group-hover:scale-100 duration-500" />
+                                
+                                <div className="relative">
+                                    {/* The Asset Marker */}
+                                    <div className="w-3 h-3 bg-brand rounded-full border-2 border-white shadow-[0_0_20px_#FF6B00] relative z-10 group-hover:scale-125 transition-transform">
+                                        <div className="absolute inset-0 bg-brand rounded-full animate-ping opacity-75" />
+                                    </div>
+
+                                    {/* Tactical Data Label */}
+                                    <div className="absolute top-6 left-6 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all translate-x-2 pointer-events-none">
+                                        <div className="glass px-5 py-3 border border-brand/40 rounded-2xl flex items-center gap-4 backdrop-blur-3xl shadow-2xl relative overflow-hidden">
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-brand/20" />
+                                            <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                                                <Navigation size={16} className="text-brand rotate-45" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[11px] font-black text-white italic uppercase tracking-tighter leading-none">{rider.name}</p>
+                                                <p className="text-[9px] font-bold text-white/30 uppercase mt-2 tracking-widest italic flex items-center gap-2">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                                                    SIGNAL REQUISITIONED
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Telemetry Tag */}
+                                    <div className="absolute -top-12 -left-4 opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity">
+                                        <div className="text-[9px] font-mono text-white tracking-[0.2em] italic uppercase">NODE::{ (rider._id || rider.id).slice(-4).toUpperCase() }</div>
+                                        <div className="h-px w-8 bg-white/20 mt-1" />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
+            </div>
+
+            {/* 6. STRATEGIC OVERLAY (Top Left) */}
+            <div className="absolute top-12 left-12 space-y-6 z-40">
+                <div className="p-10 glass rounded-[40px] border border-white/5 bg-[#050510]/60 backdrop-blur-3xl shadow-2xl min-w-[300px]">
+                    <div className="flex items-center gap-4 mb-10">
+                        <div className="p-3 rounded-2xl bg-brand/10 border border-brand/20 shadow-inner">
+                            <Activity size={22} className="text-brand animate-pulse" />
+                        </div>
+                        <div>
+                            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-white italic">Asset Flux Control</h4>
+                            <p className="text-[9px] font-bold text-success uppercase tracking-widest mt-2 italic flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-success rounded-full" />
+                                All Nodes Optimized
+                            </p>
+                        </div>
                     </div>
                     
-                    <div className="px-3 py-1.5 glass rounded-xl border border-white/10 opacity-0 group-hover/node:opacity-100 transition-all -translate-y-2 group-hover/node:translate-y-0 backdrop-blur-2xl">
-                        <p className="text-[9px] font-black uppercase text-white tracking-widest">{sector.name}</p>
-                        <p className="text-[8px] font-bold text-brand mt-0.5 uppercase tracking-tighter italic">{sector.missions} Priority Missions</p>
+                    <div className="grid grid-cols-2 gap-10 mb-10">
+                        <div className="group cursor-default">
+                            <p className="text-4xl font-black text-white italic tracking-tighter leading-none group-hover:text-brand transition-colors">{activeRiders.length}</p>
+                            <p className="text-[10px] font-black text-white/20 uppercase mt-4 tracking-widest italic">Live Signals</p>
+                        </div>
+                        <div className="group cursor-default">
+                            <p className="text-4xl font-black text-brand italic tracking-tighter leading-none">04</p>
+                            <p className="text-[10px] font-black text-white/20 uppercase mt-4 tracking-widest italic">Critical Loads</p>
+                        </div>
                     </div>
-                </motion.div>
-            ))}
 
-            {/* Strategic Overlays (Top Left) */}
-            <div className="absolute top-8 left-8 space-y-4">
-                <div className="p-5 glass rounded-3xl border border-white/10 bg-[#0A0A10]/60 backdrop-blur-3xl shadow-2xl">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 rounded-lg bg-brand/10 border border-brand/20">
-                            <Navigation size={16} className="text-brand" />
-                        </div>
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Lucknow Ops Hub</h4>
+                    <div className="py-4 px-6 bg-white/[0.03] border border-white/5 rounded-2xl flex items-center justify-between">
+                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 italic">System Guard</span>
+                         <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-4 bg-brand rounded-full" />
+                            <div className="w-1.5 h-4 bg-brand rounded-full" />
+                            <div className="w-1.5 h-4 bg-brand rounded-full opacity-30" />
+                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-8">
-                        <div>
-                            <p className="text-2xl font-black text-white italic tracking-tighter leading-none">1.2km</p>
-                            <p className="text-[8px] font-bold text-white/30 uppercase mt-2 tracking-widest">Avg ETA</p>
-                        </div>
-                        <div>
-                            <p className="text-2xl font-black text-success italic tracking-tighter leading-none">99.8%</p>
-                            <p className="text-[8px] font-bold text-white/30 uppercase mt-2 tracking-widest">Routing Acc.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="p-4 glass rounded-2xl border border-white/5 flex items-center gap-4 bg-white/[0.02]">
-                    <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40 italic">Live Telemetry Synchronized</span>
                 </div>
             </div>
 
-            {/* Tactical Grid Compass (Bottom Right) */}
-            <div className="absolute bottom-8 right-8">
-                <div className="w-20 h-20 rounded-full border border-white/10 flex items-center justify-center relative rotate-45">
-                    <Compass size={24} className="text-white/20" />
-                    <div className="absolute inset-0 border-t-2 border-brand/30 rounded-full animate-spin-slow" />
-                </div>
+            {/* 7. WATERMARKS & SCALES */}
+            <div className="absolute bottom-12 right-12 text-right opacity-30 z-40">
+                <p className="text-[11px] font-black text-white uppercase italic tracking-[0.3em]">Telemetry Command 5.0</p>
+                <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.5em] mt-3 italic">Autonomous Grid Verification</p>
             </div>
 
-            {/* Operational Pulse Line */}
-            <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand/20 to-transparent overflow-hidden">
+            <div className="absolute bottom-12 left-12 flex items-center gap-8 z-40 opacity-40">
+                {['GEO-1', 'UNIT-4', 'V-SCAN'].map((label) => (
+                    <div key={label} className="flex flex-col gap-2">
+                        <div className="text-[9px] font-black text-white uppercase tracking-[0.4em] italic leading-none">{label}</div>
+                        <div className="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div 
+                                animate={{ x: ['-100%', '100%'] }}
+                                transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                                className="w-1/2 h-full bg-brand"
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* 8. GRID CROSSING LINE */}
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden z-20">
                 <motion.div 
                     animate={{ x: ['-100%', '100%'] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    className="w-1/2 h-full bg-brand shadow-[0_0_20px_rgba(255,107,0,1)]"
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                    className="w-[40%] h-full bg-gradient-to-r from-transparent via-brand to-transparent"
                 />
             </div>
         </div>

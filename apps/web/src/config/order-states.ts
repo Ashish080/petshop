@@ -24,6 +24,7 @@ export interface StateConfig {
   icon: string;
   isTerminal: boolean;
   requiresRider: boolean;
+  missionLog: string;
 }
 
 export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
@@ -35,6 +36,7 @@ export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
     icon: 'Clock',
     isTerminal: false,
     requiresRider: false,
+    missionLog: 'Mission parameters received. Initializing system audit and baseline verification.',
   },
   confirmed: {
     transitions: ['accepted', 'cancelled'],
@@ -43,7 +45,8 @@ export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
     color: 'info',
     icon: 'CheckCircle',
     isTerminal: false,
-    requiresRider: true, // Must assign rider before moving forward
+    requiresRider: true,
+    missionLog: 'Order validated. High-precision sorting protocol initiated at central distribution hub.',
   },
   accepted: {
     transitions: ['picked', 'cancelled'],
@@ -53,6 +56,7 @@ export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
     icon: 'UserCheck',
     isTerminal: false,
     requiresRider: false,
+    missionLog: 'Strategic intercept successful. Ground asset assigned to payload coordinates.',
   },
   picked: {
     transitions: ['out-for-delivery'],
@@ -62,6 +66,7 @@ export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
     icon: 'Package',
     isTerminal: false,
     requiresRider: false,
+    missionLog: 'Payload secured. Asset has exited the perimeter and heading to extraction point.',
   },
   'out-for-delivery': {
     transitions: ['delivered'],
@@ -71,6 +76,7 @@ export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
     icon: 'Truck',
     isTerminal: false,
     requiresRider: false,
+    missionLog: 'Transit protocol active. Telemetry synchronized. Intercept ETA: Highly Imminent.',
   },
   delivered: {
     transitions: [],
@@ -80,6 +86,7 @@ export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
     icon: 'CheckCircle2',
     isTerminal: true,
     requiresRider: false,
+    missionLog: 'Mission Success. Asset delivered to target. Grid status: SECURED.',
   },
   cancelled: {
     transitions: [],
@@ -89,6 +96,7 @@ export const ORDER_STATE_MACHINE: Record<OrderStatus, StateConfig> = {
     icon: 'XCircle',
     isTerminal: true,
     requiresRider: false,
+    missionLog: 'Protocol Termination. Mission aborted by command. Asset returning to base.',
   },
 };
 

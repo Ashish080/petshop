@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { 
     Plus, Search, Edit2, Trash2, 
     AlertTriangle, Package, Filter,
@@ -26,6 +26,16 @@ export function AdminProductsClient({ initialProducts }: { initialProducts: Prod
     (p.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (p.category?.toLowerCase() || '').includes(search.toLowerCase())
   );
+
+  useEffect(() => {
+    if (products.length === 0) {
+      startTransition(async () => {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success) setProducts(data.data);
+      });
+    }
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Execute deletion protocol?')) return;

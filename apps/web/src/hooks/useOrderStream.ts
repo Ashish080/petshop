@@ -6,7 +6,9 @@ export type ConnectionState = 'connecting' | 'connected' | 'reconnecting' | 'clo
 
 export interface OrderStreamUpdate {
   type: 'init' | 'update';
-  orderStatus: string;
+  orderStatus?: string;
+  missionLog?: string;
+  location?: { lat: number; lng: number };
   riderId?: string;
   updatedAt?: string;
 }
@@ -84,7 +86,7 @@ export function useOrderStream({
         onUpdateRef.current(data);
 
         // Auto-close once terminal state is confirmed
-        if (TERMINAL_STATUSES.has(data.orderStatus)) {
+        if (data.orderStatus && TERMINAL_STATUSES.has(data.orderStatus)) {
           es.close();
           setConnState('closed');
         }

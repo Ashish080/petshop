@@ -59,78 +59,100 @@ function ConnBadge({ state }: { state: ConnectionState }) {
 // A. TRACKING UI MAP COMPONENT - "Mission Radar"
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function JourneyMap({ statusIdx }: { statusIdx: number }) {
+function JourneyMap({ statusIdx, riderLocation }: { statusIdx: number; riderLocation?: { lat: number; lng: number } }) {
+  // If riderLocation exists, we could use mapbox or a simulated offset for this radar view
+  // For this tactical map, we'll use riderLocation to trigger a "Pulsing Signal" effect
   const progressPercent = Math.max(5, Math.min(100, (statusIdx / (STATUS_STEPS.length - 1)) * 100));
 
   return (
-    <div className="relative w-full h-[240px] bg-obsidian overflow-hidden rounded-t-[40px] flex flex-col items-center justify-end pb-16 border-b border-white/5">
+    <div className="relative w-full h-[280px] bg-obsidian overflow-hidden rounded-t-[40px] flex flex-col items-center justify-end pb-20 border-b border-white/5">
       
       {/* Tactical Radar Grid Overlay */}
       <div className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none" 
-           style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+           style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '35px 35px' }} />
       
-      {/* Base Elevation Shadow */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-brand/10 to-transparent pointer-events-none opacity-40" />
+      {/* Radar Sweep Effect (Active only when rider is in transit) */}
+      {statusIdx >= 2 && statusIdx < 5 && (
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-brand/5 via-transparent to-transparent rounded-full pointer-events-none origin-center"
+            style={{ borderRight: '1px solid rgba(255,107,0,0.1)' }}
+          />
+      )}
 
       {/* The Mission Path */}
-      <div className="absolute bottom-20 w-[85%] h-[2px] bg-white/5 rounded-full overflow-hidden">
-        {/* Dynamic Telemetry Line */}
+      <div className="absolute bottom-24 w-[85%] h-[4px] bg-white/[0.03] rounded-full overflow-hidden">
         <motion.div 
           className="h-full bg-brand relative"
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}
           transition={{ type: "spring", stiffness: 45, damping: 15 }}
         >
-            <div className="absolute top-[-4px] right-[-4px] w-2 h-2 bg-brand rounded-full shadow-[0_0_15px_rgba(255,107,0,1)]" />
+            <div className="absolute top-[-3px] right-[-3px] w-2.5 h-2.5 bg-brand rounded-full shadow-[0_0_20px_rgba(255,107,0,1)] z-10" />
+            <div className="absolute top-[-3px] right-[-3px] w-2.5 h-2.5 bg-brand rounded-full animate-ping z-0" />
         </motion.div>
       </div>
 
       {/* Strategic Milestones */}
-      <div className="absolute bottom-14 w-[85%] flex justify-between z-10 items-end px-2 pointer-events-none">
+      <div className="absolute bottom-16 w-[85%] flex justify-between z-10 items-end px-2 pointer-events-none">
          <div className="flex flex-col items-center">
-            <div className="w-10 h-10 rounded-2xl glass border border-white/10 flex items-center justify-center mb-3">
-                <Navigation size={18} className="text-white/40" />
+            <div className="w-12 h-12 rounded-[20px] glass border border-white/10 flex items-center justify-center mb-3">
+                <Navigation size={20} className="text-white/20" />
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 italic">Asset Origin</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">Asset Origin</span>
          </div>
          <div className="flex flex-col items-center">
-            <div className={`w-10 h-10 rounded-2xl glass border border-white/10 flex items-center justify-center mb-3 transition-colors ${statusIdx === 5 ? 'border-success/40 bg-success/10' : ''}`}>
-                <MapPin size={18} className={statusIdx === 5 ? 'text-success' : 'text-white/40'} />
+            <div className={`w-12 h-12 rounded-[20px] glass border border-white/10 flex items-center justify-center mb-3 transition-all duration-700 ${statusIdx === 5 ? 'border-success/40 bg-success/10 shadow-[0_0_30px_rgba(0,196,140,0.2)]' : ''}`}>
+                <MapPin size={20} className={statusIdx === 5 ? 'text-success' : 'text-white/20'} />
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 italic">Deployment Node</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">Deployment Node</span>
          </div>
       </div>
 
-      {/* The Strategic Asset / Rider Marker */}
+      {/* The Strategic Asset Marker */}
       <motion.div 
-         className="absolute bottom-20 z-30 ml-4"
+         className="absolute bottom-24 z-30 ml-4"
          initial={{ left: '0%' }}
          animate={{ left: `${progressPercent}%` }}
          transition={{ type: "spring", stiffness: 50, damping: 20 }}
          style={{ translateX: '-50%' }}
       >
           <motion.div 
-            animate={{ y: [0, -4, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            animate={{ y: [0, -6, 0] }}
+            transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
             className="relative"
           >
              {statusIdx < 2 ? (
-                <div className="p-3 bg-brand/20 border border-brand/40 rounded-xl backdrop-blur-md">
-                    <Package size={24} className="text-brand" />
+                <div className="p-4 bg-brand/10 border border-brand/30 rounded-2xl backdrop-blur-3xl shadow-2xl">
+                    <Package size={28} className="text-brand" />
                 </div>
              ) : statusIdx === 5 ? (
-                <div className="p-3 bg-success/20 border border-success/40 rounded-xl backdrop-blur-md animate-bounce">
-                    <CheckCircle size={24} className="text-success" />
+                <div className="p-4 bg-success/20 border border-success/40 rounded-2xl backdrop-blur-3xl shadow-[0_0_40px_rgba(0,196,140,0.3)]">
+                    <CheckCircle size={28} className="text-success" />
                 </div>
              ) : (
                 <div className="relative group">
-                    <div className="p-4 bg-brand rounded-2xl shadow-[0_15px_30px_rgba(255,107,0,0.4)] flex items-center justify-center">
-                        <Truck size={24} className="text-white" />
+                    <div className="p-5 bg-brand rounded-[24px] shadow-[0_20px_40px_rgba(255,107,0,0.5)] flex items-center justify-center border-2 border-white/20">
+                        <Truck size={28} className="text-white" />
+                        {riderLocation && (
+                            <div className="absolute -top-3 -right-3 px-3 py-1 bg-success text-white text-[9px] font-black rounded-full shadow-lg border border-white/20 flex items-center gap-1.5 animate-bounce">
+                                <Activity size={10} className="animate-pulse" /> LIVE
+                            </div>
+                        )}
                     </div>
                 </div>
              )}
           </motion.div>
       </motion.div>
+      
+      {/* Background Signal Pulse */}
+      {riderLocation && (
+          <div className="absolute top-10 left-10 flex items-center gap-4 animate-pulse">
+              <div className="w-2 h-2 bg-success rounded-full shadow-[0_0_10px_#00C48C]" />
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-success italic">Coordinates Synchronized</span>
+          </div>
+      )}
     </div>
   );
 }
@@ -140,11 +162,18 @@ function JourneyMap({ statusIdx }: { statusIdx: number }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function ActiveOrderCard({ order, onStatusChange }: { order: any; onStatusChange: (id: string, s: string) => void; }) {
-  const [liveStatus, setLiveStatus] = useState<string>(order.orderStatus);
-  const [expanded, setExpanded]     = useState(false);
-  const [showSparkle, setShowSparkle] = useState(false);
-  const [showSupport, setShowSupport] = useState(false);
-  const [reporting, setReporting]     = useState(false);
+  const [liveStatus, setLiveStatus]     = useState<string>(order.orderStatus);
+  const [riderLocation, setRiderLocation] = useState<{ lat: number; lng: number } | undefined>(undefined);
+  const [missionLog, setMissionLog]       = useState<string>(order.timeline?.[order.timeline.length - 1]?.message || '');
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [expanded, setExpanded]         = useState(false);
+
+  useEffect(() => {
+    setCurrentTime(new Date().toLocaleTimeString([], { hour12: false }));
+  }, [liveStatus, missionLog]);
+  const [showSparkle, setShowSparkle]   = useState(false);
+  const [showSupport, setShowSupport]   = useState(false);
+  const [reporting, setReporting]       = useState(false);
   
   const handleReport = async (issueType: string) => {
     setReporting(true);
@@ -171,13 +200,12 @@ function ActiveOrderCard({ order, onStatusChange }: { order: any; onStatusChange
   const eta        = ETA_MINUTES[liveStatus] ?? 0;
 
   useEffect(() => {
-    // Simulated arrival sparkle when ETA is very close and status is out-for-delivery
     if (liveStatus === 'out-for-delivery') {
       const timer = setTimeout(() => {
          setShowSparkle(true);
          confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ['#FF6B00', '#00C48C'] });
          setTimeout(() => setShowSparkle(false), 8000);
-      }, 5000); // 5 sec after entering out for delivery for demo
+      }, 5000); 
       return () => clearTimeout(timer);
     }
   }, [liveStatus]);
@@ -185,11 +213,18 @@ function ActiveOrderCard({ order, onStatusChange }: { order: any; onStatusChange
   const connState = useOrderStream({
     orderId: order._id,
     enabled: !isTerminal,
-    onUpdate: ({ orderStatus }) => {
-      if (!orderStatus || orderStatus === liveStatus) return;
-      setLiveStatus(orderStatus);
-      onStatusChange(order._id, orderStatus);
-      if (orderStatus === 'delivered') confetti({ particleCount: 150, spread: 100 });
+    onUpdate: ({ orderStatus, location, missionLog: newLog }) => {
+      if (orderStatus && orderStatus !== liveStatus) {
+        setLiveStatus(orderStatus);
+        onStatusChange(order._id, orderStatus);
+        if (orderStatus === 'delivered') confetti({ particleCount: 150, spread: 100 });
+      }
+      if (location) {
+        setRiderLocation(location);
+      }
+      if (newLog) {
+        setMissionLog(newLog);
+      }
     },
   });
 
@@ -209,8 +244,7 @@ function ActiveOrderCard({ order, onStatusChange }: { order: any; onStatusChange
             <ConnBadge state={connState} />
         </div>
         
-        {/* Playful Animal Timeline Map */}
-        {!isTerminal && <JourneyMap statusIdx={currentIdx} /> }
+        {!isTerminal && <JourneyMap statusIdx={currentIdx} riderLocation={riderLocation} /> }
 
         {/* Dynamic ETA Banner */}
         <div className="p-6 pb-2">
@@ -255,6 +289,35 @@ function ActiveOrderCard({ order, onStatusChange }: { order: any; onStatusChange
                           )
                        })}
                     </div>
+                 </div>
+              </div>
+            )}
+
+            {/* Tactical Mission Log (Combat Log style) */}
+            {!isTerminal && (
+              <div className="mt-10 mb-2">
+                 <div className="flex items-center gap-2 mb-3">
+                    <div className="p-1 rounded bg-brand/10 border border-brand/20">
+                        <Cpu size={12} className="text-brand" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-text-secondary italic">Mission Intel</span>
+                 </div>
+                 <div className="p-5 bg-obsidian-dark rounded-[--radius-xl] border border-white/5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-brand/5 blur-2xl pointer-events-none" />
+                    <motion.p 
+                      key={missionLog}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="text-body-sm font-mono text-brand uppercase tracking-tight leading-relaxed italic"
+                    >
+                       <span className="opacity-40 mr-2">[{currentTime || 'T-SYNC'}]</span>
+                       {missionLog || 'Establishing baseline telemetry...'}
+                       <motion.span 
+                         animate={{ opacity: [1, 0] }} 
+                         transition={{ repeat: Infinity, duration: 0.8 }}
+                         className="inline-block w-1.5 h-3 bg-brand ml-1"
+                       />
+                    </motion.p>
                  </div>
               </div>
             )}

@@ -19,8 +19,40 @@ export default function Hero() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
       <div className="absolute bottom-0 left-0 w-full h-[300px] bg-gradient-to-t from-[#050505] to-transparent z-10" />
       
-      {/* Background Glow */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-brand/5 blur-[120px] rounded-full pointer-events-none opacity-40" />
+      {/* Background Motion Graphics */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Dynamic Light Leak */}
+        <motion.div 
+            animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3],
+                x: [-100, 100, -100],
+                y: [-50, 50, -50]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-brand/5 blur-[150px] rounded-full"
+        />
+        
+        {/* Floating Particles */}
+        {[...Array(15)].map((_, i) => (
+            <motion.div 
+                key={i}
+                initial={{ opacity: 0, x: Math.random() * 100 + '%', y: Math.random() * 100 + '%' }}
+                animate={{ 
+                    y: [null, '-20%', '120%'], 
+                    opacity: [0, 0.3, 0],
+                    scale: [0.5, 1, 0.5]
+                }}
+                transition={{ 
+                    duration: Math.random() * 15 + 10, 
+                    repeat: Infinity, 
+                    ease: "linear",
+                    delay: Math.random() * 5
+                }}
+                className="absolute w-1 h-1 bg-white rounded-full blur-[1px]"
+            />
+        ))}
+      </div>
       
       <div className="container-app relative z-10 lg:px-12">
         <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-20 items-center">
